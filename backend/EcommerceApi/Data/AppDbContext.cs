@@ -9,6 +9,12 @@ public class AppDbContext : DbContext
     {
     }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.ConfigureWarnings(warnings => 
+            warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+    }
+
     public DbSet<Usuario> Usuarios { get; set; }
     public DbSet<Categoria> Categorias { get; set; }
     public DbSet<Producto> Productos { get; set; }
