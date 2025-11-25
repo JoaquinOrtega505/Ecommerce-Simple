@@ -1,0 +1,47 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.userprefs
+.vs/
+*.dll
+*.pdb
+
+# Entity Framework
+Migrations/
+
+# Configuración sensible
+appsettings.json
+appsettings.*.json
+!appsettings.Development.json
+
+# Angular
+node_modules/
+dist/
+.angular/
+npm-debug.log
+yarn-error.log
+
+# Base de datos
+*.db
+*.db-shm
+*.db-wal
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Docker
+.env
+docker-compose.override.yml
+
+# Logs
+logs/
+*.log
