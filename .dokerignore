@@ -1,9 +1,0 @@
-bin/
-obj/
-.git/
-.gitignore
-README.md
-node_modules/
-.vs/
-.vscode/
-*.md
