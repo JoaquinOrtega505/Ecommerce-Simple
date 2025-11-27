@@ -26,7 +26,7 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Configurar precisión de decimales
+        // Configurar decimales
         modelBuilder.Entity<Producto>()
             .Property(p => p.Precio)
             .HasPrecision(18, 2);
