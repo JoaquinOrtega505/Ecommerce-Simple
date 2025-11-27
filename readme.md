@@ -41,7 +41,7 @@ Ecommerce/
 
 
 #### Clonar el repositorio
-```bash
+
 git clone https://github.com/JoaquinOrtega505/Ecommerce.git
 cd Ecommerce
 
