@@ -1,4 +1,4 @@
-# E-commerce Full Stack
+# E-commerce 
 Sistema de comercio electrónico desarrollado con ASP.NET Core 9 y PostgreSQL.
 
 ## Descripción
