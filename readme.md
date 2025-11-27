@@ -1,29 +1,29 @@
-E-commerce Full Stack
+# E-commerce Full Stack
 Sistema de comercio electrónico desarrollado con ASP.NET Core 9 y PostgreSQL.
-Descripción
+
+## Descripción
 API REST completa para un e-commerce que incluye autenticación JWT, gestión de productos, categorías, carrito de compras y pedidos con control de roles (Admin y Cliente).
-Características Principales
 
-Autenticación y registro de usuarios con JWT
-CRUD de productos con categorías
-Sistema de carrito de compras persistente
-Gestión completa de pedidos
-Control automático de stock
-Roles de usuario (Admin/Cliente)
-API documentada con Swagger
+## Características Principales
+- Autenticación y registro de usuarios con JWT
+- CRUD de productos con categorías
+- Sistema de carrito de compras persistente
+- Gestión completa de pedidos
+- Control automático de stock
+- Roles de usuario (Admin/Cliente)
+- API documentada con Swagger
 
-Stack Tecnológico
-Backend
+## Stack Tecnológico
+### Backend
+- ASP.NET Core 9
+- Entity Framework Core 9
+- PostgreSQL 15+
+- JWT Bearer Authentication
+- BCrypt para hash de contraseñas
+- Swagger/OpenAPI
 
-ASP.NET Core 9
-Entity Framework Core 9
-PostgreSQL 15+
-JWT Bearer Authentication
-BCrypt para hash de contraseñas
-Swagger/OpenAPI
-
-Estructura del Proyecto
-Ecommerce-Simple/
+## Estructura del Proyecto
+Ecommerce/
 ├── backend/
 │   └── EcommerceApi/
 │       ├── Controllers/
@@ -33,18 +33,17 @@ Ecommerce-Simple/
 │       └── Program.cs
 ├── .gitignore
 └── README.md
-Instalación Local
-Requisitos previos
 
-.NET 9 SDK
-PostgreSQL 15+
+## Instalación Local
+### Requisitos previos
+- .NET 9 SDK
+- PostgreSQL 15+
 
-Pasos
 
-Clonar el repositorio
-
-bashgit clone https://github.com/JoaquinOrtega505/Ecommerce-Simple.git
-cd Ecommerce-Simple
+#### Clonar el repositorio
+```bash
+git clone https://github.com/JoaquinOrtega505/Ecommerce.git
+cd Ecommerce
 
 Crear la base de datos
 
@@ -55,11 +54,11 @@ CREATE DATABASE ecommerce_db;
 Configurar la conexión
 
 Crear backend/EcommerceApi/appsettings.Development.json:
-json{
+{
   "ConnectionStrings": {
     "DefaultConnection": "Host=localhost;Port=5432;Database=ecommerce_db;Username=postgres;Password=TU_PASSWORD"
   }
-}
+
 
 Aplicar migraciones
 
@@ -69,7 +68,8 @@ dotnet ef database update
 
 Ejecutar
 
-bashdotnet run
+
+dotnet run
 La API estará disponible en:
 
 http://localhost:5090
@@ -116,7 +116,9 @@ Credenciales de Prueba
 Usuario Admin:
 Email: admin@ecommerce.com
 Password: Admin123!
+
 Modelo de Datos
+
 Usuario
 
 Id
