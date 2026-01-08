@@ -1,0 +1,92 @@
+<div class="container mt-4">
+  <div class="mb-3">
+    <a routerLink="/productos" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Volver a Productos
+    </a>
+  </div>
+
+  <div class="alert alert-success" *ngIf="mensaje">{{ mensaje }}</div>
+
+  <div class="text-center my-5" *ngIf="loading">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <div class="row" *ngIf="!loading && producto">
+    <div class="col-md-6">
+      <img
+        [src]="producto.imagenUrl || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22400%22%3E%3Crect fill=%22%23e9ecef%22 width=%22600%22 height=%22400%22/%3E%3Ctext fill=%22%236c757d%22 font-family=%22sans-serif%22 font-size=%2224%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3ESin Imagen%3C/text%3E%3C/svg%3E'"
+        [alt]="producto.nombre"
+        class="img-fluid rounded shadow"
+      >
+    </div>
+
+    <div class="col-md-6">
+      <h1 class="mb-3">{{ producto.nombre }}</h1>
+
+      <div class="mb-3">
+        <span class="badge bg-primary me-2">{{ producto.categoria?.nombre || 'Sin categoría' }}</span>
+        <span class="badge" [class.bg-success]="producto.stock > 0" [class.bg-danger]="producto.stock === 0">
+          {{ producto.stock > 0 ? 'Disponible' : 'Sin Stock' }}
+        </span>
+      </div>
+
+      <h2 class="text-primary mb-4">${{ producto.precio | number:'1.2-2' }}</h2>
+
+      <p class="lead">{{ producto.descripcion }}</p>
+
+      <div class="mb-3">
+        <strong>Stock disponible:</strong> {{ producto.stock }} unidades
+      </div>
+
+      <div class="card p-4" *ngIf="producto.stock > 0">
+        <div class="mb-3">
+          <label class="form-label fw-bold">Cantidad:</label>
+          <div class="input-group" style="max-width: 200px;">
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              (click)="decrementarCantidad()"
+              [disabled]="cantidad <= 1"
+            >
+              <i class="bi bi-dash"></i>
+            </button>
+            <input
+              type="number"
+              class="form-control text-center"
+              [(ngModel)]="cantidad"
+              [min]="1"
+              [max]="producto.stock"
+              readonly
+            >
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              (click)="incrementarCantidad()"
+              [disabled]="cantidad >= producto.stock"
+            >
+              <i class="bi bi-plus"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <strong>Subtotal:</strong>
+          <span class="h4 text-primary ms-2">${{ (producto.precio * cantidad) | number:'1.2-2' }}</span>
+        </div>
+
+        <button
+          class="btn btn-primary btn-lg w-100"
+          (click)="agregarAlCarrito()"
+        >
+          <i class="bi bi-cart-plus"></i> Agregar al Carrito
+        </button>
+      </div>
+
+      <div class="alert alert-warning mt-3" *ngIf="producto.stock === 0">
+        Este producto no está disponible actualmente
+      </div>
+    </div>
+  </div>
+</div>

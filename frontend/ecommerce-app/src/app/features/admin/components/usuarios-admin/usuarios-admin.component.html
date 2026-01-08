@@ -1,0 +1,142 @@
+<div class="container mt-4">
+  <h2 class="mb-4">Gestión de Usuarios</h2>
+
+  <div class="alert alert-success" *ngIf="mensaje">{{ mensaje }}</div>
+
+  <!-- Botón para crear nuevo usuario -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <button class="btn btn-primary" (click)="toggleForm()">
+        <i class="bi bi-plus-circle"></i> {{ mostrarForm ? 'Cancelar' : 'Nuevo Usuario' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Formulario de Usuario -->
+  <div class="card mb-4" *ngIf="mostrarForm">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">{{ editando ? 'Editar Usuario' : 'Nuevo Usuario' }}</h5>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="usuarioForm">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" class="form-control" formControlName="nombre" placeholder="Nombre completo">
+            <div class="text-danger" *ngIf="usuarioForm.get('nombre')?.invalid && usuarioForm.get('nombre')?.touched">
+              El nombre es requerido
+            </div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" formControlName="email" placeholder="usuario@ejemplo.com">
+            <div class="text-danger" *ngIf="usuarioForm.get('email')?.invalid && usuarioForm.get('email')?.touched">
+              Email válido es requerido
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Contraseña {{ editando ? '(dejar vacío para no cambiar)' : '' }}</label>
+            <input type="password" class="form-control" formControlName="password" placeholder="Contraseña">
+            <div class="text-danger" *ngIf="usuarioForm.get('password')?.invalid && usuarioForm.get('password')?.touched && !editando">
+              La contraseña es requerida
+            </div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Rol</label>
+            <select class="form-select" formControlName="rol">
+              <option *ngFor="let rol of rolesDisponibles" [value]="rol">{{ rol }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-success" (click)="guardarUsuario()" [disabled]="usuarioForm.invalid">
+            <i class="bi bi-save"></i> Guardar
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="toggleForm()">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="text-center my-5" *ngIf="loading">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Tabla de Usuarios -->
+  <div class="card" *ngIf="!loading">
+    <div class="card-header">
+      <h5 class="mb-0">Listado de Usuarios</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Fecha Creación</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let usuario of usuarios">
+              <td>{{ usuario.id }}</td>
+              <td>{{ usuario.nombre }}</td>
+              <td>{{ usuario.email }}</td>
+              <td>
+                <span class="badge" [ngClass]="getRolBadgeClass(usuario.rol)">
+                  {{ usuario.rol }}
+                </span>
+              </td>
+              <td>{{ usuario.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <button class="btn btn-sm btn-warning me-1" (click)="editarUsuario(usuario)">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button
+                  class="btn btn-sm btn-danger"
+                  (click)="eliminarUsuario(usuario.id, usuario.nombre)"
+                  [disabled]="usuario.id === 1"
+                  [title]="usuario.id === 1 ? 'No se puede eliminar el admin principal' : 'Eliminar usuario'"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="usuarios.length === 0" class="text-center text-muted my-4">
+          No hay usuarios registrados
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resumen por rol -->
+  <div class="row mt-4" *ngIf="!loading && usuarios.length > 0">
+    <div class="col-12">
+      <h5 class="mb-3">Resumen por rol</h5>
+    </div>
+    <div class="col-md-4" *ngFor="let rol of rolesDisponibles">
+      <div class="card text-center">
+        <div class="card-body">
+          <span class="badge mb-2 w-100" [ngClass]="getRolBadgeClass(rol)">{{ rol }}</span>
+          <h4 class="mb-0">{{ getUsuariosPorRol(rol) }}</h4>
+          <small class="text-muted">usuarios</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

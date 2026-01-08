@@ -1,0 +1,136 @@
+<div class="container mt-4">
+  <h2 class="mb-4">Gestión de Pedidos</h2>
+
+  <div class="alert alert-success" *ngIf="mensaje">{{ mensaje }}</div>
+
+  <!-- Filtros y estadísticas -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Buscar por ID o usuario..."
+        [(ngModel)]="busqueda"
+        (ngModelChange)="filtrarPedidos()"
+      >
+    </div>
+    <div class="col-md-3">
+      <select class="form-select" [(ngModel)]="estadoFiltro" (ngModelChange)="filtrarPedidos()">
+        <option value="Todos">Todos los estados</option>
+        <option *ngFor="let estado of estadosDisponibles" [value]="estado">{{ estado }}</option>
+      </select>
+    </div>
+    <div class="col-md-5 text-end">
+      <div class="card">
+        <div class="card-body py-2">
+          <strong>Total filtrado: ${{ getTotalPedidos() | number:'1.2-2' }}</strong>
+          <span class="text-muted ms-2">({{ pedidosFiltrados.length }} pedidos)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="text-center my-5" *ngIf="loading">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Tabla de pedidos -->
+  <div class="card" *ngIf="!loading">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let pedido of pedidosFiltrados">
+              <td>
+                <a [routerLink]="['/pedidos', pedido.id]" class="text-decoration-none">
+                  #{{ pedido.id }}
+                </a>
+              </td>
+              <td>{{ pedido.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ pedido.usuarioNombre }}</td>
+              <td>
+                <span class="badge bg-secondary">{{ pedido.items.length }} items</span>
+              </td>
+              <td>
+                <strong>${{ pedido.total | number:'1.2-2' }}</strong>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getEstadoBadgeClass(pedido.estado)">
+                  {{ pedido.estado }}
+                </span>
+              </td>
+              <td>
+                <div class="btn-group" role="group">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    Cambiar estado
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li *ngFor="let estado of estadosDisponibles">
+                      <a
+                        class="dropdown-item"
+                        [class.active]="estado === pedido.estado"
+                        [class.disabled]="estado === pedido.estado"
+                        (click)="cambiarEstado(pedido.id, estado)"
+                        style="cursor: pointer;"
+                      >
+                        {{ estado }}
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+                <a
+                  [routerLink]="['/pedidos', pedido.id]"
+                  class="btn btn-sm btn-outline-primary ms-2"
+                  title="Ver detalles"
+                >
+                  <i class="bi bi-eye"></i>
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="pedidosFiltrados.length === 0" class="text-center text-muted my-4">
+          No hay pedidos que coincidan con los filtros
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resumen por estado -->
+  <div class="row mt-4" *ngIf="!loading && pedidos.length > 0">
+    <div class="col-12">
+      <h5 class="mb-3">Resumen por estado</h5>
+    </div>
+    <div class="col-md-2 mb-3" *ngFor="let estado of estadosDisponibles">
+      <div class="card text-center">
+        <div class="card-body py-2">
+          <span class="badge mb-2 w-100" [ngClass]="getEstadoBadgeClass(estado)">{{ estado }}</span>
+          <h4 class="mb-0">{{ getPedidosPorEstado(estado).length }}</h4>
+          <small class="text-muted">
+            ${{ getTotalPorEstado(estado) | number:'1.2-2' }}
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

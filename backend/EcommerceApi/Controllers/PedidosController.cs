@@ -31,15 +31,16 @@ public class PedidosController : ControllerBase
     {
         var usuarioId = GetUsuarioId();
         var esAdmin = User.IsInRole("Admin");
+        var esDeposito = User.IsInRole("Deposito");
 
         var query = _context.Pedidos
             .Include(p => p.Usuario)
-            .Include(p => p.Items)
+            .Include(p => p.PedidoItems)
             .ThenInclude(i => i.Producto)
             .AsQueryable();
 
-        // Si no es admin, solo ver sus propios pedidos
-        if (!esAdmin)
+        // Si no es admin ni deposito, solo ver sus propios pedidos
+        if (!esAdmin && !esDeposito)
         {
             query = query.Where(p => p.UsuarioId == usuarioId);
         }
@@ -55,10 +56,15 @@ public class PedidosController : ControllerBase
                 Estado = p.Estado,
                 DireccionEnvio = p.DireccionEnvio,
                 FechaCreacion = p.FechaCreacion,
-                Items = p.Items.Select(i => new PedidoItemDto
+                NumeroSeguimiento = p.NumeroSeguimiento,
+                ServicioEnvio = p.ServicioEnvio,
+                FechaDespacho = p.FechaDespacho,
+                FechaEntrega = p.FechaEntrega,
+                Items = p.PedidoItems.Select(i => new PedidoItemDto
                 {
                     ProductoId = i.ProductoId,
                     ProductoNombre = i.Producto!.Nombre,
+                    ProductoImagen = i.Producto.ImagenUrl,
                     Cantidad = i.Cantidad,
                     PrecioUnitario = i.PrecioUnitario,
                     Subtotal = i.Subtotal
@@ -74,10 +80,11 @@ public class PedidosController : ControllerBase
     {
         var usuarioId = GetUsuarioId();
         var esAdmin = User.IsInRole("Admin");
+        var esDeposito = User.IsInRole("Deposito");
 
         var pedido = await _context.Pedidos
             .Include(p => p.Usuario)
-            .Include(p => p.Items)
+            .Include(p => p.PedidoItems)
             .ThenInclude(i => i.Producto)
             .Where(p => p.Id == id)
             .FirstOrDefaultAsync();
@@ -88,7 +95,7 @@ public class PedidosController : ControllerBase
         }
 
         // Verificar permisos
-        if (!esAdmin && pedido.UsuarioId != usuarioId)
+        if (!esAdmin && !esDeposito && pedido.UsuarioId != usuarioId)
         {
             return Forbid();
         }
@@ -102,10 +109,15 @@ public class PedidosController : ControllerBase
             Estado = pedido.Estado,
             DireccionEnvio = pedido.DireccionEnvio,
             FechaCreacion = pedido.FechaCreacion,
-            Items = pedido.Items.Select(i => new PedidoItemDto
+            NumeroSeguimiento = pedido.NumeroSeguimiento,
+            ServicioEnvio = pedido.ServicioEnvio,
+            FechaDespacho = pedido.FechaDespacho,
+            FechaEntrega = pedido.FechaEntrega,
+            Items = pedido.PedidoItems.Select(i => new PedidoItemDto
             {
                 ProductoId = i.ProductoId,
                 ProductoNombre = i.Producto!.Nombre,
+                ProductoImagen = i.Producto.ImagenUrl,
                 Cantidad = i.Cantidad,
                 PrecioUnitario = i.PrecioUnitario,
                 Subtotal = i.Subtotal
@@ -159,14 +171,14 @@ public class PedidosController : ControllerBase
                 Subtotal = carritoItem.Producto.Precio * carritoItem.Cantidad
             };
 
-            pedido.Items.Add(pedidoItem);
+            pedido.PedidoItems.Add(pedidoItem);
 
             // Actualizar stock
             carritoItem.Producto.Stock -= carritoItem.Cantidad;
         }
 
         // Calcular total
-        pedido.Total = pedido.Items.Sum(i => i.Subtotal);
+        pedido.Total = pedido.PedidoItems.Sum(i => i.Subtotal);
 
         _context.Pedidos.Add(pedido);
 
@@ -186,10 +198,11 @@ public class PedidosController : ControllerBase
             Estado = pedido.Estado,
             DireccionEnvio = pedido.DireccionEnvio,
             FechaCreacion = pedido.FechaCreacion,
-            Items = pedido.Items.Select(i => new PedidoItemDto
+            Items = pedido.PedidoItems.Select(i => new PedidoItemDto
             {
                 ProductoId = i.ProductoId,
                 ProductoNombre = i.Producto!.Nombre,
+                ProductoImagen = i.Producto.ImagenUrl,
                 Cantidad = i.Cantidad,
                 PrecioUnitario = i.PrecioUnitario,
                 Subtotal = i.Subtotal

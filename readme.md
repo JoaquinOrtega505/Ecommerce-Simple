@@ -1,171 +1,345 @@
-# E-commerce 
-Sistema de comercio electrónico desarrollado con ASP.NET Core 9 y PostgreSQL.
+# E-Commerce Fullstack 🛒
 
-## Descripción
-API REST completa para un e-commerce que incluye autenticación JWT, gestión de productos, categorías, carrito de compras y pedidos con control de roles (Admin y Cliente).
+Sistema de comercio electrónico completo desarrollado con **ASP.NET Core 9** (Backend) y **Angular 17** (Frontend).
 
-## Características Principales
-- Autenticación y registro de usuarios con JWT
-- CRUD de productos con categorías
-- Sistema de carrito de compras persistente
-- Gestión completa de pedidos
-- Control automático de stock
-- Roles de usuario (Admin/Cliente)
-- API documentada con Swagger
+## 📸 Capturas
 
-## Stack Tecnológico
+> Sistema completo con autenticación, gestión de productos, carrito de compras, checkout con múltiples métodos de pago y panel de administración.
+
+## ✨ Características Principales
+
+### Backend (API REST)
+- ✅ Autenticación y registro con JWT
+- ✅ CRUD completo de productos y categorías
+- ✅ Sistema de carrito de compras persistente
+- ✅ Gestión de pedidos con estados
+- ✅ Control automático de stock
+- ✅ Roles de usuario (Admin/Cliente)
+- ✅ Documentación con Swagger/OpenAPI
+- ✅ Hash de contraseñas con BCrypt
+
+### Frontend (SPA)
+- ✅ Interfaz moderna con Angular 17 + Bootstrap 5
+- ✅ Autenticación con guards y interceptors
+- ✅ Lista de productos con filtros y búsqueda
+- ✅ Carrito de compras interactivo
+- ✅ Checkout con 3 métodos de pago simulados:
+  - Tarjeta de Crédito/Débito
+  - MercadoPago
+  - Transferencia Bancaria
+- ✅ Seguimiento de pedidos con timeline
+- ✅ Panel de administración completo
+- ✅ Diseño responsive
+- ✅ Lazy loading de componentes
+
+## 🚀 Stack Tecnológico
+
 ### Backend
-- ASP.NET Core 9
-- Entity Framework Core 9
-- PostgreSQL 15+
-- JWT Bearer Authentication
-- BCrypt para hash de contraseñas
-- Swagger/OpenAPI
+- **ASP.NET Core 9** - Framework web
+- **Entity Framework Core 9** - ORM
+- **PostgreSQL 15+** - Base de datos
+- **JWT Bearer** - Autenticación
+- **BCrypt** - Hash de contraseñas
+- **Swagger** - Documentación API
 
-## Estructura del Proyecto
-Ecommerce/
+### Frontend
+- **Angular 17** - Framework SPA (Standalone Components)
+- **Bootstrap 5** - Framework CSS
+- **Bootstrap Icons** - Iconografía
+- **RxJS** - Programación reactiva
+- **TypeScript** - Lenguaje tipado
+
+## 📁 Estructura del Proyecto
+
+```
+Ecommerce-Simple/
 ├── backend/
 │   └── EcommerceApi/
-│       ├── Controllers/
-│       ├── Models/
-│       ├── DTOs/
-│       ├── Data/
-│       └── Program.cs
-├── .gitignore
+│       ├── Controllers/        # Endpoints de la API
+│       ├── Models/            # Entidades del dominio
+│       ├── DTOs/              # Data Transfer Objects
+│       ├── Data/              # DbContext y configuración
+│       ├── Migrations/        # Migraciones de BD
+│       └── Program.cs         # Configuración principal
+│
+├── frontend/
+│   └── ecommerce-app/
+│       ├── src/app/
+│       │   ├── core/          # Servicios centrales
+│       │   ├── shared/        # Componentes compartidos
+│       │   ├── features/      # Módulos por funcionalidad
+│       │   └── environments/  # Configuración de entornos
+│       └── package.json
+│
 └── README.md
+```
 
-## Instalación Local
-### Requisitos previos
-- .NET 9 SDK
-- PostgreSQL 15+
+## 🛠️ Instalación y Configuración
 
+### Requisitos Previos
+- ✅ .NET 9 SDK
+- ✅ Node.js 18+
+- ✅ PostgreSQL 15+
+- ✅ Angular CLI 17
 
-#### Clonar el repositorio
-
+### 1. Clonar el Repositorio
+```bash
 git clone https://github.com/JoaquinOrtega505/Ecommerce.git
-cd Ecommerce
+cd Ecommerce-Simple
+```
 
-Crear la base de datos
+### 2. Configurar Backend
 
-sqlpsql -U postgres
+#### Crear Base de Datos
+```bash
+psql -U postgres
 CREATE DATABASE ecommerce_db;
 \q
+```
 
-Configurar la conexión
-
-Crear backend/EcommerceApi/appsettings.Development.json:
+#### Configurar Conexión
+Crear `backend/EcommerceApi/appsettings.Development.json`:
+```json
 {
   "ConnectionStrings": {
     "DefaultConnection": "Host=localhost;Port=5432;Database=ecommerce_db;Username=postgres;Password=TU_PASSWORD"
+  },
+  "Jwt": {
+    "Key": "tu_clave_secreta_super_segura_de_al_menos_32_caracteres",
+    "Issuer": "EcommerceApi",
+    "Audience": "EcommerceClient"
   }
+}
+```
 
-
-Aplicar migraciones
-
-bashcd backend/EcommerceApi
+#### Aplicar Migraciones y Ejecutar
+```bash
+cd backend/EcommerceApi
 dotnet tool install --global dotnet-ef
 dotnet ef database update
-
-Ejecutar
-
-
 dotnet run
-La API estará disponible en:
+```
 
-http://localhost:5090
-Swagger: http://localhost:5090/swagger
+**Backend disponible en:** `http://localhost:5090`
+**Swagger:** `http://localhost:5090/swagger`
 
-API Endpoints
-Autenticación
+### 3. Configurar Frontend
 
-POST /api/auth/register - Registrar usuario
-POST /api/auth/login - Iniciar sesión
+```bash
+cd frontend/ecommerce-app
+npm install
+ng serve
+```
 
-Categorías
+**Frontend disponible en:** `http://localhost:4200`
 
-GET /api/categorias - Listar todas
-GET /api/categorias/{id} - Obtener por ID
-POST /api/categorias - Crear (Admin)
-PUT /api/categorias/{id} - Actualizar (Admin)
-DELETE /api/categorias/{id} - Eliminar (Admin)
+## 👤 Credenciales de Prueba
 
-Productos
+### Usuario Admin
+- **Email:** `admin@ecommerce.com`
+- **Password:** `Admin123!`
+- **Permisos:** Acceso completo al panel de administración
 
-GET /api/productos - Listar todos
-GET /api/productos/{id} - Obtener por ID
-POST /api/productos - Crear (Admin)
-PUT /api/productos/{id} - Actualizar (Admin)
-DELETE /api/productos/{id} - Eliminar (Admin)
+### Usuario Cliente
+- Crear nuevo usuario desde `/register`
+- **Permisos:** Comprar productos, gestionar carrito, ver pedidos
 
-Carrito (Requiere autenticación)
+## 📡 API Endpoints
 
-GET /api/carrito - Ver carrito
-POST /api/carrito - Agregar producto
-PUT /api/carrito/{itemId} - Actualizar cantidad
-DELETE /api/carrito/{itemId} - Eliminar producto
-DELETE /api/carrito - Vaciar carrito
+### Autenticación
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Registrar usuario |
+| POST | `/api/auth/login` | Iniciar sesión (retorna JWT) |
 
-Pedidos (Requiere autenticación)
+### Productos
+| Método | Endpoint | Descripción | Requiere |
+|--------|----------|-------------|----------|
+| GET | `/api/productos` | Listar todos | - |
+| GET | `/api/productos/{id}` | Obtener por ID | - |
+| POST | `/api/productos` | Crear producto | Admin |
+| PUT | `/api/productos/{id}` | Actualizar | Admin |
+| DELETE | `/api/productos/{id}` | Eliminar | Admin |
 
-GET /api/pedidos - Listar pedidos
-GET /api/pedidos/{id} - Obtener pedido
-POST /api/pedidos - Crear pedido
-PUT /api/pedidos/{id}/estado - Actualizar estado (Admin)
+### Categorías
+| Método | Endpoint | Descripción | Requiere |
+|--------|----------|-------------|----------|
+| GET | `/api/categorias` | Listar todas | - |
+| GET | `/api/categorias/{id}` | Obtener por ID | - |
+| POST | `/api/categorias` | Crear categoría | Admin |
+| PUT | `/api/categorias/{id}` | Actualizar | Admin |
+| DELETE | `/api/categorias/{id}` | Eliminar | Admin |
 
-Credenciales de Prueba
-Usuario Admin:
-Email: admin@ecommerce.com
-Password: Admin123!
+### Carrito
+| Método | Endpoint | Descripción | Requiere |
+|--------|----------|-------------|----------|
+| GET | `/api/carrito` | Ver carrito actual | Auth |
+| POST | `/api/carrito` | Agregar producto | Auth |
+| PUT | `/api/carrito/{itemId}` | Actualizar cantidad | Auth |
+| DELETE | `/api/carrito/{itemId}` | Eliminar producto | Auth |
+| DELETE | `/api/carrito` | Vaciar carrito | Auth |
 
-Modelo de Datos
+### Pedidos
+| Método | Endpoint | Descripción | Requiere |
+|--------|----------|-------------|----------|
+| GET | `/api/pedidos` | Listar mis pedidos | Auth |
+| GET | `/api/pedidos/{id}` | Obtener detalle | Auth |
+| POST | `/api/pedidos` | Crear pedido | Auth |
+| PUT | `/api/pedidos/{id}/estado` | Actualizar estado | Admin |
 
-Usuario
+## 🎯 Rutas del Frontend
 
-Id
-Nombre
-Email
-PasswordHash
-Rol (Admin/Cliente)
+| Ruta | Componente | Requiere Auth | Requiere Admin |
+|------|------------|---------------|----------------|
+| `/` | Redirect → `/productos` | No | No |
+| `/login` | Login | No | No |
+| `/register` | Registro | No | No |
+| `/productos` | Lista de Productos | No | No |
+| `/productos/:id` | Detalle Producto | No | No |
+| `/carrito` | Carrito de Compras | Sí | No |
+| `/checkout` | Finalizar Compra | Sí | No |
+| `/pedidos` | Mis Pedidos | Sí | No |
+| `/pedidos/:id` | Detalle de Pedido | Sí | No |
+| `/admin/productos` | Admin Productos | Sí | Sí |
 
-Categoria
+## 🗄️ Modelo de Datos
 
-Id
-Nombre
-Descripcion
+### Usuario
+```typescript
+{
+  id: number
+  nombre: string
+  email: string
+  passwordHash: string
+  rol: 'Admin' | 'Cliente'
+}
+```
 
-Producto
+### Producto
+```typescript
+{
+  id: number
+  nombre: string
+  descripcion: string
+  precio: number
+  stock: number
+  imagenUrl: string
+  activo: boolean
+  categoriaId: number
+}
+```
 
-Id
-Nombre
-Descripcion
-Precio
-Stock
-ImagenUrl
-Activo
-CategoriaId
+### Pedido
+```typescript
+{
+  id: number
+  usuarioId: number
+  total: number
+  estado: 'Pendiente' | 'Procesando' | 'Enviado' | 'Entregado' | 'Cancelado'
+  direccionEnvio: string
+  fechaCreacion: Date
+  items: PedidoItem[]
+}
+```
 
-CarritoItem
+## 🔐 Seguridad
 
-Id
-UsuarioId
-ProductoId
-Cantidad
+- **JWT Authentication**: Tokens firmados con HS256
+- **Password Hashing**: BCrypt con salt automático
+- **HTTP Interceptor**: Agrega token JWT automáticamente
+- **Guards**: Protección de rutas en frontend
+- **CORS**: Configurado para desarrollo local
+- **Validación**: En backend y frontend
 
-Pedido
+## 🧪 Testing
 
-Id
-UsuarioId
-Total
-Estado
-DireccionEnvio
-FechaCreacion
+### Backend
+```bash
+cd backend/EcommerceApi
+dotnet test
+```
 
-PedidoItem
+### Frontend
+```bash
+cd frontend/ecommerce-app
+ng test
+```
 
-Id
-PedidoId
-ProductoId
-Cantidad
-PrecioUnitario
-Subtotal
+## 📦 Build para Producción
 
+### Backend
+```bash
+cd backend/EcommerceApi
+dotnet publish -c Release -o ./publish
+```
+
+### Frontend
+```bash
+cd frontend/ecommerce-app
+ng build --configuration production
+```
+
+## 🚀 Despliegue
+
+### Opciones de Hosting
+
+**Backend:**
+- Azure App Service
+- AWS Elastic Beanstalk
+- Heroku
+- Railway
+
+**Frontend:**
+- Vercel
+- Netlify
+- Firebase Hosting
+- Azure Static Web Apps
+
+**Base de Datos:**
+- Azure Database for PostgreSQL
+- AWS RDS
+- ElephantSQL
+- Supabase
+
+## 🔮 Roadmap / Mejoras Futuras
+
+- [ ] Integración real con Stripe/MercadoPago
+- [ ] Sistema de notificaciones push
+- [ ] Chat de soporte en vivo
+- [ ] Sistema de reseñas y calificaciones
+- [ ] Wishlist / Lista de deseos
+- [ ] Comparador de productos
+- [ ] Sistema de cupones y descuentos
+- [ ] Búsqueda avanzada con Elasticsearch
+- [ ] Panel de analytics para admin
+- [ ] Exportación de reportes (PDF/Excel)
+- [ ] Multi-idioma (i18n)
+- [ ] Modo oscuro
+- [ ] PWA (Progressive Web App)
+- [ ] Sistema de recomendaciones con ML
+
+## 🤝 Contribuciones
+
+Las contribuciones son bienvenidas. Por favor:
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver archivo `LICENSE` para más detalles.
+
+## 👨‍💻 Autor
+
+**Joaquín Ortega**
+- GitHub: [@JoaquinOrtega505](https://github.com/JoaquinOrtega505)
+
+## 📞 Soporte
+
+Si encuentras algún problema o tienes sugerencias, por favor abre un issue en GitHub.
+
+---
+
+⭐ Si te gustó este proyecto, ¡dale una estrella en GitHub!
