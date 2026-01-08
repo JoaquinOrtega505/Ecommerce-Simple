@@ -1,0 +1,62 @@
+<div class="container">
+  <div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-4">
+      <div class="card shadow">
+        <div class="card-body p-4">
+          <h2 class="card-title text-center mb-4">Iniciar Sesión</h2>
+
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                formControlName="email"
+                [class.is-invalid]="email?.invalid && email?.touched"
+              >
+              <div class="invalid-feedback" *ngIf="email?.invalid && email?.touched">
+                <span *ngIf="email?.errors?.['required']">El email es requerido</span>
+                <span *ngIf="email?.errors?.['email']">Formato de email inválido</span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="password" class="form-label">Contraseña</label>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                formControlName="password"
+                [class.is-invalid]="password?.invalid && password?.touched"
+              >
+              <div class="invalid-feedback" *ngIf="password?.invalid && password?.touched">
+                <span *ngIf="password?.errors?.['required']">La contraseña es requerida</span>
+                <span *ngIf="password?.errors?.['minlength']">Mínimo 6 caracteres</span>
+              </div>
+            </div>
+
+            <div class="alert alert-danger" *ngIf="errorMessage">
+              {{ errorMessage }}
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-primary w-100 mb-3"
+              [disabled]="loginForm.invalid || loading"
+            >
+              <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+              {{ loading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
+            </button>
+
+            <div class="text-center">
+              <p class="mb-0">¿No tienes cuenta?
+                <a routerLink="/register" class="text-decoration-none">Regístrate</a>
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

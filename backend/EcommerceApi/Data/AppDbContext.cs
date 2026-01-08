@@ -70,7 +70,7 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<PedidoItem>()
             .HasOne(pi => pi.Pedido)
-            .WithMany(p => p.Items)
+            .WithMany(p => p.PedidoItems)
             .HasForeignKey(pi => pi.PedidoId)
             .OnDelete(DeleteBehavior.Cascade);
 

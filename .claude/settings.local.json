@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx ng generate:*)",
+      "Bash(dotnet run:*)",
+      "Bash(npm start)",
+      "Bash(cat:*)",
+      "Bash(curl:*)",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW5pc3RyYWRvciIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6ImFkbWluQGVjb21tZXJjZS5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImV4cCI6MTc2Nzg5NDg0MywiaXNzIjoiRWNvbW1lcmNlQXBpIiwiYXVkIjoiRWNvbW1lcmNlQ2xpZW50In0.i6j1gdcAGnRXy2sPTa40IszG14gm8FU4PvRvtMjBSVA\")",
+      "Bash(python:*)",
+      "Bash(dotnet build:*)",
+      "Bash(ls:*)",
+      "Bash(dotnet add:*)",
+      "Bash(dotnet remove:*)",
+      "Bash(dotnet ef migrations:*)",
+      "Bash(taskkill:*)",
+      "Bash(dotnet ef database:*)",
+      "Bash(timeout /t 5 /nobreak)",
+      "Bash(ping:*)"
+    ]
+  }
+}

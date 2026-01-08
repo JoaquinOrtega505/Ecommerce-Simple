@@ -10,12 +10,17 @@ public class PedidoDto
     public string DireccionEnvio { get; set; } = string.Empty;
     public DateTime FechaCreacion { get; set; }
     public List<PedidoItemDto> Items { get; set; } = new();
+    public string? NumeroSeguimiento { get; set; }
+    public string? ServicioEnvio { get; set; }
+    public DateTime? FechaDespacho { get; set; }
+    public DateTime? FechaEntrega { get; set; }
 }
 
 public class PedidoItemDto
 {
     public int ProductoId { get; set; }
     public string ProductoNombre { get; set; } = string.Empty;
+    public string? ProductoImagen { get; set; }
     public int Cantidad { get; set; }
     public decimal PrecioUnitario { get; set; }
     public decimal Subtotal { get; set; }

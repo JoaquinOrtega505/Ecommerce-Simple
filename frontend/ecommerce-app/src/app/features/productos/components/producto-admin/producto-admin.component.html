@@ -1,0 +1,170 @@
+<div class="container mt-4">
+  <h2 class="mb-4">Administración de Productos</h2>
+
+  <div class="alert alert-info" *ngIf="mensaje">{{ mensaje }}</div>
+
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <button class="btn btn-primary me-2" (click)="toggleFormProducto()">
+        <i class="bi bi-plus-circle"></i> {{ mostrarFormProducto ? 'Cancelar' : 'Nuevo Producto' }}
+      </button>
+      <button class="btn btn-success" (click)="toggleFormCategoria()">
+        <i class="bi bi-tag"></i> {{ mostrarFormCategoria ? 'Cancelar' : 'Nueva Categoría' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Formulario de Producto -->
+  <div class="card mb-4" *ngIf="mostrarFormProducto">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">{{ editando ? 'Editar Producto' : 'Nuevo Producto' }}</h5>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="productoForm">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" class="form-control" formControlName="nombre">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Categoría</label>
+            <select class="form-select" formControlName="categoriaId">
+              <option [value]="0">Seleccionar categoría</option>
+              <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.nombre }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Descripción</label>
+          <textarea class="form-control" rows="3" formControlName="descripcion"></textarea>
+        </div>
+
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Precio</label>
+            <input type="number" class="form-control" formControlName="precio" step="0.01">
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Stock</label>
+            <input type="number" class="form-control" formControlName="stock">
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Activo</label>
+            <div class="form-check form-switch mt-2">
+              <input class="form-check-input" type="checkbox" formControlName="activo">
+              <label class="form-check-label">Producto activo</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">URL de Imagen</label>
+          <input type="text" class="form-control" formControlName="imagenUrl" placeholder="https://ejemplo.com/imagen.jpg">
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-success" (click)="guardarProducto()" [disabled]="productoForm.invalid">
+            <i class="bi bi-save"></i> Guardar
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="cancelarEdicion(); toggleFormProducto()">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Formulario de Categoría -->
+  <div class="card mb-4" *ngIf="mostrarFormCategoria">
+    <div class="card-header bg-success text-white">
+      <h5 class="mb-0">Nueva Categoría</h5>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="categoriaForm">
+        <div class="mb-3">
+          <label class="form-label">Nombre</label>
+          <input type="text" class="form-control" formControlName="nombre">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Descripción</label>
+          <textarea class="form-control" rows="2" formControlName="descripcion"></textarea>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-success" (click)="guardarCategoria()" [disabled]="categoriaForm.invalid">
+            <i class="bi bi-save"></i> Guardar Categoría
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="toggleFormCategoria()">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tabla de Productos -->
+  <div class="card">
+    <div class="card-header">
+      <h5 class="mb-0">Listado de Productos</h5>
+    </div>
+    <div class="card-body">
+      <div class="text-center my-5" *ngIf="loading">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+
+      <div class="table-responsive" *ngIf="!loading">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Imagen</th>
+              <th>Nombre</th>
+              <th>Categoría</th>
+              <th>Precio</th>
+              <th>Stock</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let producto of productos">
+              <td>{{ producto.id }}</td>
+              <td>
+                <img [src]="producto.imagenUrl || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2250%22 height=%2250%22%3E%3Crect fill=%22%23e9ecef%22 width=%2250%22 height=%2250%22/%3E%3Ctext fill=%22%236c757d%22 font-family=%22sans-serif%22 font-size=%228%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3ESin Img%3C/text%3E%3C/svg%3E'" alt="{{ producto.nombre }}" class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
+              </td>
+              <td>{{ producto.nombre }}</td>
+              <td>
+                <span class="badge bg-info">{{ producto.categoria?.nombre || 'Sin categoría' }}</span>
+              </td>
+              <td>${{ producto.precio | number:'1.2-2' }}</td>
+              <td>
+                <span class="badge" [class.bg-success]="producto.stock > 10" [class.bg-warning]="producto.stock > 0 && producto.stock <= 10" [class.bg-danger]="producto.stock === 0">
+                  {{ producto.stock }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [class.bg-success]="producto.activo" [class.bg-secondary]="!producto.activo">
+                  {{ producto.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td>
+                <button class="btn btn-sm btn-warning me-1" (click)="editarProducto(producto)">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" (click)="eliminarProducto(producto.id)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="productos.length === 0" class="text-center text-muted my-4">
+          No hay productos registrados
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

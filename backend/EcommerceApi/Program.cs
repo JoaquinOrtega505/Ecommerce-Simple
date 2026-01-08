@@ -47,6 +47,12 @@ builder.Services.AddCors(options =>
         });
 });
 
+// Registrar HttpClient para AndreaniService
+builder.Services.AddHttpClient<EcommerceApi.Services.AndreaniService>();
+
+// Registrar servicio de envíos simulado
+builder.Services.AddSingleton<EcommerceApi.Services.MockShippingService>();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

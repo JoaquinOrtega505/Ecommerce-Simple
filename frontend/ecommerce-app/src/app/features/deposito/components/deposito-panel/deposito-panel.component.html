@@ -1,0 +1,84 @@
+<div class="container mt-4">
+  <h2 class="mb-4">Panel de Depósito - Pedidos para Despachar</h2>
+
+  <div class="alert alert-success" *ngIf="mensaje">{{ mensaje }}</div>
+
+  <!-- Loading -->
+  <div class="text-center my-5" *ngIf="loading">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Resumen -->
+  <div class="row mb-4" *ngIf="!loading">
+    <div class="col-md-12">
+      <div class="card bg-success text-white">
+        <div class="card-body">
+          <h5 class="card-title">Pedidos Pagados Pendientes de Despacho</h5>
+          <h2 class="mb-0">{{ pedidosPagados.length }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de Pedidos Pagados -->
+  <div class="card" *ngIf="!loading">
+    <div class="card-header bg-success text-white">
+      <h5 class="mb-0">Pedidos Listos para Despachar</h5>
+    </div>
+    <div class="card-body">
+      <div *ngIf="pedidosPagados.length === 0" class="text-center text-muted my-4">
+        <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+        <p class="mt-3">No hay pedidos pendientes de despacho</p>
+      </div>
+
+      <div *ngFor="let pedido of pedidosPagados" class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div>
+            <strong>Pedido #{{ pedido.id }}</strong>
+            <span class="badge ms-2" [ngClass]="getEstadoBadgeClass(pedido.estado)">
+              {{ pedido.estado }}
+            </span>
+          </div>
+          <div class="text-muted">
+            {{ pedido.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <p class="mb-1"><strong>Cliente:</strong> {{ pedido.usuarioNombre }}</p>
+              <p class="mb-1"><strong>Dirección:</strong> {{ pedido.direccionEnvio }}</p>
+              <p class="mb-1"><strong>Total:</strong> ${{ pedido.total.toFixed(2) }}</p>
+            </div>
+            <div class="col-md-6">
+              <p class="mb-2"><strong>Productos:</strong></p>
+              <ul class="list-unstyled">
+                <li *ngFor="let item of pedido.items" class="mb-1">
+                  <small>
+                    {{ item.cantidad }}x {{ item.productoNombre }} - ${{ item.subtotal.toFixed(2) }}
+                  </small>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <hr>
+
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-primary btn-sm" (click)="imprimirListaProductos(pedido)">
+              <i class="bi bi-printer"></i> Imprimir Lista de Productos
+            </button>
+            <button class="btn btn-info btn-sm" (click)="imprimirEtiquetaEnvio(pedido)">
+              <i class="bi bi-tag"></i> Imprimir Etiqueta de Envío
+            </button>
+            <button class="btn btn-success btn-sm" (click)="marcarComoEnviado(pedido.id)">
+              <i class="bi bi-truck"></i> Marcar como Enviado
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
