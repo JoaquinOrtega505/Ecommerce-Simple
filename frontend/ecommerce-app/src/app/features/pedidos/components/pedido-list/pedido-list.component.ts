@@ -40,11 +40,36 @@ export class PedidoListComponent implements OnInit {
   getEstadoClass(estado: string): string {
     const classes: { [key: string]: string } = {
       'Pendiente': 'bg-warning',
+      'Pagado': 'bg-info',
       'Procesando': 'bg-info',
       'Enviado': 'bg-primary',
       'Entregado': 'bg-success',
       'Cancelado': 'bg-danger'
     };
     return classes[estado] || 'bg-secondary';
+  }
+
+  getEstadoTexto(estado: string): string {
+    const textos: { [key: string]: string } = {
+      'Pendiente': 'Pendiente de pago',
+      'Pagado': 'Estamos preparando tu pedido',
+      'Procesando': 'Estamos preparando tu pedido',
+      'Enviado': 'En camino',
+      'Entregado': 'Entregado',
+      'Cancelado': 'Cancelado'
+    };
+    return textos[estado] || estado;
+  }
+
+  getEstadoIcono(estado: string): string {
+    const iconos: { [key: string]: string } = {
+      'Pendiente': 'bi-clock',
+      'Pagado': 'bi-box-seam',
+      'Procesando': 'bi-box-seam',
+      'Enviado': 'bi-truck',
+      'Entregado': 'bi-check-circle',
+      'Cancelado': 'bi-x-circle'
+    };
+    return iconos[estado] || 'bi-info-circle';
   }
 }

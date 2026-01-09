@@ -4,7 +4,10 @@ import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CarritoService } from '../../../../core/services/carrito.service';
 import { PedidoService } from '../../../../core/services/pedido.service';
+import { PagoService } from '../../../../core/services/pago.service';
 import { CarritoItem } from '../../../../shared/models';
+
+declare var MercadoPago: any;
 
 @Component({
   selector: 'app-checkout',
@@ -17,6 +20,7 @@ export class CheckoutComponent implements OnInit {
   private fb = inject(FormBuilder);
   private carritoService = inject(CarritoService);
   private pedidoService = inject(PedidoService);
+  private pagoService = inject(PagoService);
   private router = inject(Router);
 
   checkoutForm: FormGroup;
@@ -25,21 +29,15 @@ export class CheckoutComponent implements OnInit {
   procesando = false;
   errorMessage = '';
 
-  // Simulación de pasarela de pago
-  metodoPago: 'tarjeta' | 'mercadopago' | 'transferencia' = 'tarjeta';
+  // Método de pago seleccionado
+  metodoPago: 'mercadopago' | 'transferencia' = 'mercadopago';
 
   constructor() {
     this.checkoutForm = this.fb.group({
       direccionEnvio: ['', [Validators.required, Validators.minLength(10)]],
       ciudad: ['', Validators.required],
       codigoPostal: ['', Validators.required],
-      telefono: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
-
-      // Datos de tarjeta (simulados)
-      numeroTarjeta: ['', [Validators.pattern(/^\d{16}$/)]],
-      nombreTitular: [''],
-      fechaExpiracion: ['', [Validators.pattern(/^(0[1-9]|1[0-2])\/\d{2}$/)]],
-      cvv: ['', [Validators.pattern(/^\d{3,4}$/)]]
+      telefono: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]]
     });
   }
 
@@ -67,7 +65,7 @@ export class CheckoutComponent implements OnInit {
 
   get total(): number {
     return this.items.reduce((sum, item) => {
-      return sum + (item.producto?.precio || 0) * item.cantidad;
+      return sum + (item.precioUnitario || item.producto?.precio || 0) * item.cantidad;
     }, 0);
   }
 
@@ -75,25 +73,8 @@ export class CheckoutComponent implements OnInit {
     return this.items.reduce((sum, item) => sum + item.cantidad, 0);
   }
 
-  seleccionarMetodoPago(metodo: 'tarjeta' | 'mercadopago' | 'transferencia'): void {
+  seleccionarMetodoPago(metodo: 'mercadopago' | 'transferencia'): void {
     this.metodoPago = metodo;
-
-    // Actualizar validadores según el método de pago
-    const tarjetaControls = ['numeroTarjeta', 'nombreTitular', 'fechaExpiracion', 'cvv'];
-
-    if (metodo === 'tarjeta') {
-      tarjetaControls.forEach(control => {
-        this.checkoutForm.get(control)?.setValidators([Validators.required]);
-      });
-    } else {
-      tarjetaControls.forEach(control => {
-        this.checkoutForm.get(control)?.clearValidators();
-      });
-    }
-
-    tarjetaControls.forEach(control => {
-      this.checkoutForm.get(control)?.updateValueAndValidity();
-    });
   }
 
   procesarPago(): void {
@@ -107,10 +88,40 @@ export class CheckoutComponent implements OnInit {
     this.procesando = true;
     this.errorMessage = '';
 
-    // Simulación de procesamiento de pago
-    setTimeout(() => {
+    if (this.metodoPago === 'mercadopago') {
+      this.crearPedidoYRedirigirMercadoPago();
+    } else {
+      // Para transferencia, crear pedido directamente
       this.crearPedido();
-    }, 2000);
+    }
+  }
+
+  crearPedidoYRedirigirMercadoPago(): void {
+    const direccion = `${this.checkoutForm.value.direccionEnvio}, ${this.checkoutForm.value.ciudad}, CP: ${this.checkoutForm.value.codigoPostal}`;
+
+    this.pedidoService.crearPedido({ direccionEnvio: direccion }).subscribe({
+      next: (pedido) => {
+        // Crear preferencia de pago en MercadoPago
+        this.pagoService.crearPreferencia(pedido.id).subscribe({
+          next: (preferencia) => {
+            // Vaciar el carrito
+            this.carritoService.vaciarCarrito().subscribe();
+
+            // Redirigir a MercadoPago para completar el pago
+            window.location.href = preferencia.sandboxInitPoint || preferencia.initPoint;
+          },
+          error: (error) => {
+            console.error('Error al crear preferencia:', error);
+            this.errorMessage = 'Error al iniciar el proceso de pago';
+            this.procesando = false;
+          }
+        });
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Error al procesar el pedido';
+        this.procesando = false;
+      }
+    });
   }
 
   crearPedido(): void {
@@ -147,21 +158,5 @@ export class CheckoutComponent implements OnInit {
 
   get telefono() {
     return this.checkoutForm.get('telefono');
-  }
-
-  get numeroTarjeta() {
-    return this.checkoutForm.get('numeroTarjeta');
-  }
-
-  get nombreTitular() {
-    return this.checkoutForm.get('nombreTitular');
-  }
-
-  get fechaExpiracion() {
-    return this.checkoutForm.get('fechaExpiracion');
-  }
-
-  get cvv() {
-    return this.checkoutForm.get('cvv');
   }
 }

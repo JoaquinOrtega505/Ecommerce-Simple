@@ -1,0 +1,58 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow">
+        <div class="card-body text-center p-5">
+          <!-- Icono de error -->
+          <div class="mb-4">
+            <i class="bi bi-x-circle-fill text-danger" style="font-size: 5rem;"></i>
+          </div>
+
+          <!-- Título -->
+          <h2 class="text-danger mb-3">Pago Rechazado</h2>
+
+          <!-- Mensaje -->
+          <p class="text-muted mb-4">
+            Lo sentimos, tu pago no pudo ser procesado. Por favor, verifica tus datos e intenta nuevamente.
+          </p>
+
+          <!-- Información del pedido -->
+          <div class="alert alert-warning" *ngIf="pedidoId">
+            <strong>Número de Pedido:</strong> #{{ pedidoId }}
+            <br>
+            <small class="text-muted">El pedido fue creado pero el pago fue rechazado</small>
+          </div>
+
+          <!-- Posibles causas -->
+          <div class="alert alert-light text-start">
+            <strong>Posibles causas:</strong>
+            <ul class="mb-0 mt-2">
+              <li>Fondos insuficientes</li>
+              <li>Datos de tarjeta incorrectos</li>
+              <li>Límite de compra excedido</li>
+              <li>Tarjeta bloqueada o vencida</li>
+            </ul>
+          </div>
+
+          <!-- Botones de acción -->
+          <div class="d-grid gap-2 mt-4">
+            <button
+              type="button"
+              class="btn btn-primary btn-lg"
+              (click)="intentarNuevamente()"
+            >
+              Intentar Nuevamente
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              (click)="irAInicio()"
+            >
+              Volver al Inicio
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

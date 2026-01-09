@@ -1,0 +1,27 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-body text-center p-5">
+          <div class="spinner-border text-primary mb-4" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Procesando...</span>
+          </div>
+
+          <h3 class="mb-3">Procesando tu pago</h3>
+          <p class="text-muted mb-4">Estamos verificando el estado de tu pago...</p>
+
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Nota:</strong> Si estás en la página de confirmación de MercadoPago,
+            busca el botón "Volver al sitio" o "Ir a [nombre del sitio]" para continuar.
+          </div>
+
+          <p class="text-muted small">
+            Si no ves ningún botón, copia y pega esta URL en tu navegador:<br>
+            <code>http://localhost:4200/pago/return?pedidoId=[TU_NUMERO_DE_PEDIDO]&status=approved</code>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

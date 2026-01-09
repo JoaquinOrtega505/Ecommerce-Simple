@@ -1,0 +1,61 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow">
+        <div class="card-body text-center p-5">
+          <!-- Icono de pendiente -->
+          <div class="mb-4">
+            <i class="bi bi-clock-fill text-warning" style="font-size: 5rem;"></i>
+          </div>
+
+          <!-- Título -->
+          <h2 class="text-warning mb-3">Pago Pendiente</h2>
+
+          <!-- Mensaje -->
+          <p class="text-muted mb-4">
+            Tu pago está siendo procesado. Recibirás una notificación por correo electrónico cuando se confirme.
+          </p>
+
+          <!-- Información del pedido -->
+          <div class="alert alert-info" *ngIf="pedidoId">
+            <strong>Número de Pedido:</strong> #{{ pedidoId }}
+          </div>
+
+          <div class="alert alert-secondary" *ngIf="paymentId">
+            <small><strong>ID de Transacción:</strong> {{ paymentId }}</small>
+          </div>
+
+          <!-- Información adicional -->
+          <div class="alert alert-light text-start">
+            <strong>Qué significa esto:</strong>
+            <ul class="mb-0 mt-2">
+              <li>El pago está en proceso de verificación</li>
+              <li>Puede tardar hasta 48 horas hábiles</li>
+              <li>Recibirás un email cuando se confirme</li>
+              <li>Puedes verificar el estado en "Mis Pedidos"</li>
+            </ul>
+          </div>
+
+          <!-- Botones de acción -->
+          <div class="d-grid gap-2 mt-4">
+            <button
+              type="button"
+              class="btn btn-primary btn-lg"
+              (click)="verPedido()"
+              *ngIf="pedidoId"
+            >
+              Ver Detalles del Pedido
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              (click)="irAInicio()"
+            >
+              Volver al Inicio
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
