@@ -1,0 +1,71 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow">
+        <div class="card-body text-center p-5">
+          <!-- Icono de éxito -->
+          <div class="mb-4">
+            <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+          </div>
+
+          <!-- Título -->
+          <h2 class="text-success mb-3">¡Pago Exitoso!</h2>
+
+          <!-- Mensaje -->
+          <p class="lead mb-3">
+            Tu pago ha sido procesado correctamente
+          </p>
+          <p class="text-muted mb-4">
+            <i class="bi bi-box-seam me-2"></i>
+            <strong>Estamos preparando tu pedido</strong>
+          </p>
+
+          <!-- Información del pedido -->
+          <div class="alert alert-success" *ngIf="pedidoId">
+            <div class="mb-2">
+              <strong>Número de Pedido:</strong> #{{ pedidoId }}
+            </div>
+            <small class="text-muted">Recibirás un correo electrónico con los detalles</small>
+          </div>
+
+          <div class="alert alert-light" *ngIf="paymentId">
+            <small><strong>ID de Transacción:</strong> {{ paymentId }}</small>
+          </div>
+
+          <!-- Contador de redirección -->
+          <div class="alert alert-info mb-4">
+            <i class="bi bi-clock me-2"></i>
+            Serás redirigido a tus pedidos en <strong>{{ secondsRemaining }}</strong> segundos
+          </div>
+
+          <!-- Botones de acción -->
+          <div class="d-grid gap-2 mt-4">
+            <button
+              type="button"
+              class="btn btn-success btn-lg"
+              (click)="verMisPedidos()"
+            >
+              <i class="bi bi-list-check me-2"></i>
+              Ver Mis Pedidos
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-primary"
+              (click)="verPedido()"
+              *ngIf="pedidoId"
+            >
+              Ver Detalles de Este Pedido
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              (click)="irAInicio()"
+            >
+              Volver al Inicio
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

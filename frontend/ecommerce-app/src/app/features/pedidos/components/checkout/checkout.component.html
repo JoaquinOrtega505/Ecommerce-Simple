@@ -87,20 +87,7 @@
           </div>
           <div class="card-body">
             <div class="row mb-3">
-              <div class="col-md-4 mb-2">
-                <div
-                  class="card h-100 cursor-pointer"
-                  [class.border-primary]="metodoPago === 'tarjeta'"
-                  (click)="seleccionarMetodoPago('tarjeta')"
-                  style="cursor: pointer;"
-                >
-                  <div class="card-body text-center">
-                    <i class="bi bi-credit-card" style="font-size: 2rem;"></i>
-                    <p class="mb-0 mt-2">Tarjeta de Crédito/Débito</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-4 mb-2">
+              <div class="col-md-6 mb-2">
                 <div
                   class="card h-100 cursor-pointer"
                   [class.border-primary]="metodoPago === 'mercadopago'"
@@ -108,12 +95,13 @@
                   style="cursor: pointer;"
                 >
                   <div class="card-body text-center">
-                    <i class="bi bi-wallet2" style="font-size: 2rem;"></i>
-                    <p class="mb-0 mt-2">MercadoPago</p>
+                    <i class="bi bi-wallet2" style="font-size: 2rem; color: #009ee3;"></i>
+                    <p class="mb-0 mt-2"><strong>MercadoPago</strong></p>
+                    <small class="text-muted">Tarjetas, efectivo y más</small>
                   </div>
                 </div>
               </div>
-              <div class="col-md-4 mb-2">
+              <div class="col-md-6 mb-2">
                 <div
                   class="card h-100 cursor-pointer"
                   [class.border-primary]="metodoPago === 'transferencia'"
@@ -122,75 +110,8 @@
                 >
                   <div class="card-body text-center">
                     <i class="bi bi-bank" style="font-size: 2rem;"></i>
-                    <p class="mb-0 mt-2">Transferencia</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Formulario de Tarjeta -->
-            <div *ngIf="metodoPago === 'tarjeta'">
-              <div class="row">
-                <div class="col-md-12 mb-3">
-                  <label for="numeroTarjeta" class="form-label">Número de Tarjeta</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="numeroTarjeta"
-                    formControlName="numeroTarjeta"
-                    [class.is-invalid]="numeroTarjeta?.invalid && numeroTarjeta?.touched"
-                    placeholder="1234 5678 9012 3456"
-                    maxlength="16"
-                  >
-                  <div class="invalid-feedback" *ngIf="numeroTarjeta?.invalid && numeroTarjeta?.touched">
-                    16 dígitos requeridos
-                  </div>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <label for="nombreTitular" class="form-label">Nombre del Titular</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="nombreTitular"
-                    formControlName="nombreTitular"
-                    [class.is-invalid]="nombreTitular?.invalid && nombreTitular?.touched"
-                    placeholder="Como aparece en la tarjeta"
-                  >
-                  <div class="invalid-feedback" *ngIf="nombreTitular?.invalid && nombreTitular?.touched">
-                    Requerido
-                  </div>
-                </div>
-
-                <div class="col-md-3 mb-3">
-                  <label for="fechaExpiracion" class="form-label">Vencimiento</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="fechaExpiracion"
-                    formControlName="fechaExpiracion"
-                    [class.is-invalid]="fechaExpiracion?.invalid && fechaExpiracion?.touched"
-                    placeholder="MM/AA"
-                    maxlength="5"
-                  >
-                  <div class="invalid-feedback" *ngIf="fechaExpiracion?.invalid && fechaExpiracion?.touched">
-                    Formato MM/AA
-                  </div>
-                </div>
-
-                <div class="col-md-3 mb-3">
-                  <label for="cvv" class="form-label">CVV</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="cvv"
-                    formControlName="cvv"
-                    [class.is-invalid]="cvv?.invalid && cvv?.touched"
-                    placeholder="123"
-                    maxlength="4"
-                  >
-                  <div class="invalid-feedback" *ngIf="cvv?.invalid && cvv?.touched">
-                    3-4 dígitos
+                    <p class="mb-0 mt-2"><strong>Transferencia Bancaria</strong></p>
+                    <small class="text-muted">Pago manual</small>
                   </div>
                 </div>
               </div>
@@ -198,7 +119,15 @@
 
             <!-- Información para otros métodos -->
             <div *ngIf="metodoPago === 'mercadopago'" class="alert alert-info">
-              Serás redirigido a MercadoPago para completar el pago de forma segura.
+              <i class="bi bi-info-circle me-2"></i>
+              <strong>Importante:</strong> Serás redirigido a MercadoPago para completar el pago de forma segura.
+              <hr>
+              <small class="text-muted">
+                <strong>Nota para pruebas (Sandbox):</strong> Después de completar el pago,
+                copia esta URL en tu navegador:
+                <code>http://localhost:4200/pago/return?pedidoId=TU_NUMERO&status=approved</code>
+                <br>(Reemplaza TU_NUMERO con el número de tu pedido)
+              </small>
             </div>
 
             <div *ngIf="metodoPago === 'transferencia'" class="alert alert-info">
@@ -233,11 +162,11 @@
           <div class="mb-3">
             <div *ngFor="let item of items" class="d-flex justify-content-between mb-2">
               <div class="flex-grow-1">
-                <small>{{ item.producto?.nombre }}</small><br>
+                <small>{{ item.productoNombre || item.producto?.nombre }}</small><br>
                 <small class="text-muted">Cantidad: {{ item.cantidad }}</small>
               </div>
               <div>
-                <small class="fw-bold">${{ (item.producto?.precio || 0) * item.cantidad | number:'1.2-2' }}</small>
+                <small class="fw-bold">${{ (item.precioUnitario || item.producto?.precio || 0) * item.cantidad | number:'1.2-2' }}</small>
               </div>
             </div>
           </div>

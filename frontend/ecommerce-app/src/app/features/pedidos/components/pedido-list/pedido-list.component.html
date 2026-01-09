@@ -33,7 +33,8 @@
             </div>
             <div class="col-md-2 text-center">
               <span class="badge" [ngClass]="getEstadoClass(pedido.estado)">
-                {{ pedido.estado }}
+                <i class="bi" [ngClass]="getEstadoIcono(pedido.estado)"></i>
+                {{ getEstadoTexto(pedido.estado) }}
               </span>
             </div>
             <div class="col-md-2 text-center">

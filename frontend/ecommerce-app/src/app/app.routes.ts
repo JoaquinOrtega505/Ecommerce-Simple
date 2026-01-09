@@ -44,6 +44,22 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'pago/return',
+    loadComponent: () => import('./features/pagos/pago-return/pago-return.component').then(m => m.PagoReturnComponent)
+  },
+  {
+    path: 'pago/success',
+    loadComponent: () => import('./features/pagos/pago-success/pago-success.component').then(m => m.PagoSuccessComponent)
+  },
+  {
+    path: 'pago/failure',
+    loadComponent: () => import('./features/pagos/pago-failure/pago-failure.component').then(m => m.PagoFailureComponent)
+  },
+  {
+    path: 'pago/pending',
+    loadComponent: () => import('./features/pagos/pago-pending/pago-pending.component').then(m => m.PagoPendingComponent)
+  },
+  {
     path: 'admin/productos',
     loadComponent: () => import('./features/productos/components/producto-admin/producto-admin.component').then(m => m.ProductoAdminComponent),
     canActivate: [adminGuard]

@@ -53,6 +53,9 @@ builder.Services.AddHttpClient<EcommerceApi.Services.AndreaniService>();
 // Registrar servicio de envíos simulado
 builder.Services.AddSingleton<EcommerceApi.Services.MockShippingService>();
 
+// Registrar servicio de MercadoPago
+builder.Services.AddScoped<EcommerceApi.Services.MercadoPagoService>();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
