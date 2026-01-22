@@ -31,7 +31,8 @@
       "Bash(ng generate:*)",
       "Bash(npm run build:*)",
       "Bash(powershell:*)",
-      "Bash(ng build:*)"
+      "Bash(ng build:*)",
+      "Bash(dir:*)"
     ]
   }
 }

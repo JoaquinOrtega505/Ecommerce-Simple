@@ -77,12 +77,7 @@ export class OnboardingWizardComponent implements OnInit {
       }
     }
 
-    if (this.currentStep === 2) {
-      if (!this.selectedPlanId) {
-        this.errorMessage = 'Por favor selecciona un plan';
-        return;
-      }
-    }
+    // El paso 2 (selección de plan) es opcional, se puede saltar
 
     if (this.currentStep < this.totalSteps) {
       this.currentStep++;

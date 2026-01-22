@@ -1,0 +1,161 @@
+<div class="configuracion-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Configuración</h1>
+    <p class="subtitle">Administra la configuración de tu tienda y métodos de pago</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Cargando configuración...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading" class="config-wrapper">
+    <!-- Tabs -->
+    <div class="tabs">
+      <button
+        class="tab"
+        [class.active]="activeTab === 'general'"
+        (click)="setActiveTab('general')">
+        <span class="tab-icon">⚙️</span>
+        General
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'mercadopago'"
+        (click)="setActiveTab('mercadopago')">
+        <span class="tab-icon">💳</span>
+        MercadoPago
+      </button>
+    </div>
+
+    <!-- Alerts -->
+    <div *ngIf="successMessage" class="alert alert-success">
+      ✓ {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="alert alert-error">
+      ✕ {{ errorMessage }}
+    </div>
+
+    <!-- Tab Content: General -->
+    <div *ngIf="activeTab === 'general'" class="tab-content">
+      <div class="config-card">
+        <h2>Configuración General</h2>
+        <p class="card-subtitle">Actualiza la información básica de tu tienda</p>
+
+        <form [formGroup]="tiendaForm" (ngSubmit)="saveGeneralConfig()">
+          <div class="form-group">
+            <label for="nombre">Nombre de la tienda *</label>
+            <input
+              type="text"
+              id="nombre"
+              formControlName="nombre"
+              class="form-control"
+              placeholder="Mi Tienda">
+            <div class="error-message" *ngIf="tiendaForm.get('nombre')?.invalid && tiendaForm.get('nombre')?.touched">
+              <span *ngIf="tiendaForm.get('nombre')?.errors?.['required']">El nombre es requerido</span>
+              <span *ngIf="tiendaForm.get('nombre')?.errors?.['minlength']">Mínimo 3 caracteres</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="descripcion">Descripción</label>
+            <textarea
+              id="descripcion"
+              formControlName="descripcion"
+              class="form-control"
+              rows="4"
+              placeholder="Describe tu tienda..."></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="telefonoWhatsApp">Teléfono WhatsApp</label>
+              <input
+                type="text"
+                id="telefonoWhatsApp"
+                formControlName="telefonoWhatsApp"
+                class="form-control"
+                placeholder="+549123456789">
+              <div class="error-message" *ngIf="tiendaForm.get('telefonoWhatsApp')?.invalid && tiendaForm.get('telefonoWhatsApp')?.touched">
+                <span *ngIf="tiendaForm.get('telefonoWhatsApp')?.errors?.['pattern']">Formato inválido (ej: +549123456789)</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="linkInstagram">Link de Instagram</label>
+              <input
+                type="text"
+                id="linkInstagram"
+                formControlName="linkInstagram"
+                class="form-control"
+                placeholder="https://instagram.com/tu-cuenta">
+              <div class="error-message" *ngIf="tiendaForm.get('linkInstagram')?.invalid && tiendaForm.get('linkInstagram')?.touched">
+                <span *ngIf="tiendaForm.get('linkInstagram')?.errors?.['pattern']">URL de Instagram inválida</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" [disabled]="tiendaForm.invalid || saving">
+              {{ saving ? 'Guardando...' : 'Guardar Cambios' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tab Content: MercadoPago -->
+    <div *ngIf="activeTab === 'mercadopago'" class="tab-content">
+      <div class="config-card">
+        <h2>Configuración de MercadoPago</h2>
+        <p class="card-subtitle">Configura tus credenciales de MercadoPago para recibir pagos</p>
+
+        <div class="info-box">
+          <div class="info-icon">ℹ️</div>
+          <div class="info-content">
+            <h3>¿Cómo obtengo mis credenciales?</h3>
+            <ol>
+              <li>Ingresa a tu cuenta de <a href="https://www.mercadopago.com.ar/developers/panel" target="_blank">MercadoPago Developers</a></li>
+              <li>Ve a la sección "Credenciales"</li>
+              <li>Copia tu Public Key y Access Token</li>
+              <li>Pega las credenciales en los campos de abajo</li>
+            </ol>
+          </div>
+        </div>
+
+        <form [formGroup]="mercadoPagoForm" (ngSubmit)="saveMercadoPagoConfig()">
+          <div class="form-group">
+            <label for="mercadoPagoPublicKey">Public Key</label>
+            <input
+              type="text"
+              id="mercadoPagoPublicKey"
+              formControlName="mercadoPagoPublicKey"
+              class="form-control"
+              placeholder="APP_USR-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+            <small class="form-hint">Esta clave se usa en el frontend para inicializar MercadoPago</small>
+          </div>
+
+          <div class="form-group">
+            <label for="mercadoPagoAccessToken">Access Token</label>
+            <input
+              type="password"
+              id="mercadoPagoAccessToken"
+              formControlName="mercadoPagoAccessToken"
+              class="form-control"
+              placeholder="APP_USR-xxxxxxxxxx-xxxxxx-xxxxxxxxxxxx">
+            <small class="form-hint">Esta clave se usa en el backend para procesar pagos (mantener segura)</small>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" [disabled]="saving">
+              {{ saving ? 'Guardando...' : 'Guardar Credenciales' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

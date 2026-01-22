@@ -1,0 +1,112 @@
+<div class="mi-tienda-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Vista Previa de Mi Tienda</h1>
+    <p class="subtitle">Así es como tus clientes verán tu tienda</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Cargando información de la tienda...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage && !loading" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Store Preview -->
+  <div *ngIf="tienda && !loading" class="store-preview">
+    <!-- Store Header -->
+    <div class="store-header" [style.background-image]="tienda.bannerUrl ? 'url(' + tienda.bannerUrl + ')' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'">
+      <div class="store-overlay">
+        <div class="store-info">
+          <div class="store-logo" *ngIf="tienda.logoUrl">
+            <img [src]="tienda.logoUrl" [alt]="tienda.nombre">
+          </div>
+          <div class="store-logo placeholder" *ngIf="!tienda.logoUrl">
+            🏪
+          </div>
+          <div class="store-details">
+            <h2>{{ tienda.nombre }}</h2>
+            <p class="store-description" *ngIf="tienda.descripcion">{{ tienda.descripcion }}</p>
+            <div class="store-links">
+              <a *ngIf="tienda.telefonoWhatsApp" href="https://wa.me/{{ tienda.telefonoWhatsApp }}" target="_blank" class="link-btn whatsapp">
+                <span class="icon">💬</span> WhatsApp
+              </a>
+              <a *ngIf="tienda.linkInstagram" [href]="tienda.linkInstagram" target="_blank" class="link-btn instagram">
+                <span class="icon">📷</span> Instagram
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Store Info Cards -->
+    <div class="info-cards">
+      <div class="info-card">
+        <div class="card-icon">🌐</div>
+        <div class="card-content">
+          <h3>Subdominio</h3>
+          <p>{{ tienda.subdominio }}.ecommerce.com</p>
+          <a [href]="getSubdominioUrl()" target="_blank" class="card-link">Abrir tienda →</a>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="card-icon">📦</div>
+        <div class="card-content">
+          <h3>Productos</h3>
+          <p>{{ productos.length }} productos activos</p>
+          <a routerLink="/emprendedor/productos" class="card-link">Administrar →</a>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="card-icon" [ngClass]="{'status-active': tienda.estadoTienda === 'Activa', 'status-draft': tienda.estadoTienda === 'Borrador'}">
+          {{ tienda.estadoTienda === 'Activa' ? '✓' : '⚠' }}
+        </div>
+        <div class="card-content">
+          <h3>Estado</h3>
+          <p>{{ tienda.estadoTienda }}</p>
+          <span class="card-hint" *ngIf="tienda.estadoTienda === 'Borrador'">Agrega productos para activar</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="products-section">
+      <div class="section-header">
+        <h2>Productos en tu tienda</h2>
+        <a routerLink="/emprendedor/productos/nuevo" class="btn-add">+ Agregar Producto</a>
+      </div>
+
+      <div *ngIf="productos.length === 0" class="empty-state">
+        <div class="empty-icon">📦</div>
+        <h3>No tienes productos todavía</h3>
+        <p>Comienza agregando productos a tu tienda para que tus clientes puedan comprar</p>
+        <a routerLink="/emprendedor/productos/nuevo" class="btn-primary">Agregar mi primer producto</a>
+      </div>
+
+      <div *ngIf="productos.length > 0" class="products-grid">
+        <div *ngFor="let producto of productos" class="product-card">
+          <div class="product-image">
+            <img [src]="producto.imagenUrl || 'assets/placeholder.jpg'" [alt]="producto.nombre">
+            <span class="product-stock" [class.low-stock]="producto.stock && producto.stock <= 5">
+              Stock: {{ producto.stock }}
+            </span>
+          </div>
+          <div class="product-info">
+            <h3>{{ producto.nombre }}</h3>
+            <p class="product-price">${{ producto.precio }}</p>
+            <div class="product-actions">
+              <a [routerLink]="['/emprendedor/productos/editar', producto.id]" class="btn-edit">Editar</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

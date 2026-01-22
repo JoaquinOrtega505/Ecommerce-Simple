@@ -1,0 +1,43 @@
+<aside class="sidebar" [class.collapsed]="isCollapsed">
+  <!-- Header -->
+  <div class="sidebar-header">
+    <div class="brand" *ngIf="!isCollapsed">
+      <span class="brand-icon">🏪</span>
+      <span class="brand-text">Mi Tienda</span>
+    </div>
+    <button class="toggle-btn" (click)="toggleSidebar()" title="Colapsar sidebar">
+      <span *ngIf="!isCollapsed">←</span>
+      <span *ngIf="isCollapsed">→</span>
+    </button>
+  </div>
+
+  <!-- User Info -->
+  <div class="user-info" *ngIf="currentUser && !isCollapsed">
+    <div class="user-avatar">{{ (currentUser.nombre || 'U')[0].toUpperCase() }}</div>
+    <div class="user-details">
+      <div class="user-name">{{ currentUser.nombre || 'Usuario' }}</div>
+      <div class="user-role">Emprendedor</div>
+    </div>
+  </div>
+
+  <!-- Menu Items -->
+  <nav class="sidebar-nav">
+    <a
+      *ngFor="let item of menuItems"
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      class="nav-item"
+      [title]="isCollapsed ? item.label : ''">
+      <span class="nav-icon">{{ item.icon }}</span>
+      <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
+    </a>
+  </nav>
+
+  <!-- Footer -->
+  <div class="sidebar-footer">
+    <button class="logout-btn" (click)="logout()" [title]="isCollapsed ? 'Cerrar sesión' : ''">
+      <span class="logout-icon">🚪</span>
+      <span class="logout-text" *ngIf="!isCollapsed">Cerrar sesión</span>
+    </button>
+  </div>
+</aside>
