@@ -2,7 +2,9 @@ export interface Usuario {
   id: number;
   nombre: string;
   email: string;
-  rol: 'Admin' | 'Cliente' | 'Deposito';
+  rol: 'SuperAdmin' | 'Admin' | 'Cliente' | 'Deposito';
+  emailVerificado?: boolean;
+  tiendaId?: number | null;
 }
 
 export interface LoginRequest {
@@ -21,5 +23,7 @@ export interface AuthResponse {
   usuarioId: number;
   nombre: string;
   email: string;
-  rol: 'Admin' | 'Cliente' | 'Deposito';
+  rol: 'SuperAdmin' | 'Admin' | 'Cliente' | 'Deposito';
+  emailVerificado?: boolean;
+  tiendaId?: number | null;
 }

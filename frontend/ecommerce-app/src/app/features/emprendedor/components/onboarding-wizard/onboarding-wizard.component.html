@@ -1,0 +1,249 @@
+<div class="onboarding-container">
+  <div class="onboarding-card">
+    <!-- Progress bar -->
+    <div class="progress-bar">
+      <div class="progress-step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
+        <div class="step-number">1</div>
+        <div class="step-label">Datos de tienda</div>
+      </div>
+      <div class="progress-line" [class.completed]="currentStep > 1"></div>
+      <div class="progress-step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
+        <div class="step-number">2</div>
+        <div class="step-label">Plan</div>
+      </div>
+      <div class="progress-line" [class.completed]="currentStep > 2"></div>
+      <div class="progress-step" [class.active]="currentStep >= 3">
+        <div class="step-number">3</div>
+        <div class="step-label">Confirmar</div>
+      </div>
+    </div>
+
+    <!-- Step 1: Datos de tienda -->
+    <div class="step-content" *ngIf="currentStep === 1">
+      <h2>Configura tu tienda</h2>
+      <p class="subtitle">Ingresa los datos básicos de tu emprendimiento</p>
+
+      <form [formGroup]="tiendaForm">
+        <div class="form-group">
+          <label for="nombre">Nombre de la tienda *</label>
+          <input
+            type="text"
+            id="nombre"
+            formControlName="nombre"
+            class="form-control"
+            placeholder="Mi Tienda">
+          <div class="error-message" *ngIf="nombre?.invalid && nombre?.touched">
+            <span *ngIf="nombre?.errors?.['required']">El nombre es requerido</span>
+            <span *ngIf="nombre?.errors?.['minlength']">Mínimo 3 caracteres</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="subdominio">Subdominio *</label>
+          <div class="input-with-suffix">
+            <input
+              type="text"
+              id="subdominio"
+              formControlName="subdominio"
+              class="form-control"
+              placeholder="mi-tienda">
+            <span class="suffix">.ecommerce.com</span>
+          </div>
+          <div class="error-message" *ngIf="subdominio?.invalid && subdominio?.touched">
+            <span *ngIf="subdominio?.errors?.['required']">El subdominio es requerido</span>
+            <span *ngIf="subdominio?.errors?.['minlength']">Mínimo 3 caracteres</span>
+            <span *ngIf="subdominio?.errors?.['pattern']">Solo letras minúsculas, números y guiones</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="descripcion">Descripción</label>
+          <textarea
+            id="descripcion"
+            formControlName="descripcion"
+            class="form-control"
+            rows="3"
+            placeholder="Describe tu tienda..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="telefonoWhatsApp">WhatsApp</label>
+            <input
+              type="text"
+              id="telefonoWhatsApp"
+              formControlName="telefonoWhatsApp"
+              class="form-control"
+              placeholder="+549123456789">
+            <div class="error-message" *ngIf="telefonoWhatsApp?.invalid && telefonoWhatsApp?.touched">
+              <span *ngIf="telefonoWhatsApp?.errors?.['pattern']">Formato inválido (ej: +549123456789)</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="linkInstagram">Instagram</label>
+            <input
+              type="text"
+              id="linkInstagram"
+              formControlName="linkInstagram"
+              class="form-control"
+              placeholder="https://instagram.com/tu-cuenta">
+            <div class="error-message" *ngIf="linkInstagram?.invalid && linkInstagram?.touched">
+              <span *ngIf="linkInstagram?.errors?.['pattern']">URL de Instagram inválida</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="logo">Logo</label>
+            <div class="image-upload">
+              <input
+                type="file"
+                id="logo"
+                accept="image/*"
+                (change)="onLogoSelected($event)"
+                #logoInput>
+              <label for="logo" class="upload-button">
+                <span *ngIf="!logoPreview && !uploadingLogo">Subir logo</span>
+                <span *ngIf="uploadingLogo">Subiendo...</span>
+                <img *ngIf="logoPreview && !uploadingLogo" [src]="logoPreview" alt="Logo preview">
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="banner">Banner</label>
+            <div class="image-upload">
+              <input
+                type="file"
+                id="banner"
+                accept="image/*"
+                (change)="onBannerSelected($event)"
+                #bannerInput>
+              <label for="banner" class="upload-button">
+                <span *ngIf="!bannerPreview && !uploadingBanner">Subir banner</span>
+                <span *ngIf="uploadingBanner">Subiendo...</span>
+                <img *ngIf="bannerPreview && !uploadingBanner" [src]="bannerPreview" alt="Banner preview">
+              </label>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Step 2: Seleccionar plan -->
+    <div class="step-content" *ngIf="currentStep === 2">
+      <h2>Selecciona tu plan</h2>
+      <p class="subtitle">Elige el plan que mejor se adapte a tu negocio</p>
+
+      <div class="plans-grid">
+        <div
+          *ngFor="let plan of planes"
+          class="plan-card"
+          [class.selected]="selectedPlanId === plan.id"
+          (click)="selectPlan(plan.id)">
+          <h3>{{ plan.nombre }}</h3>
+          <p class="plan-description">{{ plan.descripcion }}</p>
+          <div class="plan-price">
+            <span class="currency">$</span>
+            <span class="amount">{{ plan.precioMensual }}</span>
+            <span class="period">/mes</span>
+          </div>
+          <div class="plan-features">
+            <div class="feature">
+              <span class="check">✓</span>
+              Hasta {{ plan.maxProductos }} productos
+            </div>
+          </div>
+          <div class="selected-badge" *ngIf="selectedPlanId === plan.id">
+            Seleccionado
+          </div>
+        </div>
+      </div>
+
+      <div class="skip-plan">
+        <button type="button" class="btn-link" (click)="selectedPlanId = null; nextStep()">
+          Saltar por ahora (plan gratuito)
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 3: Confirmación -->
+    <div class="step-content" *ngIf="currentStep === 3">
+      <h2>Confirmación</h2>
+      <p class="subtitle">Revisa los datos de tu tienda antes de continuar</p>
+
+      <div class="summary-card">
+        <h3>Datos de la tienda</h3>
+        <div class="summary-item">
+          <span class="label">Nombre:</span>
+          <span class="value">{{ tiendaForm.value.nombre }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Subdominio:</span>
+          <span class="value">{{ tiendaForm.value.subdominio }}.ecommerce.com</span>
+        </div>
+        <div class="summary-item" *ngIf="tiendaForm.value.descripcion">
+          <span class="label">Descripción:</span>
+          <span class="value">{{ tiendaForm.value.descripcion }}</span>
+        </div>
+        <div class="summary-item" *ngIf="tiendaForm.value.telefonoWhatsApp">
+          <span class="label">WhatsApp:</span>
+          <span class="value">{{ tiendaForm.value.telefonoWhatsApp }}</span>
+        </div>
+        <div class="summary-item" *ngIf="tiendaForm.value.linkInstagram">
+          <span class="label">Instagram:</span>
+          <span class="value">{{ tiendaForm.value.linkInstagram }}</span>
+        </div>
+      </div>
+
+      <div class="summary-card" *ngIf="selectedPlanId">
+        <h3>Plan seleccionado</h3>
+        <div class="summary-item" *ngFor="let plan of planes">
+          <div *ngIf="plan.id === selectedPlanId">
+            <span class="label">{{ plan.nombre }}</span>
+            <span class="value">${{ plan.precioMensual }}/mes</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-success" *ngIf="successMessage">
+        {{ successMessage }}
+      </div>
+    </div>
+
+    <!-- Error message -->
+    <div class="alert alert-error" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Navigation buttons -->
+    <div class="wizard-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="previousStep()"
+        *ngIf="currentStep > 1 && !loading">
+        Anterior
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="nextStep()"
+        *ngIf="currentStep < totalSteps && !loading">
+        Siguiente
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-success"
+        (click)="finishOnboarding()"
+        *ngIf="currentStep === totalSteps"
+        [disabled]="loading">
+        {{ loading ? 'Creando tienda...' : 'Crear tienda' }}
+      </button>
+    </div>
+  </div>
+</div>

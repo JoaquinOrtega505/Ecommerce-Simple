@@ -56,7 +56,24 @@ builder.Services.AddSingleton<EcommerceApi.Services.MockShippingService>();
 // Registrar servicio de MercadoPago
 builder.Services.AddScoped<EcommerceApi.Services.MercadoPagoService>();
 
-builder.Services.AddControllers();
+// Registrar servicio de Encriptación
+builder.Services.AddSingleton<EcommerceApi.Services.EncryptionService>();
+
+// Registrar servicio de Cloudinary
+builder.Services.AddSingleton<EcommerceApi.Services.CloudinaryService>();
+
+// Registrar servicio de Tiendas (multi-tenant)
+builder.Services.AddScoped<EcommerceApi.Services.TiendaService>();
+
+// Registrar servicio de Email
+builder.Services.AddScoped<EcommerceApi.Services.EmailService>();
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

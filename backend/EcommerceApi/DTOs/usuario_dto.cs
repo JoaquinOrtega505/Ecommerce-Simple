@@ -7,6 +7,7 @@ public class UsuarioDto
     public string Email { get; set; } = string.Empty;
     public string Rol { get; set; } = string.Empty;
     public DateTime FechaCreacion { get; set; }
+    public int? TiendaId { get; set; }
 }
 
 public class CreateUsuarioDto
@@ -15,6 +16,7 @@ public class CreateUsuarioDto
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
     public string Rol { get; set; } = "Cliente";
+    public int? TiendaId { get; set; }
 }
 
 public class UpdateUsuarioDto
@@ -23,4 +25,5 @@ public class UpdateUsuarioDto
     public string Email { get; set; } = string.Empty;
     public string? Password { get; set; }
     public string? Rol { get; set; }
+    public int? TiendaId { get; set; }
 }

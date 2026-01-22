@@ -1,0 +1,40 @@
+<div class="admin-layout">
+  <nav class="admin-sidebar">
+    <div class="sidebar-header">
+      <h2>Panel Admin</h2>
+      <p class="user-info">{{ currentUser?.nombre }}</p>
+      <span class="user-role">{{ currentUser?.rol }}</span>
+    </div>
+
+    <ul class="nav-menu">
+      <li>
+        <a routerLink="/admin/tiendas" routerLinkActive="active">
+          <i class="icon">🏪</i>
+          <span>Gestión de Tiendas</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/usuarios" routerLinkActive="active">
+          <i class="icon">👥</i>
+          <span>Gestión de Usuarios</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/" class="nav-link-secondary">
+          <i class="icon">🏠</i>
+          <span>Volver al sitio</span>
+        </a>
+      </li>
+      <li>
+        <a (click)="logout()" class="nav-link-danger">
+          <i class="icon">🚪</i>
+          <span>Cerrar Sesión</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="admin-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

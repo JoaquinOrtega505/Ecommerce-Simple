@@ -7,6 +7,7 @@ using System.Text;
 using EcommerceApi.Data;
 using EcommerceApi.Models;
 using EcommerceApi.DTOs;
+using EcommerceApi.Services;
 
 namespace EcommerceApi.Controllers;
 
@@ -16,11 +17,19 @@ public class AuthController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly IConfiguration _configuration;
+    private readonly EmailService _emailService;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(AppDbContext context, IConfiguration configuration)
+    public AuthController(
+        AppDbContext context,
+        IConfiguration configuration,
+        EmailService emailService,
+        ILogger<AuthController> logger)
     {
         _context = context;
         _configuration = configuration;
+        _emailService = emailService;
+        _logger = logger;
     }
 
     [HttpPost("register")]
@@ -32,17 +41,41 @@ public class AuthController : ControllerBase
             return BadRequest(new { message = "El email ya está registrado" });
         }
 
-        // Crear nuevo usuario
+        // Generar código de verificación
+        var codigoVerificacion = _emailService.GenerarCodigoVerificacion();
+
+        // Crear nuevo usuario con rol Admin (emprendedor) automáticamente
         var usuario = new Usuario
         {
             Nombre = dto.Nombre,
             Email = dto.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-            Rol = "Cliente"
+            Rol = "Admin", // Auto-asignar rol Admin para emprendedores
+            TiendaId = null, // Sin tienda asignada hasta que la cree
+            EmailVerificado = false,
+            CodigoVerificacion = codigoVerificacion,
+            FechaExpiracionCodigo = DateTime.UtcNow.AddMinutes(15),
+            FechaCreacion = DateTime.UtcNow
         };
 
         _context.Usuarios.Add(usuario);
         await _context.SaveChangesAsync();
+
+        // Enviar email de verificación
+        try
+        {
+            await _emailService.EnviarCodigoVerificacionAsync(
+                usuario.Email,
+                codigoVerificacion,
+                usuario.Nombre);
+
+            _logger.LogInformation("Código de verificación enviado a {Email} durante el registro", usuario.Email);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al enviar email de verificación durante el registro");
+            // Continuar con el registro aunque falle el email
+        }
 
         // Generar token
         var token = GenerateJwtToken(usuario);
@@ -53,7 +86,8 @@ public class AuthController : ControllerBase
             UsuarioId = usuario.Id,
             Nombre = usuario.Nombre,
             Email = usuario.Email,
-            Rol = usuario.Rol
+            Rol = usuario.Rol,
+            EmailVerificado = usuario.EmailVerificado
         });
     }
 
@@ -77,7 +111,9 @@ public class AuthController : ControllerBase
             UsuarioId = usuario.Id,
             Nombre = usuario.Nombre,
             Email = usuario.Email,
-            Rol = usuario.Rol
+            Rol = usuario.Rol,
+            EmailVerificado = usuario.EmailVerificado,
+            TiendaId = usuario.TiendaId
         });
     }
 

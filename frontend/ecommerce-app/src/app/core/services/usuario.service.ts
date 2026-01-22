@@ -9,6 +9,7 @@ export interface Usuario {
   email: string;
   rol: string;
   fechaCreacion: string;
+  tiendaId?: number;
 }
 
 export interface CreateUsuarioDto {
@@ -16,6 +17,7 @@ export interface CreateUsuarioDto {
   email: string;
   password: string;
   rol: string;
+  tiendaId?: number;
 }
 
 export interface UpdateUsuarioDto {
@@ -23,6 +25,7 @@ export interface UpdateUsuarioDto {
   email: string;
   password?: string;
   rol?: string;
+  tiendaId?: number;
 }
 
 @Injectable({

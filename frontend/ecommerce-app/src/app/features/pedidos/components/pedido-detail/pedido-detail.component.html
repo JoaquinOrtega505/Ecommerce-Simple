@@ -10,6 +10,11 @@
     <strong>¡Pedido realizado con éxito!</strong> Tu pedido ha sido procesado correctamente.
   </div>
 
+  <div class="alert alert-success" *ngIf="mostrarMensajePagado">
+    <i class="bi bi-credit-card-fill me-2"></i>
+    <strong>¡Pago procesado exitosamente!</strong> Tu pago ha sido aprobado y el pedido está en espera de procesamiento.
+  </div>
+
   <div class="text-center my-5" *ngIf="loading">
     <div class="spinner-border" role="status">
       <span class="visually-hidden">Cargando...</span>
@@ -36,10 +41,19 @@
           <div class="col-md-6">
             <h6 class="text-muted">Información del Pedido</h6>
             <p class="mb-1">
-              <strong>Fecha:</strong> {{ pedido.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}
+              <strong>Fecha de Creación:</strong> {{ pedido.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}
             </p>
             <p class="mb-1">
               <strong>Estado:</strong> {{ pedido.estado }}
+            </p>
+            <p class="mb-1" *ngIf="pedido.fechaPago">
+              <strong>Fecha de Pago:</strong> {{ pedido.fechaPago | date:'dd/MM/yyyy HH:mm' }}
+            </p>
+            <p class="mb-1" *ngIf="pedido.metodoPago">
+              <strong>Método de Pago:</strong> {{ pedido.metodoPago }}
+            </p>
+            <p class="mb-1" *ngIf="pedido.transaccionId">
+              <strong>ID de Transacción:</strong> <span class="badge bg-info">{{ pedido.transaccionId }}</span>
             </p>
             <p class="mb-1" *ngIf="pedido.fechaDespacho">
               <strong>Fecha de Despacho:</strong> {{ pedido.fechaDespacho | date:'dd/MM/yyyy HH:mm' }}
@@ -129,11 +143,12 @@
       </div>
       <div class="card-body">
         <div class="timeline">
-          <div class="timeline-item" [class.active]="pedido.estado === 'Pendiente' || pedido.estado === 'Procesando' || pedido.estado === 'Enviado' || pedido.estado === 'Entregado'">
+          <!-- Mostrar "Pagado" solo si el estado es "Pagado", sino mostrar "Pendiente" -->
+          <div class="timeline-item" [class.active]="pedido.estado === 'Pendiente' || pedido.estado === 'Pagado' || pedido.estado === 'Procesando' || pedido.estado === 'Enviado' || pedido.estado === 'Entregado'">
             <div class="timeline-marker"></div>
             <div class="timeline-content">
-              <h6>Pendiente</h6>
-              <p class="text-muted small">Pedido recibido y en espera de procesamiento</p>
+              <h6>{{ pedido.estado === 'Pagado' ? 'Pagado' : 'Pendiente' }}</h6>
+              <p class="text-muted small">{{ pedido.estado === 'Pagado' ? 'Pedido recibido y pagado, en espera de procesamiento' : 'Pedido recibido y en espera de procesamiento' }}</p>
             </div>
           </div>
           <div class="timeline-item" [class.active]="pedido.estado === 'Procesando' || pedido.estado === 'Enviado' || pedido.estado === 'Entregado'">

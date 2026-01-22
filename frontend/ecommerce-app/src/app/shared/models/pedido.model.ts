@@ -8,11 +8,14 @@ export interface Pedido {
   estado: 'Pendiente' | 'Procesando' | 'Enviado' | 'Entregado' | 'Cancelado' | 'Pagado';
   direccionEnvio: string;
   fechaCreacion: string;
+  fechaPago?: string;
   items: PedidoItem[];
   numeroSeguimiento?: string;
   servicioEnvio?: string;
   fechaDespacho?: string;
   fechaEntrega?: string;
+  metodoPago?: string;
+  transaccionId?: string;
 }
 
 export interface PedidoItem {

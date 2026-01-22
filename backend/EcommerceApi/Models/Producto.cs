@@ -23,9 +23,13 @@ public partial class Producto
 
     public int CategoriaId { get; set; }
 
+    public int TiendaId { get; set; }
+
     public virtual ICollection<CarritoItem> CarritoItems { get; set; } = new List<CarritoItem>();
 
     public virtual Categoria Categoria { get; set; } = null!;
+
+    public virtual Tienda Tienda { get; set; } = null!;
 
     public virtual ICollection<PedidoItem> PedidoItems { get; set; } = new List<PedidoItem>();
 }

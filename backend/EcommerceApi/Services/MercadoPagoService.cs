@@ -62,7 +62,13 @@ public class MercadoPagoService
                     Failure = urlFailure,
                     Pending = urlPending
                 },
-                // AutoReturn = "approved", // Deshabilitado temporalmente para pruebas con ngrok
+                PaymentMethods = new PreferencePaymentMethodsRequest
+                {
+                    DefaultPaymentMethodId = "account_money",
+                    ExcludedPaymentMethods = new List<PreferencePaymentMethodRequest>(),
+                    ExcludedPaymentTypes = new List<PreferencePaymentTypeRequest>(),
+                    Installments = 1
+                },
                 ExternalReference = pedido.Id.ToString(),
                 NotificationUrl = $"{_configuration["AppUrl"]}/api/pagos/webhook",
                 StatementDescriptor = "ECOMMERCE"

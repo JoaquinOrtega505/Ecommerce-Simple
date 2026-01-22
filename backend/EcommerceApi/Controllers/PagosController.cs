@@ -4,8 +4,32 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using EcommerceApi.Data;
 using EcommerceApi.Services;
+using MercadoPago.Client.Payment;
+using MercadoPago.Resource.Payment;
 
 namespace EcommerceApi.Controllers;
+
+public class ProcessPaymentRequest
+{
+    public int PedidoId { get; set; }
+    public string Token { get; set; } = string.Empty;
+    public string PaymentMethodId { get; set; } = string.Empty;
+    public string? IssuerId { get; set; }
+    public int Installments { get; set; }
+    public PayerInfo Payer { get; set; } = new();
+}
+
+public class PayerInfo
+{
+    public string Email { get; set; } = string.Empty;
+    public IdentificationInfo Identification { get; set; } = new();
+}
+
+public class IdentificationInfo
+{
+    public string Type { get; set; } = string.Empty;
+    public string Number { get; set; } = string.Empty;
+}
 
 [ApiController]
 [Route("api/[controller]")]
@@ -96,6 +120,99 @@ public class PagosController : ControllerBase
     }
 
     /// <summary>
+    /// Procesa un pago directo usando el token de tarjeta de MercadoPago
+    /// </summary>
+    [HttpPost("procesar-pago")]
+    [Authorize]
+    public async Task<ActionResult> ProcesarPago([FromBody] ProcessPaymentRequest request)
+    {
+        try
+        {
+            var usuarioId = GetUsuarioId();
+
+            // Obtener el pedido con items
+            var pedido = await _context.Pedidos
+                .Include(p => p.PedidoItems)
+                .FirstOrDefaultAsync(p => p.Id == request.PedidoId && p.UsuarioId == usuarioId);
+
+            if (pedido == null)
+            {
+                return NotFound(new { message = "Pedido no encontrado" });
+            }
+
+            if (pedido.Estado != "Pendiente")
+            {
+                return BadRequest(new { message = "El pedido no está en estado pendiente" });
+            }
+
+            // Calcular el monto total
+            var amount = pedido.PedidoItems.Sum(i => i.PrecioUnitario * i.Cantidad);
+
+            // Crear la solicitud de pago simplificada
+            var paymentRequest = new PaymentCreateRequest
+            {
+                TransactionAmount = amount,
+                Token = request.Token,
+                Description = $"Pedido #{request.PedidoId}",
+                Installments = request.Installments,
+                PaymentMethodId = request.PaymentMethodId,
+                Payer = new PaymentPayerRequest
+                {
+                    Email = request.Payer.Email
+                },
+                ExternalReference = request.PedidoId.ToString()
+            };
+
+            // Procesar el pago
+            var client = new PaymentClient();
+            Payment payment = await client.CreateAsync(paymentRequest);
+
+            _logger.LogInformation("Pago procesado: {PaymentId}, Estado: {Status}, Pedido: {PedidoId}",
+                payment.Id, payment.Status, request.PedidoId);
+
+            // Actualizar el pedido según el resultado
+            switch (payment.Status)
+            {
+                case "approved":
+                    pedido.Estado = "Pagado";
+                    pedido.FechaPago = DateTime.UtcNow;
+                    pedido.TransaccionId = payment.Id.ToString();
+                    pedido.MetodoPago = payment.PaymentMethodId;
+                    break;
+
+                case "rejected":
+                    return BadRequest(new
+                    {
+                        message = "El pago fue rechazado",
+                        status = payment.Status,
+                        statusDetail = payment.StatusDetail
+                    });
+
+                case "pending":
+                case "in_process":
+                    pedido.Estado = "Pendiente";
+                    break;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                paymentId = payment.Id,
+                status = payment.Status,
+                statusDetail = payment.StatusDetail,
+                pedidoId = pedido.Id,
+                mensaje = "Pago procesado correctamente"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al procesar pago para pedido {PedidoId}", request.PedidoId);
+            return StatusCode(500, new { message = "Error al procesar el pago: " + ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Webhook para recibir notificaciones de MercadoPago
     /// </summary>
     [HttpPost("webhook")]
@@ -109,6 +226,13 @@ public class PagosController : ControllerBase
             // Solo procesamos notificaciones de pago
             if (type != "payment")
             {
+                return Ok();
+            }
+
+            // MercadoPago a veces envía notificaciones con id=0, las ignoramos
+            if (id <= 0)
+            {
+                _logger.LogInformation("Webhook con ID inválido ignorado: {Id}", id);
                 return Ok();
             }
 

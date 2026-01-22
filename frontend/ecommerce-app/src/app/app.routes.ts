@@ -1,7 +1,18 @@
 import { Routes } from '@angular/router';
-import { authGuard, adminGuard, depositoGuard } from './core/guards/auth.guard';
+import { authGuard, adminGuard, depositoGuard, superAdminGuard } from './core/guards/auth.guard';
+import { emailVerifiedGuard } from './core/guards/email-verified.guard';
 
 export const routes: Routes = [
+  {
+    path: 'admin',
+    loadChildren: () => import('./features/admin/admin.module').then(m => m.AdminModule),
+    canActivate: [superAdminGuard]
+  },
+  {
+    path: 'emprendedor',
+    loadChildren: () => import('./features/emprendedor/emprendedor.module').then(m => m.EmprendedorModule),
+    canActivate: [adminGuard]
+  },
   {
     path: '',
     redirectTo: '/productos',
@@ -16,32 +27,43 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/components/register/register.component').then(m => m.RegisterComponent)
   },
   {
+    path: 'verify-email',
+    loadComponent: () => import('./features/auth/components/email-verification/email-verification.component').then(m => m.EmailVerificationComponent)
+  },
+  {
+    path: 'onboarding',
+    loadComponent: () => import('./features/emprendedor/components/onboarding-wizard/onboarding-wizard.component').then(m => m.OnboardingWizardComponent),
+    canActivate: [authGuard, emailVerifiedGuard, adminGuard]
+  },
+  {
     path: 'productos',
-    loadComponent: () => import('./features/productos/components/producto-list/producto-list.component').then(m => m.ProductoListComponent)
+    loadComponent: () => import('./features/productos/components/producto-list/producto-list.component').then(m => m.ProductoListComponent),
+    canActivate: [authGuard, emailVerifiedGuard]
   },
   {
     path: 'productos/:id',
-    loadComponent: () => import('./features/productos/components/producto-detail/producto-detail.component').then(m => m.ProductoDetailComponent)
+    loadComponent: () => import('./features/productos/components/producto-detail/producto-detail.component').then(m => m.ProductoDetailComponent),
+    canActivate: [authGuard, emailVerifiedGuard]
   },
   {
     path: 'carrito',
     loadComponent: () => import('./features/carrito/components/carrito/carrito.component').then(m => m.CarritoComponent),
-    canActivate: [authGuard]
+    canActivate: [authGuard, emailVerifiedGuard]
   },
   {
     path: 'pedidos',
     loadComponent: () => import('./features/pedidos/components/pedido-list/pedido-list.component').then(m => m.PedidoListComponent),
-    canActivate: [authGuard]
+    canActivate: [authGuard, emailVerifiedGuard]
   },
   {
     path: 'pedidos/:id',
     loadComponent: () => import('./features/pedidos/components/pedido-detail/pedido-detail.component').then(m => m.PedidoDetailComponent),
-    canActivate: [authGuard]
+    canActivate: [authGuard, emailVerifiedGuard]
   },
   {
     path: 'checkout',
     loadComponent: () => import('./features/pedidos/components/checkout/checkout.component').then(m => m.CheckoutComponent),
-    canActivate: [authGuard]
+    canActivate: [authGuard, emailVerifiedGuard]
   },
   {
     path: 'pago/return',
@@ -62,22 +84,22 @@ export const routes: Routes = [
   {
     path: 'admin/productos',
     loadComponent: () => import('./features/productos/components/producto-admin/producto-admin.component').then(m => m.ProductoAdminComponent),
-    canActivate: [adminGuard]
+    canActivate: [adminGuard, emailVerifiedGuard]
   },
   {
     path: 'admin/pedidos',
     loadComponent: () => import('./features/pedidos/components/pedidos-admin/pedidos-admin.component').then(m => m.PedidosAdminComponent),
-    canActivate: [adminGuard]
+    canActivate: [adminGuard, emailVerifiedGuard]
   },
   {
     path: 'admin/usuarios',
     loadComponent: () => import('./features/admin/components/usuarios-admin/usuarios-admin.component').then(m => m.UsuariosAdminComponent),
-    canActivate: [adminGuard]
+    canActivate: [adminGuard, emailVerifiedGuard]
   },
   {
     path: 'deposito',
     loadComponent: () => import('./features/deposito/components/deposito-panel/deposito-panel.component').then(m => m.DepositoPanelComponent),
-    canActivate: [depositoGuard]
+    canActivate: [depositoGuard, emailVerifiedGuard]
   },
   {
     path: '**',

@@ -1,0 +1,136 @@
+<div class="form-container">
+  <div class="form-header">
+    <h1>{{ isEditMode ? 'Editar Producto' : 'Nuevo Producto' }}</h1>
+  </div>
+
+  <div *ngIf="loading && isEditMode" class="loading">
+    <p>Cargando producto...</p>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <form [formGroup]="productoForm" (ngSubmit)="onSubmit()" class="producto-form">
+    <div class="form-grid">
+      <!-- Nombre -->
+      <div class="form-group full-width">
+        <label for="nombre">Nombre del Producto *</label>
+        <input
+          id="nombre"
+          type="text"
+          formControlName="nombre"
+          class="form-control"
+          placeholder="Ej: Camiseta deportiva"
+        >
+        <div class="error-text" *ngIf="nombre?.invalid && nombre?.touched">
+          <span *ngIf="nombre?.errors?.['required']">El nombre es requerido</span>
+          <span *ngIf="nombre?.errors?.['minlength']">El nombre debe tener al menos 3 caracteres</span>
+        </div>
+      </div>
+
+      <!-- Descripción -->
+      <div class="form-group full-width">
+        <label for="descripcion">Descripción *</label>
+        <textarea
+          id="descripcion"
+          formControlName="descripcion"
+          class="form-control"
+          rows="4"
+          placeholder="Describe tu producto..."
+        ></textarea>
+        <div class="error-text" *ngIf="descripcion?.invalid && descripcion?.touched">
+          <span *ngIf="descripcion?.errors?.['required']">La descripción es requerida</span>
+          <span *ngIf="descripcion?.errors?.['minlength']">La descripción debe tener al menos 10 caracteres</span>
+        </div>
+      </div>
+
+      <!-- Precio -->
+      <div class="form-group">
+        <label for="precio">Precio *</label>
+        <input
+          id="precio"
+          type="number"
+          formControlName="precio"
+          class="form-control"
+          placeholder="0.00"
+          step="0.01"
+          min="0"
+        >
+        <div class="error-text" *ngIf="precio?.invalid && precio?.touched">
+          <span *ngIf="precio?.errors?.['required']">El precio es requerido</span>
+          <span *ngIf="precio?.errors?.['min']">El precio debe ser mayor a 0</span>
+        </div>
+      </div>
+
+      <!-- Stock -->
+      <div class="form-group">
+        <label for="stock">Stock *</label>
+        <input
+          id="stock"
+          type="number"
+          formControlName="stock"
+          class="form-control"
+          placeholder="0"
+          min="0"
+        >
+        <div class="error-text" *ngIf="stock?.invalid && stock?.touched">
+          <span *ngIf="stock?.errors?.['required']">El stock es requerido</span>
+          <span *ngIf="stock?.errors?.['min']">El stock no puede ser negativo</span>
+        </div>
+      </div>
+
+      <!-- Categoría -->
+      <div class="form-group">
+        <label for="categoriaId">Categoría *</label>
+        <select
+          id="categoriaId"
+          formControlName="categoriaId"
+          class="form-control"
+        >
+          <option [value]="null">Selecciona una categoría</option>
+          <option *ngFor="let categoria of categorias" [value]="categoria.id">
+            {{ categoria.nombre }}
+          </option>
+        </select>
+        <div class="error-text" *ngIf="categoriaId?.invalid && categoriaId?.touched">
+          <span *ngIf="categoriaId?.errors?.['required']">La categoría es requerida</span>
+        </div>
+      </div>
+
+      <!-- URL de Imagen -->
+      <div class="form-group full-width">
+        <label for="imagenUrl">URL de la Imagen *</label>
+        <input
+          id="imagenUrl"
+          type="text"
+          formControlName="imagenUrl"
+          class="form-control"
+          placeholder="https://ejemplo.com/imagen.jpg"
+          (blur)="onImageUrlChange()"
+        >
+        <div class="error-text" *ngIf="imagenUrl?.invalid && imagenUrl?.touched">
+          <span *ngIf="imagenUrl?.errors?.['required']">La URL de la imagen es requerida</span>
+        </div>
+      </div>
+
+      <!-- Vista Previa de Imagen -->
+      <div class="form-group full-width" *ngIf="imagenPreview">
+        <label>Vista Previa</label>
+        <div class="image-preview">
+          <img [src]="imagenPreview" [alt]="nombre?.value || 'Preview'" (error)="imagenPreview = undefined">
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="cancelar()" [disabled]="loading">
+        Cancelar
+      </button>
+      <button type="submit" class="btn-primary" [disabled]="loading || productoForm.invalid">
+        {{ loading ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Crear Producto') }}
+      </button>
+    </div>
+  </form>
+</div>

@@ -9,6 +9,8 @@ public partial class Pedido
 
     public int UsuarioId { get; set; }
 
+    public int TiendaId { get; set; }
+
     public decimal Total { get; set; }
 
     public string Estado { get; set; } = null!;
@@ -34,4 +36,6 @@ public partial class Pedido
     public virtual ICollection<PedidoItem> PedidoItems { get; set; } = new List<PedidoItem>();
 
     public virtual Usuario Usuario { get; set; } = null!;
+
+    public virtual Tienda Tienda { get; set; } = null!;
 }

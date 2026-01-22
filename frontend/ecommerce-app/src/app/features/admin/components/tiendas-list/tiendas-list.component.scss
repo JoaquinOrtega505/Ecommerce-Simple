@@ -1,0 +1,201 @@
+.tiendas-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+
+  h1 {
+    margin: 0;
+    color: #2d3748;
+  }
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+}
+
+.alert {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+
+  &.alert-error {
+    background: #fee;
+    color: #c33;
+    border: 1px solid #fcc;
+  }
+}
+
+.loading,
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #718096;
+}
+
+.empty-state {
+  p {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+  }
+}
+
+.tiendas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.tienda-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  &.inactive {
+    opacity: 0.7;
+    border: 2px dashed #cbd5e0;
+  }
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+
+  .tienda-info {
+    flex: 1;
+
+    h3 {
+      margin: 0 0 0.5rem 0;
+      color: #2d3748;
+      font-size: 1.25rem;
+    }
+
+    .subdominio {
+      display: block;
+      color: #718096;
+      font-size: 0.9rem;
+      font-family: monospace;
+    }
+  }
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  &.active {
+    background: #c6f6d5;
+    color: #22543d;
+  }
+
+  &.inactive {
+    background: #fed7d7;
+    color: #742a2a;
+  }
+}
+
+.card-body {
+  margin-bottom: 1.5rem;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+
+  .label {
+    color: #718096;
+    font-size: 0.9rem;
+  }
+
+  .value {
+    color: #2d3748;
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-action {
+  flex: 1;
+  min-width: 100px;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &.btn-edit {
+    background: #bee3f8;
+    color: #2c5282;
+
+    &:hover {
+      background: #90cdf4;
+    }
+  }
+
+  &.btn-activate {
+    background: #c6f6d5;
+    color: #22543d;
+
+    &:hover {
+      background: #9ae6b4;
+    }
+  }
+
+  &.btn-deactivate {
+    background: #feebc8;
+    color: #7c2d12;
+
+    &:hover {
+      background: #fbd38d;
+    }
+  }
+
+  &.btn-delete {
+    background: #fed7d7;
+    color: #742a2a;
+
+    &:hover {
+      background: #fc8181;
+      color: white;
+    }
+  }
+}

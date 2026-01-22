@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UsuarioService, Usuario, CreateUsuarioDto, UpdateUsuarioDto } from '../../../../core/services/usuario.service';
+import { TiendaService } from '../../../../core/services/tienda.service';
+import { Tienda } from '../../../../shared/models/tienda.model';
 
 @Component({
   selector: 'app-usuarios-admin',
@@ -12,6 +14,7 @@ import { UsuarioService, Usuario, CreateUsuarioDto, UpdateUsuarioDto } from '../
 })
 export class UsuariosAdminComponent implements OnInit {
   usuarios: Usuario[] = [];
+  tiendas: Tienda[] = [];
   loading = false;
   mensaje = '';
   mostrarForm = false;
@@ -23,18 +26,21 @@ export class UsuariosAdminComponent implements OnInit {
 
   constructor(
     private usuarioService: UsuarioService,
+    private tiendaService: TiendaService,
     private fb: FormBuilder
   ) {
     this.usuarioForm = this.fb.group({
       nombre: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
-      rol: ['Cliente', Validators.required]
+      rol: ['Cliente', Validators.required],
+      tiendaId: [null]
     });
   }
 
   ngOnInit() {
     this.cargarUsuarios();
+    this.cargarTiendas();
   }
 
   cargarUsuarios() {
@@ -48,6 +54,17 @@ export class UsuariosAdminComponent implements OnInit {
         console.error('Error cargando usuarios:', error);
         this.mensaje = 'Error al cargar usuarios';
         this.loading = false;
+      }
+    });
+  }
+
+  cargarTiendas() {
+    this.tiendaService.getTodasLasTiendas().subscribe({
+      next: (tiendas: Tienda[]) => {
+        this.tiendas = tiendas;
+      },
+      error: (error: any) => {
+        console.error('Error cargando tiendas:', error);
       }
     });
   }
@@ -67,7 +84,8 @@ export class UsuariosAdminComponent implements OnInit {
     this.usuarioForm.patchValue({
       nombre: usuario.nombre,
       email: usuario.email,
-      rol: usuario.rol
+      rol: usuario.rol,
+      tiendaId: usuario.tiendaId
     });
 
     // Password no es requerido al editar
@@ -78,7 +96,7 @@ export class UsuariosAdminComponent implements OnInit {
   cancelarEdicion() {
     this.editando = false;
     this.usuarioEditandoId = undefined;
-    this.usuarioForm.reset({ rol: 'Cliente' });
+    this.usuarioForm.reset({ rol: 'Cliente', tiendaId: null });
     this.usuarioForm.get('password')?.setValidators(Validators.required);
     this.usuarioForm.get('password')?.updateValueAndValidity();
   }
@@ -95,7 +113,8 @@ export class UsuariosAdminComponent implements OnInit {
       const updateData: UpdateUsuarioDto = {
         nombre: formData.nombre,
         email: formData.email,
-        rol: formData.rol
+        rol: formData.rol,
+        tiendaId: formData.tiendaId
       };
 
       if (formData.password) {
@@ -120,7 +139,8 @@ export class UsuariosAdminComponent implements OnInit {
         nombre: formData.nombre,
         email: formData.email,
         password: formData.password,
-        rol: formData.rol
+        rol: formData.rol,
+        tiendaId: formData.tiendaId
       };
 
       this.usuarioService.crearUsuario(createData).subscribe({

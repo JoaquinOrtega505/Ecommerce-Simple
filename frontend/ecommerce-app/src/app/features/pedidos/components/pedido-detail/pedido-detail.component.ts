@@ -19,6 +19,7 @@ export class PedidoDetailComponent implements OnInit {
   pedido: Pedido | null = null;
   loading = false;
   mostrarMensajeExito = false;
+  mostrarMensajePagado = false;
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -31,6 +32,10 @@ export class PedidoDetailComponent implements OnInit {
       if (params['nuevo'] === 'true') {
         this.mostrarMensajeExito = true;
         setTimeout(() => this.mostrarMensajeExito = false, 5000);
+      }
+      if (params['pagado'] === 'true') {
+        this.mostrarMensajePagado = true;
+        setTimeout(() => this.mostrarMensajePagado = false, 5000);
       }
     });
   }
@@ -53,6 +58,7 @@ export class PedidoDetailComponent implements OnInit {
   getEstadoClass(estado: string): string {
     const classes: { [key: string]: string } = {
       'Pendiente': 'bg-warning',
+      'Pagado': 'bg-success',
       'Procesando': 'bg-info',
       'Enviado': 'bg-primary',
       'Entregado': 'bg-success',
@@ -64,6 +70,7 @@ export class PedidoDetailComponent implements OnInit {
   getEstadoIcono(estado: string): string {
     const iconos: { [key: string]: string } = {
       'Pendiente': 'bi-clock-history',
+      'Pagado': 'bi-credit-card-fill',
       'Procesando': 'bi-gear',
       'Enviado': 'bi-truck',
       'Entregado': 'bi-check-circle',

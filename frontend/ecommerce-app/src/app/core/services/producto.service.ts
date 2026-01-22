@@ -15,6 +15,27 @@ export class ProductoService {
     return this.http.get<Producto[]>(this.apiUrl);
   }
 
+  getMisProductos(categoriaId?: number, buscar?: string, incluirInactivos: boolean = false): Observable<Producto[]> {
+    let url = `${this.apiUrl}/mis-productos`;
+    const params: string[] = [];
+
+    if (categoriaId) {
+      params.push(`categoriaId=${categoriaId}`);
+    }
+    if (buscar) {
+      params.push(`buscar=${encodeURIComponent(buscar)}`);
+    }
+    if (incluirInactivos) {
+      params.push(`incluirInactivos=true`);
+    }
+
+    if (params.length > 0) {
+      url += '?' + params.join('&');
+    }
+
+    return this.http.get<Producto[]>(url);
+  }
+
   getProductoById(id: number): Observable<Producto> {
     return this.http.get<Producto>(`${this.apiUrl}/${id}`);
   }

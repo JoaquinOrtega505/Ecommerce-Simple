@@ -32,6 +32,10 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
+  currentUser(): Usuario | null {
+    return this.currentUserSubject.value;
+  }
+
   get isAuthenticated(): boolean {
     return !!this.getToken();
   }
@@ -48,7 +52,9 @@ export class AuthService {
           id: response.usuarioId,
           nombre: response.nombre,
           email: response.email,
-          rol: response.rol
+          rol: response.rol,
+          emailVerificado: response.emailVerificado,
+          tiendaId: response.tiendaId
         };
         localStorage.setItem('currentUser', JSON.stringify(usuario));
         this.currentUserSubject.next(usuario);
@@ -64,7 +70,9 @@ export class AuthService {
           id: response.usuarioId,
           nombre: response.nombre,
           email: response.email,
-          rol: response.rol
+          rol: response.rol,
+          emailVerificado: response.emailVerificado,
+          tiendaId: response.tiendaId
         };
         localStorage.setItem('currentUser', JSON.stringify(usuario));
         this.currentUserSubject.next(usuario);

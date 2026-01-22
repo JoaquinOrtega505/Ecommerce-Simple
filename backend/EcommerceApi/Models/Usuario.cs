@@ -15,9 +15,19 @@ public partial class Usuario
 
     public string Rol { get; set; } = null!;
 
+    public int? TiendaId { get; set; } // Nullable for SuperAdmin users
+
+    public bool EmailVerificado { get; set; } = false;
+
+    public string? CodigoVerificacion { get; set; }
+
+    public DateTime? FechaExpiracionCodigo { get; set; }
+
     public DateTime FechaCreacion { get; set; }
 
     public virtual ICollection<CarritoItem> CarritoItems { get; set; } = new List<CarritoItem>();
 
     public virtual ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
+
+    public virtual Tienda? Tienda { get; set; }
 }

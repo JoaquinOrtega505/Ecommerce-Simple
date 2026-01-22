@@ -1,0 +1,173 @@
+<div class="form-container">
+  <div class="form-header">
+    <h1>{{ isEditMode ? 'Editar Tienda' : 'Nueva Tienda' }}</h1>
+    <button class="btn-back" (click)="cancelar()">← Volver</button>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+
+  <form [formGroup]="tiendaForm" (ngSubmit)="onSubmit()" class="tienda-form">
+    <div class="form-section">
+      <h3>Información Básica</h3>
+
+      <div class="form-group">
+        <label for="nombre">Nombre de la Tienda *</label>
+        <input
+          type="text"
+          id="nombre"
+          formControlName="nombre"
+          class="form-control"
+          placeholder="Ej: Mi Tienda de Ropa">
+        <span class="error-message" *ngIf="getErrorMessage('nombre')">
+          {{ getErrorMessage('nombre') }}
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="subdominio">Subdominio *</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="subdominio"
+            formControlName="subdominio"
+            class="form-control"
+            placeholder="mi-tienda">
+          <span class="input-suffix">.tudominio.com</span>
+        </div>
+        <span class="error-message" *ngIf="getErrorMessage('subdominio')">
+          {{ getErrorMessage('subdominio') }}
+        </span>
+        <span class="help-text">Solo letras minúsculas, números y guiones</span>
+      </div>
+
+      <div class="form-group">
+        <label for="descripcion">Descripción</label>
+        <textarea
+          id="descripcion"
+          formControlName="descripcion"
+          class="form-control"
+          rows="3"
+          placeholder="Descripción de la tienda"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="maxProductos">Máximo de Productos *</label>
+        <input
+          type="number"
+          id="maxProductos"
+          formControlName="maxProductos"
+          class="form-control"
+          placeholder="100">
+        <span class="error-message" *ngIf="getErrorMessage('maxProductos')">
+          {{ getErrorMessage('maxProductos') }}
+        </span>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Imágenes de la Tienda</h3>
+
+      <div class="form-group">
+        <label>Logo de la Tienda</label>
+        <div class="image-upload-container">
+          <div *ngIf="logoPreview || tiendaForm.get('logoUrl')?.value" class="image-preview">
+            <img [src]="logoPreview || tiendaForm.get('logoUrl')?.value" alt="Logo preview">
+            <button type="button" class="btn-remove-image" (click)="removeLogo()" *ngIf="!uploadingLogo">
+              ✕ Eliminar
+            </button>
+          </div>
+          <div *ngIf="!logoPreview && !tiendaForm.get('logoUrl')?.value" class="upload-area">
+            <input
+              type="file"
+              id="logoFile"
+              accept="image/*"
+              (change)="onLogoFileSelected($event)"
+              [disabled]="uploadingLogo">
+            <label for="logoFile" class="upload-label">
+              <span *ngIf="!uploadingLogo">📷 Subir Logo</span>
+              <span *ngIf="uploadingLogo">⏳ Subiendo...</span>
+            </label>
+          </div>
+          <span class="help-text">Tamaño recomendado: 200x200px. Máximo 5MB</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Banner de la Tienda</label>
+        <div class="image-upload-container">
+          <div *ngIf="bannerPreview || tiendaForm.get('bannerUrl')?.value" class="image-preview banner">
+            <img [src]="bannerPreview || tiendaForm.get('bannerUrl')?.value" alt="Banner preview">
+            <button type="button" class="btn-remove-image" (click)="removeBanner()" *ngIf="!uploadingBanner">
+              ✕ Eliminar
+            </button>
+          </div>
+          <div *ngIf="!bannerPreview && !tiendaForm.get('bannerUrl')?.value" class="upload-area banner">
+            <input
+              type="file"
+              id="bannerFile"
+              accept="image/*"
+              (change)="onBannerFileSelected($event)"
+              [disabled]="uploadingBanner">
+            <label for="bannerFile" class="upload-label">
+              <span *ngIf="!uploadingBanner">🖼️ Subir Banner</span>
+              <span *ngIf="uploadingBanner">⏳ Subiendo...</span>
+            </label>
+          </div>
+          <span class="help-text">Tamaño recomendado: 1200x400px. Máximo 5MB</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Configuración de MercadoPago</h3>
+
+      <div class="form-group">
+        <label for="mercadoPagoPublicKey">Public Key</label>
+        <input
+          type="text"
+          id="mercadoPagoPublicKey"
+          formControlName="mercadoPagoPublicKey"
+          class="form-control"
+          placeholder="APP_USR-...">
+      </div>
+
+      <div class="form-group">
+        <label for="mercadoPagoAccessToken">Access Token</label>
+        <input
+          type="text"
+          id="mercadoPagoAccessToken"
+          formControlName="mercadoPagoAccessToken"
+          class="form-control"
+          placeholder="APP_USR-...">
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Opciones</h3>
+
+      <div class="form-group checkbox-group">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            formControlName="envioHabilitado">
+          <span>Habilitar cálculo de envío</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="cancelar()" [disabled]="loading">
+        Cancelar
+      </button>
+      <button type="submit" class="btn-primary" [disabled]="loading || tiendaForm.invalid">
+        {{ loading ? 'Guardando...' : (isEditMode ? 'Actualizar Tienda' : 'Crear Tienda') }}
+      </button>
+    </div>
+  </form>
+</div>

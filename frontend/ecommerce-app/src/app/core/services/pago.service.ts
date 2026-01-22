@@ -47,7 +47,10 @@ export class PagoService {
    * Confirma un pago manualmente (para desarrollo sin webhook)
    */
   confirmarPago(pedidoId: number, paymentId?: string): Observable<any> {
-    const params = paymentId ? { paymentId } : {};
+    const params: { [key: string]: string } = {};
+    if (paymentId) {
+      params['paymentId'] = paymentId;
+    }
     return this.http.post(
       `${this.apiUrl}/pagos/confirmar-pago/${pedidoId}`,
       {},

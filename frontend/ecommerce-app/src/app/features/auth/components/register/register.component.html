@@ -3,88 +3,153 @@
     <div class="col-md-6 col-lg-5">
       <div class="card shadow">
         <div class="card-body p-4">
-          <h2 class="card-title text-center mb-4">Registrarse</h2>
+          <!-- Formulario de Registro -->
+          <div *ngIf="!showVerification">
+            <h2 class="card-title text-center mb-4">Registrarse</h2>
 
-          <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-            <div class="mb-3">
-              <label for="nombre" class="form-label">Nombre</label>
-              <input
-                type="text"
-                class="form-control"
-                id="nombre"
-                formControlName="nombre"
-                [class.is-invalid]="nombre?.invalid && nombre?.touched"
-              >
-              <div class="invalid-feedback" *ngIf="nombre?.invalid && nombre?.touched">
-                <span *ngIf="nombre?.errors?.['required']">El nombre es requerido</span>
-                <span *ngIf="nombre?.errors?.['minlength']">Mínimo 3 caracteres</span>
+            <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+              <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="nombre"
+                  formControlName="nombre"
+                  [class.is-invalid]="nombre?.invalid && nombre?.touched"
+                >
+                <div class="invalid-feedback" *ngIf="nombre?.invalid && nombre?.touched">
+                  <span *ngIf="nombre?.errors?.['required']">El nombre es requerido</span>
+                  <span *ngIf="nombre?.errors?.['minlength']">Mínimo 3 caracteres</span>
+                </div>
               </div>
-            </div>
 
-            <div class="mb-3">
-              <label for="email" class="form-label">Email</label>
-              <input
-                type="email"
-                class="form-control"
-                id="email"
-                formControlName="email"
-                [class.is-invalid]="email?.invalid && email?.touched"
-              >
-              <div class="invalid-feedback" *ngIf="email?.invalid && email?.touched">
-                <span *ngIf="email?.errors?.['required']">El email es requerido</span>
-                <span *ngIf="email?.errors?.['email']">Formato de email inválido</span>
+              <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="email"
+                  formControlName="email"
+                  [class.is-invalid]="email?.invalid && email?.touched"
+                >
+                <div class="invalid-feedback" *ngIf="email?.invalid && email?.touched">
+                  <span *ngIf="email?.errors?.['required']">El email es requerido</span>
+                  <span *ngIf="email?.errors?.['email']">Formato de email inválido</span>
+                </div>
               </div>
-            </div>
 
-            <div class="mb-3">
-              <label for="password" class="form-label">Contraseña</label>
-              <input
-                type="password"
-                class="form-control"
-                id="password"
-                formControlName="password"
-                [class.is-invalid]="password?.invalid && password?.touched"
-              >
-              <div class="invalid-feedback" *ngIf="password?.invalid && password?.touched">
-                <span *ngIf="password?.errors?.['required']">La contraseña es requerida</span>
-                <span *ngIf="password?.errors?.['minlength']">Mínimo 6 caracteres</span>
+              <div class="mb-3">
+                <label for="password" class="form-label">Contraseña</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="password"
+                  formControlName="password"
+                  [class.is-invalid]="password?.invalid && password?.touched"
+                >
+                <div class="invalid-feedback" *ngIf="password?.invalid && password?.touched">
+                  <span *ngIf="password?.errors?.['required']">La contraseña es requerida</span>
+                  <span *ngIf="password?.errors?.['minlength']">Mínimo 6 caracteres</span>
+                </div>
               </div>
-            </div>
 
-            <div class="mb-3">
-              <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
-              <input
-                type="password"
-                class="form-control"
-                id="confirmPassword"
-                formControlName="confirmPassword"
-                [class.is-invalid]="confirmPassword?.invalid && confirmPassword?.touched"
-              >
-              <div class="invalid-feedback" *ngIf="confirmPassword?.invalid && confirmPassword?.touched">
-                <span *ngIf="confirmPassword?.errors?.['required']">Confirma tu contraseña</span>
-                <span *ngIf="confirmPassword?.errors?.['passwordMismatch']">Las contraseñas no coinciden</span>
+              <div class="mb-3">
+                <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="confirmPassword"
+                  formControlName="confirmPassword"
+                  [class.is-invalid]="confirmPassword?.invalid && confirmPassword?.touched"
+                >
+                <div class="invalid-feedback" *ngIf="confirmPassword?.invalid && confirmPassword?.touched">
+                  <span *ngIf="confirmPassword?.errors?.['required']">Confirma tu contraseña</span>
+                  <span *ngIf="confirmPassword?.errors?.['passwordMismatch']">Las contraseñas no coinciden</span>
+                </div>
               </div>
-            </div>
 
-            <div class="alert alert-danger" *ngIf="errorMessage">
-              {{ errorMessage }}
-            </div>
+              <div class="alert alert-danger" *ngIf="errorMessage">
+                {{ errorMessage }}
+              </div>
 
-            <button
-              type="submit"
-              class="btn btn-primary w-100 mb-3"
-              [disabled]="registerForm.invalid || loading"
-            >
-              <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
-              {{ loading ? 'Registrando...' : 'Registrarse' }}
-            </button>
+              <button
+                type="submit"
+                class="btn btn-primary w-100 mb-3"
+                [disabled]="registerForm.invalid || loading"
+              >
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                {{ loading ? 'Registrando...' : 'Registrarse' }}
+              </button>
 
-            <div class="text-center">
-              <p class="mb-0">¿Ya tienes cuenta?
-                <a routerLink="/login" class="text-decoration-none">Inicia sesión</a>
-              </p>
-            </div>
-          </form>
+              <div class="text-center">
+                <p class="mb-0">¿Ya tienes cuenta?
+                  <a routerLink="/login" class="text-decoration-none">Inicia sesión</a>
+                </p>
+              </div>
+            </form>
+          </div>
+
+          <!-- Formulario de Verificación de Email -->
+          <div *ngIf="showVerification">
+            <h2 class="card-title text-center mb-4">Verificación de Email</h2>
+            <p class="text-center text-muted mb-4">
+              Hemos enviado un código de verificación de 6 dígitos a:<br>
+              <strong>{{ registeredEmail }}</strong>
+            </p>
+
+            <form [formGroup]="verificationForm" (ngSubmit)="onVerifyCode()">
+              <div class="mb-3">
+                <label for="codigo" class="form-label">Código de Verificación</label>
+                <input
+                  type="text"
+                  class="form-control form-control-lg text-center"
+                  id="codigo"
+                  formControlName="codigo"
+                  placeholder="000000"
+                  maxlength="6"
+                  style="letter-spacing: 8px; font-size: 24px;"
+                  [class.is-invalid]="codigoControl?.invalid && codigoControl?.touched"
+                >
+                <div class="invalid-feedback" *ngIf="codigoControl?.invalid && codigoControl?.touched">
+                  <span *ngIf="codigoControl?.errors?.['required']">El código es requerido</span>
+                  <span *ngIf="codigoControl?.errors?.['pattern']">El código debe tener 6 dígitos</span>
+                </div>
+                <small class="form-text text-muted d-block text-center mt-2">
+                  El código expira en 15 minutos
+                </small>
+              </div>
+
+              <div class="alert alert-danger" *ngIf="verificationError">
+                {{ verificationError }}
+              </div>
+
+              <div class="alert alert-success" *ngIf="verificationSuccess">
+                {{ verificationSuccess }}
+              </div>
+
+              <button
+                type="submit"
+                class="btn btn-primary w-100 mb-3"
+                [disabled]="verificationForm.invalid || loading"
+              >
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                {{ loading ? 'Verificando...' : 'Verificar Código' }}
+              </button>
+
+              <div class="text-center">
+                <p class="text-muted mb-2">¿No recibiste el código?</p>
+                <button
+                  type="button"
+                  class="btn btn-link"
+                  (click)="onResendCode()"
+                  [disabled]="resendCooldown > 0 || loading"
+                >
+                  <span *ngIf="resendCooldown === 0">Reenviar código</span>
+                  <span *ngIf="resendCooldown > 0">Reenviar en {{ resendCooldown }}s</span>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>

@@ -1,0 +1,113 @@
+<div class="pedidos-container">
+  <div class="pedidos-header">
+    <h1>Mis Pedidos</h1>
+    <div class="stats-summary">
+      <div class="stat-item">
+        <span class="stat-label">Total Pedidos:</span>
+        <span class="stat-value">{{ calcularTotalPedidos() }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Ventas Completadas:</span>
+        <span class="stat-value">${{ calcularTotalVentas() | number:'1.2-2' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="pedidos-filters">
+    <button
+      class="filter-btn"
+      [class.active]="estadoFiltro === ''"
+      (click)="filtrarPorEstado('')"
+    >
+      Todos
+    </button>
+    <button
+      class="filter-btn"
+      [class.active]="estadoFiltro === 'Pendiente'"
+      (click)="filtrarPorEstado('Pendiente')"
+    >
+      Pendientes
+    </button>
+    <button
+      class="filter-btn"
+      [class.active]="estadoFiltro === 'Completado'"
+      (click)="filtrarPorEstado('Completado')"
+    >
+      Completados
+    </button>
+    <button
+      class="filter-btn"
+      [class.active]="estadoFiltro === 'Cancelado'"
+      (click)="filtrarPorEstado('Cancelado')"
+    >
+      Cancelados
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <p>Cargando pedidos...</p>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && pedidos.length === 0" class="no-pedidos">
+    <p>No hay pedidos{{ estadoFiltro ? ' con estado ' + estadoFiltro : '' }}</p>
+  </div>
+
+  <div *ngIf="!loading && pedidos.length > 0" class="pedidos-list">
+    <div class="pedido-card" *ngFor="let pedido of pedidos">
+      <div class="pedido-header">
+        <div class="pedido-info-header">
+          <h3>Pedido #{{ pedido.id }}</h3>
+          <span class="pedido-estado" [ngClass]="getEstadoClass(pedido.estado)">
+            {{ pedido.estado }}
+          </span>
+        </div>
+        <div class="pedido-fecha">
+          {{ pedido.fechaCreacion | date:'short' }}
+        </div>
+      </div>
+
+      <div class="pedido-cliente">
+        <div class="cliente-info">
+          <strong>Cliente:</strong> {{ pedido.cliente.nombre }}
+        </div>
+        <div class="cliente-contacto">
+          <strong>Email:</strong> {{ pedido.cliente.email }}
+        </div>
+      </div>
+
+      <div class="pedido-entrega">
+        <strong>Dirección de Envío:</strong>
+        <p>{{ pedido.direccionEnvio }}</p>
+      </div>
+
+      <div class="pedido-items">
+        <h4>Productos ({{ pedido.cantidadItems }} items)</h4>
+        <div class="items-list">
+          <div class="item" *ngFor="let item of pedido.items">
+            <div class="item-info">
+              <span class="item-nombre">{{ item.productoNombre }}</span>
+              <span class="item-cantidad">x{{ item.cantidad }}</span>
+            </div>
+            <div class="item-precios">
+              <span class="item-precio-unitario">${{ item.precioUnitario | number:'1.2-2' }}</span>
+              <span class="item-subtotal">${{ item.subtotal | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pedido-footer">
+        <div class="pedido-metodo-pago" *ngIf="pedido.metodoPago">
+          <strong>Método de Pago:</strong> {{ pedido.metodoPago }}
+        </div>
+        <div class="pedido-total">
+          <strong>Total:</strong> ${{ pedido.total | number:'1.2-2' }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

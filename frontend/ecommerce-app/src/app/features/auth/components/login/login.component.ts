@@ -36,8 +36,22 @@ export class LoginComponent {
     this.errorMessage = '';
 
     this.authService.login(this.loginForm.value).subscribe({
-      next: () => {
-        this.router.navigate(['/productos']);
+      next: (response) => {
+        // Redirigir según el rol del usuario
+        if (response.rol === 'SuperAdmin') {
+          this.router.navigate(['/admin']);
+        } else if (response.rol === 'Admin') {
+          // Si el Admin no tiene tienda, redirigir a onboarding
+          if (!response.tiendaId) {
+            this.router.navigate(['/onboarding']);
+          } else {
+            this.router.navigate(['/emprendedor']);
+          }
+        } else if (response.rol === 'Deposito') {
+          this.router.navigate(['/deposito']);
+        } else {
+          this.router.navigate(['/productos']);
+        }
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Error al iniciar sesión';

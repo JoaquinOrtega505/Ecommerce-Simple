@@ -1,0 +1,73 @@
+<div class="tiendas-container">
+  <div class="header">
+    <h1>Gestión de Tiendas</h1>
+    <button class="btn-primary" (click)="crearNuevaTienda()">
+      ➕ Nueva Tienda
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    Cargando tiendas...
+  </div>
+
+  <div *ngIf="!loading && tiendas.length === 0" class="empty-state">
+    <p>No hay tiendas registradas</p>
+    <button class="btn-primary" (click)="crearNuevaTienda()">
+      Crear primera tienda
+    </button>
+  </div>
+
+  <div *ngIf="!loading && tiendas.length > 0" class="tiendas-grid">
+    <div *ngFor="let tienda of tiendas" class="tienda-card" [class.inactive]="!tienda.activo">
+      <div class="card-header">
+        <div class="tienda-info">
+          <h3>{{ tienda.nombre }}</h3>
+          <span class="subdominio">{{ tienda.subdominio }}.tudominio.com</span>
+        </div>
+        <span class="status-badge" [class.active]="tienda.activo" [class.inactive]="!tienda.activo">
+          {{ tienda.activo ? 'Activa' : 'Inactiva' }}
+        </span>
+      </div>
+
+      <div class="card-body">
+        <div class="info-row">
+          <span class="label">Max Productos:</span>
+          <span class="value">{{ tienda.maxProductos }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Envío:</span>
+          <span class="value">{{ tienda.envioHabilitado ? '✓ Habilitado' : '✗ Deshabilitado' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">MercadoPago:</span>
+          <span class="value">{{ tienda.mercadoPagoPublicKey ? '✓ Configurado' : '✗ Sin configurar' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Creada:</span>
+          <span class="value">{{ tienda.fechaCreacion | date: 'dd/MM/yyyy' }}</span>
+        </div>
+      </div>
+
+      <div class="card-actions">
+        <button class="btn-action btn-edit" (click)="editarTienda(tienda.id)" title="Editar">
+          ✏️ Editar
+        </button>
+        <button
+          class="btn-action"
+          [class.btn-activate]="!tienda.activo"
+          [class.btn-deactivate]="tienda.activo"
+          (click)="toggleEstadoTienda(tienda)"
+          [title]="tienda.activo ? 'Desactivar' : 'Activar'">
+          {{ tienda.activo ? '⏸️ Desactivar' : '▶️ Activar' }}
+        </button>
+        <button class="btn-action btn-delete" (click)="eliminarTienda(tienda)" title="Eliminar">
+          🗑️ Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

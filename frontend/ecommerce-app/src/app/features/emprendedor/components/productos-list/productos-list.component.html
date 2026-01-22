@@ -1,0 +1,74 @@
+<div class="productos-container">
+  <div class="productos-header">
+    <h1>Mis Productos</h1>
+    <button class="btn-primary" (click)="nuevoProducto()">
+      Agregar Producto
+    </button>
+  </div>
+
+  <div class="productos-filters">
+    <div class="search-box">
+      <input
+        type="text"
+        [(ngModel)]="buscarTexto"
+        (keyup.enter)="buscar()"
+        placeholder="Buscar productos..."
+        class="search-input"
+      >
+      <button class="btn-search" (click)="buscar()">Buscar</button>
+    </div>
+    <div class="filter-options">
+      <label class="checkbox-label">
+        <input
+          type="checkbox"
+          [(ngModel)]="incluirInactivos"
+          (change)="toggleInactivos()"
+        >
+        <span>Incluir productos inactivos</span>
+      </label>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <p>Cargando productos...</p>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && productos.length === 0" class="no-productos">
+    <p>No hay productos disponibles</p>
+    <button class="btn-primary" (click)="nuevoProducto()">
+      Agregar tu primer producto
+    </button>
+  </div>
+
+  <div *ngIf="!loading && productos.length > 0" class="productos-grid">
+    <div class="producto-card" *ngFor="let producto of productos">
+      <div class="producto-imagen">
+        <img [src]="producto.imagenUrl || 'assets/no-image.png'" [alt]="producto.nombre">
+        <span *ngIf="!producto.activo" class="badge-inactivo">Inactivo</span>
+      </div>
+      <div class="producto-content">
+        <h3 class="producto-nombre">{{ producto.nombre }}</h3>
+        <p class="producto-categoria">{{ producto.categoria?.nombre }}</p>
+        <p class="producto-descripcion">{{ producto.descripcion }}</p>
+        <div class="producto-info">
+          <span class="producto-precio">${{ producto.precio | number:'1.2-2' }}</span>
+          <span class="producto-stock" [ngClass]="getStockClass(producto.stock)">
+            Stock: {{ producto.stock }}
+          </span>
+        </div>
+      </div>
+      <div class="producto-actions">
+        <button class="btn-edit" (click)="editarProducto(producto.id)">
+          Editar
+        </button>
+        <button class="btn-delete" (click)="eliminarProducto(producto.id)">
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

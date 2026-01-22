@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Data;
 using EcommerceApi.Models;
 using EcommerceApi.DTOs;
+using System.Security.Claims;
 
 namespace EcommerceApi.Controllers;
 
@@ -16,6 +17,18 @@ public class ProductosController : ControllerBase
     public ProductosController(AppDbContext context)
     {
         _context = context;
+    }
+
+    private async Task<int?> GetUserTiendaIdAsync()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+        {
+            return null;
+        }
+
+        var usuario = await _context.Usuarios.FindAsync(userId);
+        return usuario?.TiendaId;
     }
 
     [HttpGet]
@@ -37,6 +50,55 @@ public class ProductosController : ControllerBase
         }
 
         var productos = await query
+            .Select(p => new ProductoDto
+            {
+                Id = p.Id,
+                Nombre = p.Nombre,
+                Descripcion = p.Descripcion,
+                Precio = p.Precio,
+                Stock = p.Stock,
+                ImagenUrl = p.ImagenUrl,
+                Activo = p.Activo,
+                CategoriaId = p.CategoriaId,
+                CategoriaNombre = p.Categoria!.Nombre
+            })
+            .ToListAsync();
+
+        return Ok(productos);
+    }
+
+    [HttpGet("mis-productos")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<List<ProductoDto>>> GetMisProductos([FromQuery] int? categoriaId, [FromQuery] string? buscar, [FromQuery] bool? incluirInactivos = false)
+    {
+        var tiendaId = await GetUserTiendaIdAsync();
+        if (tiendaId == null)
+        {
+            return BadRequest(new { message = "Usuario no asociado a ninguna tienda" });
+        }
+
+        var query = _context.Productos
+            .Include(p => p.Categoria)
+            .Where(p => p.TiendaId == tiendaId.Value)
+            .AsQueryable();
+
+        if (!incluirInactivos.GetValueOrDefault())
+        {
+            query = query.Where(p => p.Activo);
+        }
+
+        if (categoriaId.HasValue)
+        {
+            query = query.Where(p => p.CategoriaId == categoriaId.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(buscar))
+        {
+            query = query.Where(p => p.Nombre.Contains(buscar) || p.Descripcion.Contains(buscar));
+        }
+
+        var productos = await query
+            .OrderByDescending(p => p.FechaCreacion)
             .Select(p => new ProductoDto
             {
                 Id = p.Id,
@@ -86,6 +148,25 @@ public class ProductosController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<ProductoDto>> CreateProducto(CreateProductoDto dto)
     {
+        var tiendaId = await GetUserTiendaIdAsync();
+        if (tiendaId == null)
+        {
+            return BadRequest(new { message = "Usuario no asociado a ninguna tienda" });
+        }
+
+        // Verificar que la tienda no haya alcanzado el límite de productos
+        var tienda = await _context.Tiendas.FindAsync(tiendaId.Value);
+        if (tienda == null)
+        {
+            return BadRequest(new { message = "Tienda no encontrada" });
+        }
+
+        var totalProductos = await _context.Productos.CountAsync(p => p.TiendaId == tiendaId.Value && p.Activo);
+        if (totalProductos >= tienda.MaxProductos)
+        {
+            return BadRequest(new { message = $"Has alcanzado el límite de {tienda.MaxProductos} productos para tu tienda" });
+        }
+
         var producto = new Producto
         {
             Nombre = dto.Nombre,
@@ -94,7 +175,9 @@ public class ProductosController : ControllerBase
             Stock = dto.Stock,
             ImagenUrl = dto.ImagenUrl,
             CategoriaId = dto.CategoriaId,
-            Activo = true
+            TiendaId = tiendaId.Value,
+            Activo = true,
+            FechaCreacion = DateTime.UtcNow
         };
 
         _context.Productos.Add(producto);
@@ -122,10 +205,22 @@ public class ProductosController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult> UpdateProducto(int id, UpdateProductoDto dto)
     {
+        var tiendaId = await GetUserTiendaIdAsync();
+        if (tiendaId == null)
+        {
+            return BadRequest(new { message = "Usuario no asociado a ninguna tienda" });
+        }
+
         var producto = await _context.Productos.FindAsync(id);
         if (producto == null)
         {
             return NotFound(new { message = "Producto no encontrado" });
+        }
+
+        // Verificar que el producto pertenece a la tienda del usuario
+        if (producto.TiendaId != tiendaId.Value)
+        {
+            return Forbid();
         }
 
         producto.Nombre = dto.Nombre;
@@ -145,10 +240,22 @@ public class ProductosController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult> DeleteProducto(int id)
     {
+        var tiendaId = await GetUserTiendaIdAsync();
+        if (tiendaId == null)
+        {
+            return BadRequest(new { message = "Usuario no asociado a ninguna tienda" });
+        }
+
         var producto = await _context.Productos.FindAsync(id);
         if (producto == null)
         {
             return NotFound(new { message = "Producto no encontrado" });
+        }
+
+        // Verificar que el producto pertenece a la tienda del usuario
+        if (producto.TiendaId != tiendaId.Value)
+        {
+            return Forbid();
         }
 
         // Soft delete - solo marcamos como inactivo

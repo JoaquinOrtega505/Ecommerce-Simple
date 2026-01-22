@@ -24,6 +24,8 @@ public partial class EcommerceDbContext : DbContext
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
+    public virtual DbSet<Tienda> Tiendas { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<CarritoItem>(entity =>
@@ -41,10 +43,16 @@ public partial class EcommerceDbContext : DbContext
         {
             entity.HasIndex(e => e.UsuarioId, "IX_Pedidos_UsuarioId");
 
+            entity.HasIndex(e => e.TiendaId, "IX_Pedidos_TiendaId");
+
             entity.Property(e => e.Total).HasPrecision(18, 2);
 
             entity.HasOne(d => d.Usuario).WithMany(p => p.Pedidos)
                 .HasForeignKey(d => d.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(d => d.Tienda).WithMany(p => p.Pedidos)
+                .HasForeignKey(d => d.TiendaId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -68,11 +76,43 @@ public partial class EcommerceDbContext : DbContext
         {
             entity.HasIndex(e => e.CategoriaId, "IX_Productos_CategoriaId");
 
+            entity.HasIndex(e => e.TiendaId, "IX_Productos_TiendaId");
+
             entity.Property(e => e.Precio).HasPrecision(18, 2);
 
             entity.HasOne(d => d.Categoria).WithMany(p => p.Productos)
                 .HasForeignKey(d => d.CategoriaId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(d => d.Tienda).WithMany(p => p.Productos)
+                .HasForeignKey(d => d.TiendaId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Categoria>(entity =>
+        {
+            entity.HasIndex(e => e.TiendaId, "IX_Categorias_TiendaId");
+
+            entity.HasOne(d => d.Tienda).WithMany(p => p.Categorias)
+                .HasForeignKey(d => d.TiendaId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Usuario>(entity =>
+        {
+            entity.HasIndex(e => e.TiendaId, "IX_Usuarios_TiendaId");
+
+            entity.HasOne(d => d.Tienda).WithMany(p => p.Usuarios)
+                .HasForeignKey(d => d.TiendaId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Tienda>(entity =>
+        {
+            entity.HasIndex(e => e.Subdominio, "IX_Tiendas_Subdominio")
+                .IsUnique();
+
+            entity.Property(e => e.FechaCreacion).HasDefaultValueSql("GETDATE()");
         });
 
         OnModelCreatingPartial(modelBuilder);

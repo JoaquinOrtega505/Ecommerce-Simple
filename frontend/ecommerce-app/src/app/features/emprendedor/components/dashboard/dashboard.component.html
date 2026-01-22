@@ -1,0 +1,187 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Panel del Emprendedor</h1>
+    <button class="btn-primary" (click)="navegarANuevoProducto()">
+      Agregar Producto
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <p>Cargando estadísticas...</p>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <div *ngIf="mensajePlan" class="alert" [ngClass]="mensajePlan.includes('Error') ? 'alert-error' : 'alert-success'">
+    {{ mensajePlan }}
+  </div>
+
+  <div *ngIf="estadisticas && !loading" class="dashboard-content">
+    <!-- Vista previa de la tienda -->
+    <div class="tienda-preview" *ngIf="miTienda">
+      <div class="tienda-banner" *ngIf="miTienda.bannerUrl" [style.background-image]="'url(' + miTienda.bannerUrl + ')'">
+        <div class="banner-overlay">
+          <img *ngIf="miTienda.logoUrl" [src]="miTienda.logoUrl" alt="Logo" class="tienda-logo-preview">
+          <h2>{{ miTienda.nombre }}</h2>
+          <p *ngIf="miTienda.descripcion">{{ miTienda.descripcion }}</p>
+        </div>
+      </div>
+      <div class="tienda-banner-simple" *ngIf="!miTienda.bannerUrl">
+        <img *ngIf="miTienda.logoUrl" [src]="miTienda.logoUrl" alt="Logo" class="tienda-logo-preview">
+        <div>
+          <h2>{{ miTienda.nombre }}</h2>
+          <p *ngIf="miTienda.descripcion">{{ miTienda.descripcion }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Información del plan actual -->
+    <div class="plan-card" *ngIf="planActual">
+      <div class="plan-header">
+        <div>
+          <h3>{{ planActual.nombre }}</h3>
+          <p class="plan-descripcion">{{ planActual.descripcion }}</p>
+        </div>
+        <button class="btn-secondary btn-sm" (click)="togglePlanes()">
+          {{ mostrarPlanes ? 'Cancelar' : 'Cambiar Plan' }}
+        </button>
+      </div>
+      <div class="plan-details">
+        <div class="plan-detail-item">
+          <span class="label">Precio mensual:</span>
+          <span class="value">${{ planActual.precioMensual | number:'1.2-2' }}</span>
+        </div>
+        <div class="plan-detail-item">
+          <span class="label">Productos permitidos:</span>
+          <span class="value">{{ planActual.maxProductos }}</span>
+        </div>
+        <div class="plan-detail-item" *ngIf="miTienda?.fechaVencimientoSuscripcion">
+          <span class="label">Renovación:</span>
+          <span class="value">{{ miTienda?.fechaVencimientoSuscripcion | date:'dd/MM/yyyy' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de planes disponibles -->
+    <div class="planes-list" *ngIf="mostrarPlanes">
+      <h3>Selecciona tu nuevo plan</h3>
+      <div *ngIf="loadingPlanes" class="loading-small">Cargando planes...</div>
+      <div class="planes-grid" *ngIf="!loadingPlanes">
+        <div class="plan-option" *ngFor="let plan of planesDisponibles"
+             [class.current-plan]="plan.id === planActual?.id"
+             (click)="plan.id !== planActual?.id && cambiarPlan(plan)">
+          <div class="plan-option-header">
+            <h4>{{ plan.nombre }}</h4>
+            <span class="plan-badge" *ngIf="plan.id === planActual?.id">Plan Actual</span>
+          </div>
+          <p class="plan-price">${{ plan.precioMensual | number:'1.2-2' }}/mes</p>
+          <p class="plan-products">Hasta {{ plan.maxProductos }} productos</p>
+          <p class="plan-desc">{{ plan.descripcion }}</p>
+        </div>
+      </div>
+    </div>
+    <!-- Información de la tienda -->
+    <div class="tienda-info">
+      <img *ngIf="estadisticas.tienda.logoUrl" [src]="estadisticas.tienda.logoUrl" alt="Logo" class="tienda-logo">
+      <div>
+        <h2>{{ estadisticas.tienda.nombre }}</h2>
+        <p class="subdominio">{{ estadisticas.tienda.subdominio }}.tudominio.com</p>
+      </div>
+    </div>
+
+    <!-- Tarjetas de estadísticas -->
+    <div class="stats-grid">
+      <!-- Productos -->
+      <div class="stat-card" (click)="navegarAProductos()">
+        <div class="stat-header">
+          <h3>Productos</h3>
+          <span class="stat-icon">📦</span>
+        </div>
+        <p class="stat-value">{{ estadisticas.productos.total }} / {{ estadisticas.productos.maximo }}</p>
+        <div class="stat-details">
+          <span class="detail-item">
+            <strong>Disponibles:</strong> {{ estadisticas.productos.disponibles }}
+          </span>
+          <span class="detail-item warning" *ngIf="estadisticas.productos.stockBajo > 0">
+            <strong>Stock bajo:</strong> {{ estadisticas.productos.stockBajo }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Pedidos -->
+      <div class="stat-card" (click)="navegarAPedidos()">
+        <div class="stat-header">
+          <h3>Pedidos</h3>
+          <span class="stat-icon">🛒</span>
+        </div>
+        <p class="stat-value">{{ estadisticas.pedidos.total }}</p>
+        <div class="stat-details">
+          <span class="detail-item">
+            <strong>Pendientes:</strong> {{ estadisticas.pedidos.pendientes }}
+          </span>
+          <span class="detail-item success">
+            <strong>Completados:</strong> {{ estadisticas.pedidos.completados }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Ventas Totales -->
+      <div class="stat-card">
+        <div class="stat-header">
+          <h3>Ventas Totales</h3>
+          <span class="stat-icon">💰</span>
+        </div>
+        <p class="stat-value">${{ estadisticas.ventas.totales | number:'1.2-2' }}</p>
+        <div class="stat-details">
+          <span class="detail-item">
+            <strong>Este mes:</strong> ${{ estadisticas.ventas.delMes | number:'1.2-2' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pedidos Recientes -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3>Pedidos Recientes</h3>
+        <button class="btn-secondary" (click)="navegarAPedidos()">Ver todos</button>
+      </div>
+      <div class="pedidos-list" *ngIf="estadisticas.pedidosRecientes.length > 0; else noPedidos">
+        <div class="pedido-item" *ngFor="let pedido of estadisticas.pedidosRecientes">
+          <div class="pedido-info">
+            <span class="pedido-id">#{{ pedido.id }}</span>
+            <span class="pedido-cliente">{{ pedido.cliente }}</span>
+          </div>
+          <div class="pedido-details">
+            <span class="pedido-estado" [ngClass]="'estado-' + pedido.estado.toLowerCase()">
+              {{ pedido.estado }}
+            </span>
+            <span class="pedido-total">${{ pedido.total | number:'1.2-2' }}</span>
+            <span class="pedido-fecha">{{ pedido.fechaCreacion | date:'short' }}</span>
+          </div>
+        </div>
+      </div>
+      <ng-template #noPedidos>
+        <p class="no-data">No hay pedidos recientes</p>
+      </ng-template>
+    </div>
+
+    <!-- Productos Más Vendidos -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3>Productos Más Vendidos</h3>
+      </div>
+      <div class="productos-list" *ngIf="estadisticas.productosMasVendidos.length > 0; else noProductos">
+        <div class="producto-item" *ngFor="let producto of estadisticas.productosMasVendidos">
+          <span class="producto-nombre">{{ producto.nombre }}</span>
+          <span class="producto-cantidad">{{ producto.cantidadVendida }} vendidos</span>
+        </div>
+      </div>
+      <ng-template #noProductos>
+        <p class="no-data">No hay productos vendidos aún</p>
+      </ng-template>
+    </div>
+  </div>
+</div>

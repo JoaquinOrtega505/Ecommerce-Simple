@@ -17,7 +17,21 @@
       "Bash(taskkill:*)",
       "Bash(dotnet ef database:*)",
       "Bash(timeout /t 5 /nobreak)",
-      "Bash(ping:*)"
+      "Bash(ping:*)",
+      "Bash(ng serve:*)",
+      "Bash(timeout /t 10)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(timeout 10 tail:*)",
+      "Bash(netstat:*)",
+      "Bash(timeout 5 tail:*)",
+      "Bash(timeout 8 tail:*)",
+      "Bash(powershell -Command \"Stop-Process -Id 18828 -Force\")",
+      "Bash(timeout:*)",
+      "Bash(ng generate:*)",
+      "Bash(npm run build:*)",
+      "Bash(powershell:*)",
+      "Bash(ng build:*)"
     ]
   }
 }

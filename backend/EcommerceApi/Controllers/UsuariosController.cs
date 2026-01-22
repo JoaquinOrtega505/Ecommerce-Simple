@@ -9,7 +9,7 @@ namespace EcommerceApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "SuperAdmin,Admin")]
 public class UsuariosController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -29,7 +29,8 @@ public class UsuariosController : ControllerBase
                 Nombre = u.Nombre,
                 Email = u.Email,
                 Rol = u.Rol,
-                FechaCreacion = u.FechaCreacion
+                FechaCreacion = u.FechaCreacion,
+                TiendaId = u.TiendaId
             })
             .ToListAsync();
 
@@ -52,7 +53,8 @@ public class UsuariosController : ControllerBase
             Nombre = usuario.Nombre,
             Email = usuario.Email,
             Rol = usuario.Rol,
-            FechaCreacion = usuario.FechaCreacion
+            FechaCreacion = usuario.FechaCreacion,
+            TiendaId = usuario.TiendaId
         };
 
         return Ok(usuarioDto);
@@ -80,6 +82,7 @@ public class UsuariosController : ControllerBase
             Email = dto.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
             Rol = dto.Rol,
+            TiendaId = dto.TiendaId,
             FechaCreacion = DateTime.UtcNow
         };
 
@@ -92,7 +95,8 @@ public class UsuariosController : ControllerBase
             Nombre = usuario.Nombre,
             Email = usuario.Email,
             Rol = usuario.Rol,
-            FechaCreacion = usuario.FechaCreacion
+            FechaCreacion = usuario.FechaCreacion,
+            TiendaId = usuario.TiendaId
         };
 
         return CreatedAtAction(nameof(GetUsuario), new { id = usuario.Id }, usuarioDto);
@@ -116,7 +120,8 @@ public class UsuariosController : ControllerBase
 
         usuario.Nombre = dto.Nombre;
         usuario.Email = dto.Email;
-        
+        usuario.TiendaId = dto.TiendaId;
+
         if (!string.IsNullOrEmpty(dto.Password))
         {
             usuario.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
