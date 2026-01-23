@@ -22,15 +22,25 @@
 
   <!-- Menu Items -->
   <nav class="sidebar-nav">
-    <a
-      *ngFor="let item of menuItems"
-      [routerLink]="item.route"
-      routerLinkActive="active"
-      class="nav-item"
-      [title]="isCollapsed ? item.label : ''">
-      <span class="nav-icon">{{ item.icon }}</span>
-      <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
-    </a>
+    <ng-container *ngFor="let item of menuItems">
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        class="nav-item"
+        [title]="isCollapsed ? item.label : ''">
+        <span class="nav-icon">{{ item.icon }}</span>
+        <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
+      </a>
+      <!-- Botón especial después de "Mi Tienda" -->
+      <button
+        *ngIf="item.label === 'Mi Tienda' && tienda"
+        class="nav-item nav-button"
+        (click)="irAMiTienda()"
+        [title]="isCollapsed ? 'Ir a mi tienda' : ''">
+        <span class="nav-icon">🔗</span>
+        <span class="nav-label" *ngIf="!isCollapsed">Ir a mi tienda</span>
+      </button>
+    </ng-container>
   </nav>
 
   <!-- Footer -->

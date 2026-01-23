@@ -27,6 +27,13 @@ export class PlanesService {
   }
 
   /**
+   * Obtiene TODOS los planes de suscripción (activos e inactivos) - Solo SuperAdmin
+   */
+  getTodosLosPlanes(): Observable<PlanSuscripcion[]> {
+    return this.http.get<PlanSuscripcion[]>(`${this.apiUrl}/todos`);
+  }
+
+  /**
    * Obtiene un plan de suscripción por ID
    */
   getPlanById(id: number): Observable<PlanSuscripcion> {
@@ -73,5 +80,26 @@ export class PlanesService {
    */
   confirmarPago(dto: ConfirmarPagoDto): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.apiUrl}/confirmar-pago`, dto);
+  }
+
+  /**
+   * Crea un nuevo plan de suscripción (solo SuperAdmin)
+   */
+  crearPlan(plan: any): Observable<PlanSuscripcion> {
+    return this.http.post<PlanSuscripcion>(this.apiUrl, plan);
+  }
+
+  /**
+   * Actualiza un plan de suscripción existente (solo SuperAdmin)
+   */
+  actualizarPlan(id: number, plan: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, plan);
+  }
+
+  /**
+   * Elimina un plan de suscripción (solo SuperAdmin)
+   */
+  eliminarPlan(id: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
   }
 }

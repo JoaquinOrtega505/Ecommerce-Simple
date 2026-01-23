@@ -4,6 +4,7 @@ import { AdminDashboardComponent } from './components/admin-dashboard/admin-dash
 import { TiendasListComponent } from './components/tiendas-list/tiendas-list.component';
 import { TiendaFormComponent } from './components/tienda-form/tienda-form.component';
 import { UsuariosAdminComponent } from './components/usuarios-admin/usuarios-admin.component';
+import { PlanesAdminComponent } from './components/planes-admin/planes-admin.component';
 
 const routes: Routes = [
   {
@@ -14,7 +15,8 @@ const routes: Routes = [
       { path: 'tiendas', component: TiendasListComponent },
       { path: 'tiendas/nueva', component: TiendaFormComponent },
       { path: 'tiendas/editar/:id', component: TiendaFormComponent },
-      { path: 'usuarios', component: UsuariosAdminComponent }
+      { path: 'usuarios', component: UsuariosAdminComponent },
+      { path: 'planes', component: PlanesAdminComponent }
     ]
   }
 ];

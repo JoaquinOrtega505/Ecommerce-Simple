@@ -41,6 +41,18 @@ public class PlanesController : ControllerBase
         return Ok(planes);
     }
 
+    // GET: api/planes/todos
+    [HttpGet("todos")]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<ActionResult<List<PlanSuscripcion>>> GetTodosLosPlanes()
+    {
+        var planes = await _context.PlanesSuscripcion
+            .OrderBy(p => p.MaxProductos)
+            .ToListAsync();
+
+        return Ok(planes);
+    }
+
     // GET: api/planes/{id}
     [HttpGet("{id}")]
     public async Task<ActionResult<PlanSuscripcion>> GetPlan(int id)
@@ -53,6 +65,83 @@ public class PlanesController : ControllerBase
         }
 
         return Ok(plan);
+    }
+
+    // POST: api/planes
+    [HttpPost]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<ActionResult<PlanSuscripcion>> CrearPlan([FromBody] CrearPlanDto dto)
+    {
+        var plan = new PlanSuscripcion
+        {
+            Nombre = dto.Nombre,
+            Descripcion = dto.Descripcion,
+            MaxProductos = dto.MaxProductos,
+            PrecioMensual = dto.PrecioMensual,
+            Activo = dto.Activo
+        };
+
+        _context.PlanesSuscripcion.Add(plan);
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Plan de suscripción creado: {PlanNombre} (ID: {PlanId})", plan.Nombre, plan.Id);
+
+        return CreatedAtAction(nameof(GetPlan), new { id = plan.Id }, plan);
+    }
+
+    // PUT: api/planes/{id}
+    [HttpPut("{id}")]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<ActionResult> ActualizarPlan(int id, [FromBody] ActualizarPlanDto dto)
+    {
+        var plan = await _context.PlanesSuscripcion.FindAsync(id);
+        if (plan == null)
+        {
+            return NotFound(new { message = "Plan no encontrado" });
+        }
+
+        plan.Nombre = dto.Nombre;
+        plan.Descripcion = dto.Descripcion;
+        plan.MaxProductos = dto.MaxProductos;
+        plan.PrecioMensual = dto.PrecioMensual;
+        plan.Activo = dto.Activo;
+
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Plan de suscripción actualizado: {PlanNombre} (ID: {PlanId})", plan.Nombre, plan.Id);
+
+        return Ok(new { message = "Plan actualizado exitosamente", plan });
+    }
+
+    // DELETE: api/planes/{id}
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<ActionResult> EliminarPlan(int id)
+    {
+        var plan = await _context.PlanesSuscripcion.FindAsync(id);
+        if (plan == null)
+        {
+            return NotFound(new { message = "Plan no encontrado" });
+        }
+
+        // Verificar si hay tiendas usando este plan
+        var tiendasConPlan = await _context.Tiendas
+            .Where(t => t.PlanSuscripcionId == id)
+            .CountAsync();
+
+        if (tiendasConPlan > 0)
+        {
+            return BadRequest(new {
+                message = $"No se puede eliminar el plan porque hay {tiendasConPlan} tienda(s) suscritas a él. Desactívelo en su lugar."
+            });
+        }
+
+        _context.PlanesSuscripcion.Remove(plan);
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Plan de suscripción eliminado: {PlanNombre} (ID: {PlanId})", plan.Nombre, plan.Id);
+
+        return Ok(new { message = "Plan eliminado exitosamente" });
     }
 
     // POST: api/planes/suscribirse
@@ -392,4 +481,22 @@ public class ConfirmarPagoDto
     public int PlanId { get; set; }
     public long? PaymentId { get; set; }
     public string? PreferenceId { get; set; }
+}
+
+public class CrearPlanDto
+{
+    public string Nombre { get; set; } = string.Empty;
+    public string Descripcion { get; set; } = string.Empty;
+    public int MaxProductos { get; set; }
+    public decimal PrecioMensual { get; set; }
+    public bool Activo { get; set; } = true;
+}
+
+public class ActualizarPlanDto
+{
+    public string Nombre { get; set; } = string.Empty;
+    public string Descripcion { get; set; } = string.Empty;
+    public int MaxProductos { get; set; }
+    public decimal PrecioMensual { get; set; }
+    public bool Activo { get; set; }
 }

@@ -1,0 +1,163 @@
+<div class="planes-admin-container">
+  <div class="header">
+    <h2>Gestión de Planes de Suscripción</h2>
+    <button class="btn btn-primary" (click)="abrirFormularioNuevo()" [disabled]="loading">
+      ➕ Nuevo Plan
+    </button>
+  </div>
+
+  <!-- Mensajes -->
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading && !showForm" class="loading">
+    <p>Cargando planes...</p>
+  </div>
+
+  <!-- Formulario de creación/edición -->
+  <div *ngIf="showForm" class="form-modal">
+    <div class="form-container">
+      <div class="form-header">
+        <h3>{{ isEditing ? 'Editar Plan' : 'Nuevo Plan' }}</h3>
+        <button class="btn-close" (click)="cerrarFormulario()">✕</button>
+      </div>
+
+      <form (ngSubmit)="guardarPlan()" #planFormElement="ngForm">
+        <div class="form-group">
+          <label for="nombre">Nombre del Plan *</label>
+          <input
+            type="text"
+            id="nombre"
+            [(ngModel)]="planForm.nombre"
+            name="nombre"
+            placeholder="Ej: Plan Básico"
+            required
+            maxlength="100">
+        </div>
+
+        <div class="form-group">
+          <label for="descripcion">Descripción *</label>
+          <textarea
+            id="descripcion"
+            [(ngModel)]="planForm.descripcion"
+            name="descripcion"
+            placeholder="Descripción del plan"
+            rows="3"
+            required
+            maxlength="500"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="maxProductos">Máx. Productos *</label>
+            <input
+              type="number"
+              id="maxProductos"
+              [(ngModel)]="planForm.maxProductos"
+              name="maxProductos"
+              placeholder="0"
+              min="0"
+              required>
+          </div>
+
+          <div class="form-group">
+            <label for="precioMensual">Precio Mensual (ARS) *</label>
+            <input
+              type="number"
+              id="precioMensual"
+              [(ngModel)]="planForm.precioMensual"
+              name="precioMensual"
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+              required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [(ngModel)]="planForm.activo"
+              name="activo">
+            <span>Plan activo (disponible para suscripción)</span>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="cerrarFormulario()" [disabled]="loading">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="loading || !planFormElement.valid">
+            {{ loading ? 'Guardando...' : (isEditing ? 'Actualizar' : 'Crear') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tabla de planes -->
+  <div *ngIf="!loading || showForm" class="planes-table">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Descripción</th>
+          <th>Máx. Productos</th>
+          <th>Precio Mensual</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let plan of planes" [class.inactive]="!plan.activo">
+          <td>{{ plan.id }}</td>
+          <td><strong>{{ plan.nombre }}</strong></td>
+          <td>{{ plan.descripcion }}</td>
+          <td>{{ plan.maxProductos }}</td>
+          <td>$ {{ plan.precioMensual.toFixed(2) }}</td>
+          <td>
+            <span class="badge" [class.badge-success]="plan.activo" [class.badge-inactive]="!plan.activo">
+              {{ plan.activo ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+          <td class="actions">
+            <button
+              class="btn btn-sm btn-edit"
+              (click)="abrirFormularioEditar(plan)"
+              [disabled]="loading"
+              title="Editar">
+              ✏️
+            </button>
+            <button
+              class="btn btn-sm"
+              [class.btn-warning]="plan.activo"
+              [class.btn-success]="!plan.activo"
+              (click)="toggleActivo(plan)"
+              [disabled]="loading"
+              [title]="plan.activo ? 'Desactivar' : 'Activar'">
+              {{ plan.activo ? '🔒' : '🔓' }}
+            </button>
+            <button
+              class="btn btn-sm btn-danger"
+              (click)="eliminarPlan(plan)"
+              [disabled]="loading"
+              title="Eliminar">
+              🗑️
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="planes.length === 0 && !loading">
+          <td colspan="7" class="no-data">No hay planes registrados</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
