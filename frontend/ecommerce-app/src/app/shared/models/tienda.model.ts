@@ -1,3 +1,5 @@
+import { PlanSuscripcion } from './plan-suscripcion.model';
+
 export interface Tienda {
   id: number;
   nombre: string;
@@ -14,12 +16,13 @@ export interface Tienda {
   apiEnvioCredenciales?: string;
   maxProductos: number;
   planSuscripcionId?: number;
-  fechaSuscripcion?: Date;
-  fechaVencimientoSuscripcion?: Date;
+  planSuscripcion?: PlanSuscripcion;
+  fechaSuscripcion?: string;
+  fechaVencimientoSuscripcion?: string;
   estadoTienda: string; // Borrador, Activa, Suspendida, Inactiva
   activo: boolean;
-  fechaCreacion: Date;
-  fechaModificacion?: Date;
+  fechaCreacion: string;
+  fechaModificacion?: string;
 }
 
 export interface TiendaEstadisticas {

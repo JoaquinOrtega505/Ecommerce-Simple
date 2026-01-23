@@ -110,4 +110,75 @@ public class MercadoPagoService
             return null;
         }
     }
+
+    /// <summary>
+    /// Crea una preferencia de pago para una suscripción
+    /// </summary>
+    public async Task<Preference> CrearPreferenciaSuscripcionAsync(
+        PlanSuscripcion plan,
+        Tienda tienda,
+        string emailComprador,
+        string urlSuccess,
+        string urlFailure,
+        string urlPending)
+    {
+        try
+        {
+            // Crear el item de la preferencia
+            var items = new List<PreferenceItemRequest>
+            {
+                new PreferenceItemRequest
+                {
+                    Id = plan.Id.ToString(),
+                    Title = $"Suscripción {plan.Nombre}",
+                    Description = plan.Descripcion,
+                    Quantity = 1,
+                    CurrencyId = "ARS",
+                    UnitPrice = plan.PrecioMensual
+                }
+            };
+
+            // Crear la preferencia
+            var request = new PreferenceRequest
+            {
+                Items = items,
+                Payer = new PreferencePayerRequest
+                {
+                    Email = emailComprador
+                },
+                BackUrls = new PreferenceBackUrlsRequest
+                {
+                    Success = urlSuccess,
+                    Failure = urlFailure,
+                    Pending = urlPending
+                },
+                PaymentMethods = new PreferencePaymentMethodsRequest
+                {
+                    DefaultPaymentMethodId = "account_money",
+                    ExcludedPaymentMethods = new List<PreferencePaymentMethodRequest>(),
+                    ExcludedPaymentTypes = new List<PreferencePaymentTypeRequest>(),
+                    Installments = 1
+                },
+                ExternalReference = $"SUSCRIPCION_{tienda.Id}_{plan.Id}",
+                NotificationUrl = $"{_configuration["AppUrl"]}/api/planes/webhook",
+                StatementDescriptor = "SUSCRIPCION ECOMMERCE"
+            };
+
+            var client = new PreferenceClient();
+            var preference = await client.CreateAsync(request);
+
+            _logger.LogInformation(
+                "Preferencia de suscripción creada: {PreferenceId} para tienda {TiendaId} plan {PlanId}",
+                preference.Id, tienda.Id, plan.Id);
+
+            return preference;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Error al crear preferencia de suscripción para tienda {TiendaId} plan {PlanId}",
+                tienda.Id, plan.Id);
+            throw;
+        }
+    }
 }

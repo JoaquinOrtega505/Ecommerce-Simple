@@ -29,6 +29,13 @@
         <span class="tab-icon">💳</span>
         MercadoPago
       </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'suscripcion'"
+        (click)="setActiveTab('suscripcion')">
+        <span class="tab-icon">📋</span>
+        Suscripción
+      </button>
     </div>
 
     <!-- Alerts -->
@@ -111,50 +118,196 @@
     <div *ngIf="activeTab === 'mercadopago'" class="tab-content">
       <div class="config-card">
         <h2>Configuración de MercadoPago</h2>
-        <p class="card-subtitle">Configura tus credenciales de MercadoPago para recibir pagos</p>
+        <p class="card-subtitle">Configura MercadoPago para recibir pagos en tu tienda</p>
 
-        <div class="info-box">
-          <div class="info-icon">ℹ️</div>
-          <div class="info-content">
-            <h3>¿Cómo obtengo mis credenciales?</h3>
-            <ol>
-              <li>Ingresa a tu cuenta de <a href="https://www.mercadopago.com.ar/developers/panel" target="_blank">MercadoPago Developers</a></li>
-              <li>Ve a la sección "Credenciales"</li>
-              <li>Copia tu Public Key y Access Token</li>
-              <li>Pega las credenciales en los campos de abajo</li>
-            </ol>
+        <!-- Estado de Conexión -->
+        <div class="connection-status" [class.connected]="mercadoPagoConnected">
+          <div class="status-indicator">
+            <span class="status-dot" [class.active]="mercadoPagoConnected"></span>
+            <span class="status-text">
+              {{ mercadoPagoConnected ? 'Conectado' : 'No Conectado' }}
+            </span>
+          </div>
+          <div *ngIf="mercadoPagoConnected && mercadoPagoPublicKey" class="status-details">
+            <small>Public Key: {{ mercadoPagoPublicKey }}</small>
           </div>
         </div>
 
-        <form [formGroup]="mercadoPagoForm" (ngSubmit)="saveMercadoPagoConfig()">
-          <div class="form-group">
-            <label for="mercadoPagoPublicKey">Public Key</label>
-            <input
-              type="text"
-              id="mercadoPagoPublicKey"
-              formControlName="mercadoPagoPublicKey"
-              class="form-control"
-              placeholder="APP_USR-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
-            <small class="form-hint">Esta clave se usa en el frontend para inicializar MercadoPago</small>
+        <!-- Conexión OAuth (Recomendado) -->
+        <div class="oauth-section" *ngIf="!mercadoPagoConnected || useManualCredentials">
+          <div class="section-header-with-badge">
+            <h3>Conexión Rápida</h3>
+            <span class="badge-recommended">Recomendado</span>
           </div>
+          <p class="section-description">
+            Conecta tu cuenta de MercadoPago con un solo clic. Es la forma más fácil y segura de configurar los pagos.
+          </p>
 
-          <div class="form-group">
-            <label for="mercadoPagoAccessToken">Access Token</label>
-            <input
-              type="password"
-              id="mercadoPagoAccessToken"
-              formControlName="mercadoPagoAccessToken"
-              class="form-control"
-              placeholder="APP_USR-xxxxxxxxxx-xxxxxx-xxxxxxxxxxxx">
-            <small class="form-hint">Esta clave se usa en el backend para procesar pagos (mantener segura)</small>
-          </div>
+          <button
+            class="btn-mercadopago"
+            (click)="connectMercadoPago()"
+            [disabled]="saving"
+            *ngIf="!mercadoPagoConnected">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+              <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+            </svg>
+            Conectar con MercadoPago
+          </button>
 
-          <div class="form-actions">
-            <button type="submit" class="btn-primary" [disabled]="saving">
-              {{ saving ? 'Guardando...' : 'Guardar Credenciales' }}
-            </button>
+          <button
+            class="btn-disconnect"
+            (click)="disconnectMercadoPago()"
+            [disabled]="saving"
+            *ngIf="mercadoPagoConnected && !useManualCredentials">
+            Desconectar MercadoPago
+          </button>
+        </div>
+
+        <!-- Divisor -->
+        <div class="section-divider-with-text" *ngIf="!mercadoPagoConnected">
+          <span>O</span>
+        </div>
+
+        <!-- Credenciales Manuales (Avanzado) -->
+        <div class="manual-section" *ngIf="!mercadoPagoConnected">
+          <button
+            class="btn-link"
+            (click)="toggleManualCredentials()"
+            type="button">
+            {{ useManualCredentials ? 'Usar conexión rápida' : 'Configurar credenciales manualmente (Avanzado)' }}
+          </button>
+
+          <div class="manual-credentials" *ngIf="useManualCredentials">
+            <div class="info-box">
+              <div class="info-icon">ℹ️</div>
+              <div class="info-content">
+                <h4>¿Cómo obtengo mis credenciales?</h4>
+                <ol>
+                  <li>Ingresa a <a href="https://www.mercadopago.com.ar/developers/panel" target="_blank">MercadoPago Developers</a></li>
+                  <li>Ve a la sección "Credenciales"</li>
+                  <li>Copia tu Public Key y Access Token</li>
+                  <li>Pega las credenciales en los campos de abajo</li>
+                </ol>
+              </div>
+            </div>
+
+            <form [formGroup]="mercadoPagoForm" (ngSubmit)="saveMercadoPagoConfig()">
+              <div class="form-group">
+                <label for="mercadoPagoPublicKey">Public Key</label>
+                <input
+                  type="text"
+                  id="mercadoPagoPublicKey"
+                  formControlName="mercadoPagoPublicKey"
+                  class="form-control"
+                  placeholder="APP_USR-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+                <small class="form-hint">Esta clave se usa en el frontend para inicializar MercadoPago</small>
+              </div>
+
+              <div class="form-group">
+                <label for="mercadoPagoAccessToken">Access Token</label>
+                <input
+                  type="password"
+                  id="mercadoPagoAccessToken"
+                  formControlName="mercadoPagoAccessToken"
+                  class="form-control"
+                  placeholder="APP_USR-xxxxxxxxxx-xxxxxx-xxxxxxxxxxxx">
+                <small class="form-hint">Esta clave se usa en el backend para procesar pagos (mantener segura)</small>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-primary" [disabled]="saving">
+                  {{ saving ? 'Guardando...' : 'Guardar Credenciales' }}
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Content: Suscripción -->
+    <div *ngIf="activeTab === 'suscripcion'" class="tab-content">
+      <div class="config-card">
+        <h2>Mi Suscripción</h2>
+        <p class="card-subtitle">Administra tu plan y suscripción</p>
+
+        <!-- Plan Actual -->
+        <div class="plan-actual" *ngIf="tienda">
+          <div class="plan-badge">Plan Actual</div>
+          <h3>{{ tienda.planSuscripcion?.nombre || 'Sin Plan' }}</h3>
+          <p class="plan-desc">{{ tienda.planSuscripcion?.descripcion || 'Sin límites para grandes emprendimientos' }}</p>
+
+          <div class="plan-info-grid">
+            <div class="info-item">
+              <span class="label">Precio Mensual</span>
+              <span class="value">${{ tienda.planSuscripcion?.precioMensual || 0 | number:'1.2-2' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Productos Permitidos</span>
+              <span class="value">{{ tienda.planSuscripcion?.maxProductos || '∞' }}</span>
+            </div>
+            <div class="info-item" *ngIf="tienda.fechaVencimientoSuscripcion">
+              <span class="label">Próxima Renovación</span>
+              <span class="value">{{ tienda.fechaVencimientoSuscripcion | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Estado</span>
+              <span class="value status-active">Activa</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cambiar Plan -->
+        <div class="section-divider"></div>
+        <div class="actions-section">
+          <button class="btn-secondary" (click)="mostrarPlanes = !mostrarPlanes">
+            {{ mostrarPlanes ? 'Cancelar' : 'Cambiar Plan' }}
+          </button>
+        </div>
+
+        <!-- Planes Disponibles -->
+        <div class="planes-container" *ngIf="mostrarPlanes">
+          <h4>Selecciona un nuevo plan</h4>
+          <div *ngIf="loadingPlanes" class="loading-small">
+            <div class="spinner"></div>
+            <p>Cargando planes...</p>
+          </div>
+          <div class="planes-grid" *ngIf="!loadingPlanes && planesDisponibles.length > 0">
+            <div class="plan-card" *ngFor="let plan of planesDisponibles"
+                 [class.current]="plan.id === tienda?.planSuscripcionId">
+              <div class="plan-header">
+                <h5>{{ plan.nombre }}</h5>
+                <span class="badge-actual" *ngIf="plan.id === tienda?.planSuscripcionId">Actual</span>
+              </div>
+              <div class="plan-price">
+                <span class="amount">${{ plan.precioMensual | number:'1.2-2' }}</span>
+                <span class="period">/mes</span>
+              </div>
+              <p class="plan-description">{{ plan.descripcion }}</p>
+              <ul class="plan-features">
+                <li>Hasta {{ plan.maxProductos }} productos</li>
+                <li>Panel de administración</li>
+                <li>Soporte técnico</li>
+              </ul>
+              <button class="btn-primary"
+                      (click)="cambiarPlan(plan)"
+                      [disabled]="plan.id === tienda?.planSuscripcionId || saving">
+                {{ plan.id === tienda?.planSuscripcionId ? 'Plan Actual' : 'Seleccionar' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cancelar Suscripción -->
+        <div class="section-divider"></div>
+        <div class="danger-zone">
+          <h4>Zona de Peligro</h4>
+          <p>Si cancelas tu suscripción, perderás acceso a todas las funcionalidades de tu tienda.</p>
+          <button class="btn-danger" (click)="cancelarSuscripcion()">
+            Cancelar Suscripción
+          </button>
+        </div>
       </div>
     </div>
   </div>

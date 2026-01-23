@@ -50,6 +50,9 @@ builder.Services.AddCors(options =>
 // Registrar HttpClient para AndreaniService
 builder.Services.AddHttpClient<EcommerceApi.Services.AndreaniService>();
 
+// Registrar HttpClientFactory para OAuth y otros servicios
+builder.Services.AddHttpClient();
+
 // Registrar servicio de envíos simulado
 builder.Services.AddSingleton<EcommerceApi.Services.MockShippingService>();
 

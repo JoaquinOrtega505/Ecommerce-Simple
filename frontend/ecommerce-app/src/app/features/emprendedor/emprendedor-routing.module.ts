@@ -7,6 +7,7 @@ import { ProductoFormComponent } from './components/producto-form/producto-form.
 import { PedidosListComponent } from './components/pedidos-list/pedidos-list.component';
 import { MiTiendaComponent } from './components/mi-tienda/mi-tienda.component';
 import { ConfiguracionComponent } from './components/configuracion/configuracion.component';
+import { OAuthCallbackComponent } from './components/oauth-callback/oauth-callback.component';
 
 const routes: Routes = [
   {
@@ -45,6 +46,10 @@ const routes: Routes = [
       {
         path: 'configuracion',
         component: ConfiguracionComponent
+      },
+      {
+        path: 'configuracion/oauth-callback',
+        component: OAuthCallbackComponent
       }
     ]
   }

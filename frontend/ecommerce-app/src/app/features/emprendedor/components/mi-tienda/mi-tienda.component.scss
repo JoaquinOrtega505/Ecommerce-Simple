@@ -49,39 +49,36 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.store-header {
-  height: 300px;
+// Banner Image with Overlay Branding
+.store-banner {
+  height: 350px;
   background-size: cover;
   background-position: center;
   position: relative;
 }
 
-.store-overlay {
-  background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7));
-  height: 100%;
+// Logo and Store Name Overlay (Top Left Corner)
+.store-branding-overlay {
+  position: absolute;
+  top: 1.5rem;
+  left: 2rem;
   display: flex;
-  align-items: flex-end;
-  padding: 2rem;
-}
-
-.store-info {
-  display: flex;
-  gap: 1.5rem;
   align-items: center;
-  color: white;
-  width: 100%;
+  gap: 1rem;
+  z-index: 10;
 }
 
 .store-logo {
-  width: 120px;
-  height: 120px;
-  border-radius: 12px;
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
   overflow: hidden;
   background: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 
   img {
     width: 100%;
@@ -90,128 +87,32 @@
   }
 
   &.placeholder {
-    font-size: 3rem;
+    font-size: 1.75rem;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
 }
 
-.store-details {
-  flex: 1;
-
-  h2 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  }
-
-  .store-description {
-    font-size: 1.125rem;
-    margin-bottom: 1rem;
-    opacity: 0.95;
-  }
-}
-
-.store-links {
-  display: flex;
-  gap: 1rem;
-}
-
-.link-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border-radius: 8px;
+.store-name {
+  font-size: 1.75rem;
+  font-weight: 700;
   color: white;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
-  }
+  margin: 0;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 
-.info-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  padding: 2rem;
+// Store Info Bar (Description below banner)
+.store-info-bar {
+  background: white;
+  padding: 1.5rem 2rem;
   border-bottom: 1px solid #e8e8e8;
 }
 
-.info-card {
-  display: flex;
-  gap: 1rem;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 12px;
-  transition: all 0.2s ease;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-}
-
-.card-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.75rem;
-  flex-shrink: 0;
-
-  &.status-active {
-    background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
-  }
-
-  &.status-draft {
-    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
-  }
-}
-
-.card-content {
-  flex: 1;
-
-  h3 {
-    font-size: 0.875rem;
-    color: #666;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 0.5rem;
-  }
-
-  p {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 0.5rem;
-  }
-
-  .card-link {
-    color: #667eea;
-    font-size: 0.875rem;
-    font-weight: 600;
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-
-  .card-hint {
-    color: #ff9800;
-    font-size: 0.8125rem;
-    font-weight: 600;
-  }
+.centered-description {
+  text-align: center;
+  font-size: 1.125rem;
+  color: #333;
+  margin: 0;
+  font-weight: 500;
 }
 
 .products-section {
@@ -219,30 +120,12 @@
 }
 
 .section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 2rem;
 
   h2 {
     font-size: 1.5rem;
     font-weight: 700;
     color: #333;
-  }
-}
-
-.btn-add {
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.2s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
   }
 }
 
@@ -376,4 +259,67 @@
   border-radius: 8px;
   color: #c62828;
   margin-bottom: 2rem;
+}
+
+// Footer with Social Links (Horizontal Layout)
+.store-footer {
+  background: #f8f9fa;
+  border-top: 1px solid #e8e8e8;
+  padding: 2rem;
+}
+
+.footer-content {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1.5rem;
+}
+
+.footer-text {
+  color: #666;
+  font-size: 1rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+.social-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  text-decoration: none;
+
+  &.whatsapp {
+    background: #25D366;
+    color: white;
+
+    &:hover {
+      background: #20BA5A;
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+    }
+  }
+
+  &.instagram {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    color: white;
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(225, 48, 108, 0.4);
+    }
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
 }

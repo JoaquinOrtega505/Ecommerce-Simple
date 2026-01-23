@@ -126,6 +126,8 @@ public class TiendaService
         tienda.LogoUrl = tiendaActualizada.LogoUrl;
         tienda.BannerUrl = tiendaActualizada.BannerUrl;
         tienda.Descripcion = tiendaActualizada.Descripcion;
+        tienda.TelefonoWhatsApp = tiendaActualizada.TelefonoWhatsApp;
+        tienda.LinkInstagram = tiendaActualizada.LinkInstagram;
         tienda.MercadoPagoPublicKey = tiendaActualizada.MercadoPagoPublicKey;
 
         // Encriptar credenciales sensibles si se proporcionaron nuevas

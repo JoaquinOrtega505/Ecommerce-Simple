@@ -23,6 +23,7 @@ public class AppDbContext : DbContext
     public DbSet<PedidoItem> PedidoItems { get; set; }
     public DbSet<Tienda> Tiendas { get; set; }
     public DbSet<PlanSuscripcion> PlanesSuscripcion { get; set; }
+    public DbSet<HistorialSuscripcion> HistorialSuscripciones { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -47,6 +48,10 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<PlanSuscripcion>()
             .Property(p => p.PrecioMensual)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<HistorialSuscripcion>()
+            .Property(h => h.MontoTotal)
             .HasPrecision(18, 2);
 
         // Configurar relaciones
@@ -114,6 +119,18 @@ public class AppDbContext : DbContext
             .HasOne(t => t.PlanSuscripcion)
             .WithMany(p => p.Tiendas)
             .HasForeignKey(t => t.PlanSuscripcionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<HistorialSuscripcion>()
+            .HasOne(h => h.Tienda)
+            .WithMany()
+            .HasForeignKey(h => h.TiendaId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<HistorialSuscripcion>()
+            .HasOne(h => h.PlanSuscripcion)
+            .WithMany()
+            .HasForeignKey(h => h.PlanSuscripcionId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // Configurar índice único para subdominios
