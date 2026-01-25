@@ -3,7 +3,7 @@ namespace EcommerceApi.DTOs;
 public class PedidoDto
 {
     public int Id { get; set; }
-    public int UsuarioId { get; set; }
+    public int? UsuarioId { get; set; }
     public string UsuarioNombre { get; set; } = string.Empty;
     public decimal Total { get; set; }
     public string Estado { get; set; } = string.Empty;
@@ -34,4 +34,18 @@ public class CreatePedidoDto
 public class UpdateEstadoDto
 {
     public string Estado { get; set; } = string.Empty;
+}
+
+public class CreatePedidoAnonimoDto
+{
+    public string CompradorNombre { get; set; } = string.Empty;
+    public string CompradorEmail { get; set; } = string.Empty;
+    public string DireccionEnvio { get; set; } = string.Empty;
+    public List<PedidoAnonimoItemDto> Items { get; set; } = new();
+}
+
+public class PedidoAnonimoItemDto
+{
+    public int ProductoId { get; set; }
+    public int Cantidad { get; set; }
 }

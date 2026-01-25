@@ -51,7 +51,7 @@ public class PedidosController : ControllerBase
             {
                 Id = p.Id,
                 UsuarioId = p.UsuarioId,
-                UsuarioNombre = p.Usuario!.Nombre,
+                UsuarioNombre = p.Usuario != null ? p.Usuario.Nombre : p.CompradorNombre ?? "Cliente Anónimo",
                 Total = p.Total,
                 Estado = p.Estado,
                 DireccionEnvio = p.DireccionEnvio,
@@ -104,7 +104,7 @@ public class PedidosController : ControllerBase
         {
             Id = pedido.Id,
             UsuarioId = pedido.UsuarioId,
-            UsuarioNombre = pedido.Usuario!.Nombre,
+            UsuarioNombre = pedido.Usuario != null ? pedido.Usuario.Nombre : pedido.CompradorNombre ?? "Cliente Anónimo",
             Total = pedido.Total,
             Estado = pedido.Estado,
             DireccionEnvio = pedido.DireccionEnvio,
@@ -194,6 +194,106 @@ public class PedidosController : ControllerBase
             Id = pedido.Id,
             UsuarioId = pedido.UsuarioId,
             UsuarioNombre = usuario!.Nombre,
+            Total = pedido.Total,
+            Estado = pedido.Estado,
+            DireccionEnvio = pedido.DireccionEnvio,
+            FechaCreacion = pedido.FechaCreacion,
+            Items = pedido.PedidoItems.Select(i => new PedidoItemDto
+            {
+                ProductoId = i.ProductoId,
+                ProductoNombre = i.Producto!.Nombre,
+                ProductoImagen = i.Producto.ImagenUrl,
+                Cantidad = i.Cantidad,
+                PrecioUnitario = i.PrecioUnitario,
+                Subtotal = i.Subtotal
+            }).ToList()
+        };
+
+        return CreatedAtAction(nameof(GetPedido), new { id = pedido.Id }, pedidoDto);
+    }
+
+    [HttpPost("anonimo")]
+    [AllowAnonymous]
+    public async Task<ActionResult<PedidoDto>> CrearPedidoAnonimo(CreatePedidoAnonimoDto dto)
+    {
+        // Validar que hay items
+        if (!dto.Items.Any())
+        {
+            return BadRequest(new { message = "El carrito está vacío" });
+        }
+
+        // Obtener productos y verificar stock
+        var productoIds = dto.Items.Select(i => i.ProductoId).ToList();
+        var productos = await _context.Productos
+            .Where(p => productoIds.Contains(p.Id))
+            .ToListAsync();
+
+        if (productos.Count != dto.Items.Count)
+        {
+            return BadRequest(new { message = "Algunos productos no fueron encontrados" });
+        }
+
+        // Verificar stock de todos los productos
+        foreach (var item in dto.Items)
+        {
+            var producto = productos.First(p => p.Id == item.ProductoId);
+            if (producto.Stock < item.Cantidad)
+            {
+                return BadRequest(new { message = $"Stock insuficiente para {producto.Nombre}" });
+            }
+        }
+
+        // Obtener la tienda del primer producto (asumiendo que todos son de la misma tienda)
+        var primerProducto = productos.First();
+
+        // Crear pedido anónimo
+        var pedido = new Pedido
+        {
+            UsuarioId = null, // Pedido anónimo
+            TiendaId = primerProducto.TiendaId,
+            CompradorNombre = dto.CompradorNombre,
+            CompradorEmail = dto.CompradorEmail,
+            DireccionEnvio = dto.DireccionEnvio,
+            Estado = "Pendiente"
+        };
+
+        // Crear items del pedido y actualizar stock
+        foreach (var itemDto in dto.Items)
+        {
+            var producto = productos.First(p => p.Id == itemDto.ProductoId);
+
+            var pedidoItem = new PedidoItem
+            {
+                ProductoId = producto.Id,
+                Cantidad = itemDto.Cantidad,
+                PrecioUnitario = producto.Precio,
+                Subtotal = producto.Precio * itemDto.Cantidad
+            };
+
+            pedido.PedidoItems.Add(pedidoItem);
+
+            // Actualizar stock
+            producto.Stock -= itemDto.Cantidad;
+        }
+
+        // Calcular total
+        pedido.Total = pedido.PedidoItems.Sum(i => i.Subtotal);
+
+        _context.Pedidos.Add(pedido);
+        await _context.SaveChangesAsync();
+
+        // Cargar los productos para el DTO
+        await _context.Entry(pedido)
+            .Collection(p => p.PedidoItems)
+            .Query()
+            .Include(pi => pi.Producto)
+            .LoadAsync();
+
+        var pedidoDto = new PedidoDto
+        {
+            Id = pedido.Id,
+            UsuarioId = 0, // Pedido anónimo
+            UsuarioNombre = dto.CompradorNombre,
             Total = pedido.Total,
             Estado = pedido.Estado,
             DireccionEnvio = pedido.DireccionEnvio,

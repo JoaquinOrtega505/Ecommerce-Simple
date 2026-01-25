@@ -15,8 +15,12 @@ export const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: '/productos',
+    redirectTo: '/login',
     pathMatch: 'full'
+  },
+  {
+    path: 'tienda/:subdominio',
+    loadComponent: () => import('./features/tienda-publica/tienda-publica.component').then(m => m.TiendaPublicaComponent)
   },
   {
     path: 'login',
@@ -47,8 +51,7 @@ export const routes: Routes = [
   },
   {
     path: 'carrito',
-    loadComponent: () => import('./features/carrito/components/carrito/carrito.component').then(m => m.CarritoComponent),
-    canActivate: [authGuard, emailVerifiedGuard]
+    loadComponent: () => import('./features/carrito/components/carrito/carrito.component').then(m => m.CarritoComponent)
   },
   {
     path: 'pedidos',
@@ -62,8 +65,7 @@ export const routes: Routes = [
   },
   {
     path: 'checkout',
-    loadComponent: () => import('./features/pedidos/components/checkout/checkout.component').then(m => m.CheckoutComponent),
-    canActivate: [authGuard, emailVerifiedGuard]
+    loadComponent: () => import('./features/pedidos/components/checkout/checkout.component').then(m => m.CheckoutComponent)
   },
   {
     path: 'pago/return',

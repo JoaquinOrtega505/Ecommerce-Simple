@@ -1,14 +1,8 @@
-<div class="mi-tienda-container">
-  <!-- Header -->
-  <div class="page-header">
-    <h1>Vista Previa de Mi Tienda</h1>
-    <p class="subtitle">Así es como tus clientes verán tu tienda</p>
-  </div>
-
+<div class="tienda-publica-container">
   <!-- Loading State -->
   <div *ngIf="loading" class="loading">
     <div class="spinner"></div>
-    <p>Cargando información de la tienda...</p>
+    <p>Cargando tienda...</p>
   </div>
 
   <!-- Error State -->
@@ -16,11 +10,15 @@
     {{ errorMessage }}
   </div>
 
-  <!-- Store Preview -->
-  <div *ngIf="tienda && !loading" class="store-preview">
-    <!-- Banner Image with Logo and Store Name Overlay -->
+  <!-- Mensaje temporal -->
+  <div *ngIf="mensaje" class="alert alert-info">
+    {{ mensaje }}
+  </div>
+
+  <!-- Store View -->
+  <div *ngIf="tienda && !loading" class="store-view">
+    <!-- Banner with Logo and Store Name -->
     <div class="store-banner" [style.background-image]="tienda.bannerUrl ? 'url(' + tienda.bannerUrl + ')' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'">
-      <!-- Logo and Store Name in Top Left Corner (Over Banner) -->
       <div class="store-branding-overlay">
         <div class="store-logo" *ngIf="tienda.logoUrl">
           <img [src]="tienda.logoUrl" [alt]="tienda.nombre">
@@ -32,7 +30,7 @@
       </div>
     </div>
 
-    <!-- Store Description below Banner (Centered) -->
+    <!-- Store Description -->
     <div class="store-info-bar" *ngIf="tienda.descripcion || tienda.telefonoWhatsApp">
       <p class="centered-description">{{ tienda.descripcion || tienda.telefonoWhatsApp }}</p>
     </div>
@@ -41,25 +39,26 @@
     <div class="products-section">
       <div class="section-header">
         <h2>Nuestros Productos</h2>
-        <!-- Carrito alineado a la derecha -->
-        <div class="cart-preview">
+        <!-- Carrito -->
+        <div class="cart-preview" (click)="irAlCarrito()">
           <svg class="cart-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="9" cy="21" r="1"></circle>
             <circle cx="20" cy="21" r="1"></circle>
             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
           </svg>
-          <span class="cart-badge">0</span>
+          <span class="cart-badge">{{ cantidadCarrito }}</span>
           <span class="cart-text">Carrito</span>
         </div>
       </div>
 
+      <!-- Empty State -->
       <div *ngIf="productos.length === 0" class="empty-state">
         <div class="empty-icon">📦</div>
-        <h3>No tienes productos todavía</h3>
-        <p>Comienza agregando productos a tu tienda para que tus clientes puedan comprar</p>
-        <a routerLink="/emprendedor/productos/nuevo" class="btn-primary">Agregar mi primer producto</a>
+        <h3>No hay productos disponibles</h3>
+        <p>Esta tienda aún no tiene productos para mostrar</p>
       </div>
 
+      <!-- Products Grid -->
       <div *ngIf="productos.length > 0" class="products-grid">
         <div *ngFor="let producto of productos" class="product-card">
           <div class="product-image">
@@ -70,16 +69,22 @@
           </div>
           <div class="product-info">
             <h3>{{ producto.nombre }}</h3>
+            <p class="product-description">{{ producto.descripcion }}</p>
             <p class="product-price">${{ producto.precio }}</p>
             <div class="product-actions">
-              <a [routerLink]="['/emprendedor/productos/editar', producto.id]" class="btn-edit">Editar</a>
+              <button class="btn-detail" (click)="verDetalle(producto)">
+                Ver Detalle
+              </button>
+              <button class="btn-add-cart" (click)="agregarAlCarrito(producto)">
+                Agregar al Carrito
+              </button>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Footer with Social Links (Horizontal Layout) -->
+    <!-- Footer with Social Links -->
     <footer class="store-footer">
       <div class="footer-content">
         <p class="footer-text">Contáctanos en nuestras redes:</p>
@@ -105,5 +110,43 @@
         </div>
       </div>
     </footer>
+  </div>
+
+  <!-- Modal de Detalle del Producto -->
+  <div *ngIf="mostrarModal && productoSeleccionado" class="modal-overlay" (click)="cerrarModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="cerrarModal()">&times;</button>
+
+      <div class="modal-body">
+        <div class="modal-image">
+          <img [src]="productoSeleccionado.imagenUrl || 'assets/placeholder.jpg'" [alt]="productoSeleccionado.nombre">
+        </div>
+
+        <div class="modal-info">
+          <h2>{{ productoSeleccionado.nombre }}</h2>
+
+          <div class="detail-section">
+            <h3>Descripción</h3>
+            <p>{{ productoSeleccionado.descripcion || 'Sin descripción disponible' }}</p>
+          </div>
+
+          <div class="detail-section">
+            <h3>Precio</h3>
+            <p class="modal-price">${{ productoSeleccionado.precio }}</p>
+          </div>
+
+          <div class="detail-section">
+            <h3>Disponibilidad</h3>
+            <p class="modal-stock" [class.low-stock]="productoSeleccionado.stock && productoSeleccionado.stock <= 5">
+              {{ productoSeleccionado.stock > 0 ? 'En stock: ' + productoSeleccionado.stock + ' unidades' : 'Sin stock' }}
+            </p>
+          </div>
+
+          <button class="btn-add-cart-modal" (click)="agregarAlCarrito(productoSeleccionado); cerrarModal()">
+            Agregar al Carrito
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

@@ -19,6 +19,36 @@
           </div>
           <div class="card-body">
             <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="nombre" class="form-label">Nombre Completo</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="nombre"
+                  formControlName="nombre"
+                  [class.is-invalid]="nombre?.invalid && nombre?.touched"
+                  placeholder="Juan Pérez"
+                >
+                <div class="invalid-feedback" *ngIf="nombre?.invalid && nombre?.touched">
+                  El nombre es requerido
+                </div>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="email"
+                  formControlName="email"
+                  [class.is-invalid]="email?.invalid && email?.touched"
+                  placeholder="email@ejemplo.com"
+                >
+                <div class="invalid-feedback" *ngIf="email?.invalid && email?.touched">
+                  Email válido es requerido
+                </div>
+              </div>
+
               <div class="col-md-12 mb-3">
                 <label for="direccionEnvio" class="form-label">Dirección</label>
                 <input

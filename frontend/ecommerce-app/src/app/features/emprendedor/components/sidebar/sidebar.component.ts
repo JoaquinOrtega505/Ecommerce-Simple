@@ -69,8 +69,13 @@ export class SidebarComponent implements OnInit {
 
   irAMiTienda(): void {
     if (this.tienda?.subdominio) {
-      // Generar URL de la tienda (por ahora usando el mismo host)
-      const tiendaUrl = `/tienda/${this.tienda.subdominio}`;
+      // Generar URL de la tienda con el subdominio, a la ruta pública /tienda
+      const protocol = window.location.protocol;
+      const hostname = window.location.hostname;
+      const port = window.location.port ? `:${window.location.port}` : '';
+
+      // URL con subdominio: http://subdominio.localhost:4200/tienda
+      const tiendaUrl = `${protocol}//${this.tienda.subdominio}.${hostname}${port}/tienda`;
       window.open(tiendaUrl, '_blank');
     }
   }

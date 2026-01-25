@@ -15,6 +15,10 @@ export class ProductoService {
     return this.http.get<Producto[]>(this.apiUrl);
   }
 
+  getProductosPorTienda(tiendaId: number): Observable<Producto[]> {
+    return this.http.get<Producto[]>(`${this.apiUrl}/tienda/${tiendaId}`);
+  }
+
   getMisProductos(categoriaId?: number, buscar?: string, incluirInactivos: boolean = false): Observable<Producto[]> {
     let url = `${this.apiUrl}/mis-productos`;
     const params: string[] = [];

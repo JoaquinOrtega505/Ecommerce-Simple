@@ -116,6 +116,34 @@ public class ProductosController : ControllerBase
         return Ok(productos);
     }
 
+    // GET: api/productos/tienda/{tiendaId} - Público (para vista de tienda pública)
+    [HttpGet("tienda/{tiendaId}")]
+    public async Task<ActionResult<List<ProductoDto>>> GetProductosPorTienda(int tiendaId)
+    {
+        var query = _context.Productos
+            .Include(p => p.Categoria)
+            .Where(p => p.TiendaId == tiendaId && p.Activo)
+            .AsQueryable();
+
+        var productos = await query
+            .OrderByDescending(p => p.FechaCreacion)
+            .Select(p => new ProductoDto
+            {
+                Id = p.Id,
+                Nombre = p.Nombre,
+                Descripcion = p.Descripcion,
+                Precio = p.Precio,
+                Stock = p.Stock,
+                ImagenUrl = p.ImagenUrl,
+                Activo = p.Activo,
+                CategoriaId = p.CategoriaId,
+                CategoriaNombre = p.Categoria!.Nombre
+            })
+            .ToListAsync();
+
+        return Ok(productos);
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<ProductoDto>> GetProducto(int id)
     {

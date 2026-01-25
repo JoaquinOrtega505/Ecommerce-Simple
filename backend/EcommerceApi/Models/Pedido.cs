@@ -7,7 +7,7 @@ public partial class Pedido
 {
     public int Id { get; set; }
 
-    public int UsuarioId { get; set; }
+    public int? UsuarioId { get; set; }
 
     public int TiendaId { get; set; }
 
@@ -16,6 +16,11 @@ public partial class Pedido
     public string Estado { get; set; } = null!;
 
     public string DireccionEnvio { get; set; } = null!;
+
+    // Campos para compradores anónimos
+    public string? CompradorNombre { get; set; }
+
+    public string? CompradorEmail { get; set; }
 
     public DateTime FechaCreacion { get; set; }
 
@@ -35,7 +40,7 @@ public partial class Pedido
 
     public virtual ICollection<PedidoItem> PedidoItems { get; set; } = new List<PedidoItem>();
 
-    public virtual Usuario Usuario { get; set; } = null!;
+    public virtual Usuario? Usuario { get; set; }
 
     public virtual Tienda Tienda { get; set; } = null!;
 }

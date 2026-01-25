@@ -19,11 +19,11 @@ export class AppComponent {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
-      const hiddenRoutes = ['/login', '/register', '/verify-email', '/onboarding'];
+      const hiddenRoutes = ['/login', '/register', '/verify-email', '/onboarding', '/tienda'];
       const url = event.urlAfterRedirects;
 
-      // Ocultar navbar en rutas específicas o si la URL comienza con /emprendedor
-      this.showNavbar = !hiddenRoutes.includes(url) && !url.startsWith('/emprendedor');
+      // Ocultar navbar en rutas específicas o si la URL comienza con /emprendedor o /tienda
+      this.showNavbar = !hiddenRoutes.includes(url) && !url.startsWith('/emprendedor') && !url.startsWith('/tienda');
     });
   }
 }
