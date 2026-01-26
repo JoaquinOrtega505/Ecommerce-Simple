@@ -9,8 +9,10 @@ public class EncryptionService
 
     public EncryptionService(IConfiguration configuration)
     {
-        _encryptionKey = configuration["EncryptionSettings:Key"]
-            ?? throw new InvalidOperationException("Encryption key no configurada");
+        // Leer de variable de entorno primero, luego appsettings
+        _encryptionKey = Environment.GetEnvironmentVariable("ENCRYPTION_KEY")
+            ?? configuration["EncryptionSettings:Key"]
+            ?? throw new InvalidOperationException("Encryption key no configurada. Configure ENCRYPTION_KEY");
 
         // Validar que la clave tenga exactamente 32 caracteres (256 bits)
         if (_encryptionKey.Length != 32)

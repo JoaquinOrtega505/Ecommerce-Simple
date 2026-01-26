@@ -18,12 +18,19 @@ public class EmailService
     {
         try
         {
-            var smtpHost = _configuration["Email:SmtpHost"];
-            var smtpPort = int.Parse(_configuration["Email:SmtpPort"] ?? "587");
-            var smtpUser = _configuration["Email:SmtpUser"];
-            var smtpPassword = _configuration["Email:SmtpPassword"];
-            var fromEmail = _configuration["Email:FromEmail"];
-            var fromName = _configuration["Email:FromName"];
+            // Leer de variables de entorno primero, luego appsettings
+            var smtpHost = Environment.GetEnvironmentVariable("EMAIL_SMTP_HOST")
+                ?? _configuration["Email:SmtpHost"];
+            var smtpPort = int.Parse(Environment.GetEnvironmentVariable("EMAIL_SMTP_PORT")
+                ?? _configuration["Email:SmtpPort"] ?? "587");
+            var smtpUser = Environment.GetEnvironmentVariable("EMAIL_SMTP_USER")
+                ?? _configuration["Email:SmtpUser"];
+            var smtpPassword = Environment.GetEnvironmentVariable("EMAIL_SMTP_PASSWORD")
+                ?? _configuration["Email:SmtpPassword"];
+            var fromEmail = Environment.GetEnvironmentVariable("EMAIL_FROM_ADDRESS")
+                ?? _configuration["Email:FromEmail"];
+            var fromName = Environment.GetEnvironmentVariable("EMAIL_FROM_NAME")
+                ?? _configuration["Email:FromName"];
 
             var mailMessage = new MailMessage
             {

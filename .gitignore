@@ -14,7 +14,14 @@ Migrations/
 # Configuración sensible
 appsettings.json
 appsettings.*.json
-!appsettings.Development.json
+appsettings.Development.json
+appsettings.Production.json
+!appsettings.Example.json
+
+# Variables de entorno
+.env
+.env.*
+!.env.example
 
 # Angular
 node_modules/

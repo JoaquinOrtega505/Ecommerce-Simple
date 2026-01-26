@@ -9,13 +9,17 @@ public class CloudinaryService
 
     public CloudinaryService(IConfiguration configuration)
     {
-        var cloudName = configuration["Cloudinary:CloudName"];
-        var apiKey = configuration["Cloudinary:ApiKey"];
-        var apiSecret = configuration["Cloudinary:ApiSecret"];
+        // Leer de variables de entorno primero, luego appsettings
+        var cloudName = Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME")
+            ?? configuration["Cloudinary:CloudName"];
+        var apiKey = Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY")
+            ?? configuration["Cloudinary:ApiKey"];
+        var apiSecret = Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET")
+            ?? configuration["Cloudinary:ApiSecret"];
 
         if (string.IsNullOrEmpty(cloudName) || string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(apiSecret))
         {
-            throw new InvalidOperationException("Configuración de Cloudinary incompleta");
+            throw new InvalidOperationException("Configuración de Cloudinary incompleta. Configure CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET");
         }
 
         var account = new Account(cloudName, apiKey, apiSecret);

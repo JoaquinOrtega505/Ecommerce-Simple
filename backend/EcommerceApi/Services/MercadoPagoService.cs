@@ -18,8 +18,11 @@ public class MercadoPagoService
     {
         _configuration = configuration;
         _logger = logger;
-        _accessToken = _configuration["MercadoPago:AccessToken"]
-            ?? throw new InvalidOperationException("MercadoPago AccessToken no configurado");
+
+        // Leer de variable de entorno primero, luego appsettings
+        _accessToken = Environment.GetEnvironmentVariable("MERCADOPAGO_ACCESS_TOKEN")
+            ?? _configuration["MercadoPago:AccessToken"]
+            ?? throw new InvalidOperationException("MercadoPago AccessToken no configurado. Configure MERCADOPAGO_ACCESS_TOKEN");
 
         // Configurar el Access Token de MercadoPago
         MercadoPagoConfig.AccessToken = _accessToken;
@@ -70,7 +73,7 @@ public class MercadoPagoService
                     Installments = 1
                 },
                 ExternalReference = pedido.Id.ToString(),
-                NotificationUrl = $"{_configuration["AppUrl"]}/api/pagos/webhook",
+                NotificationUrl = $"{Environment.GetEnvironmentVariable("APP_URL") ?? _configuration["AppUrl"]}/api/pagos/webhook",
                 StatementDescriptor = "ECOMMERCE"
             };
 
@@ -160,7 +163,7 @@ public class MercadoPagoService
                     Installments = 1
                 },
                 ExternalReference = $"SUSCRIPCION_{tienda.Id}_{plan.Id}",
-                NotificationUrl = $"{_configuration["AppUrl"]}/api/planes/webhook",
+                NotificationUrl = $"{Environment.GetEnvironmentVariable("APP_URL") ?? _configuration["AppUrl"]}/api/planes/webhook",
                 StatementDescriptor = "SUSCRIPCION ECOMMERCE"
             };
 

@@ -32,7 +32,9 @@
       "Bash(npm run build:*)",
       "Bash(powershell:*)",
       "Bash(ng build:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(tree /F /L 3)",
+      "Bash(tree:*)"
     ]
   }
 }

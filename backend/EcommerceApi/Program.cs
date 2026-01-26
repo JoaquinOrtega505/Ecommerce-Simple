@@ -6,13 +6,35 @@ using EcommerceApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Agregar variables de entorno como fuente de configuración
+builder.Configuration.AddEnvironmentVariables();
+
+// Helper para obtener configuración (primero env vars, luego appsettings)
+string GetConfig(string key) =>
+    Environment.GetEnvironmentVariable(key.Replace(":", "__").Replace(".", "_"))
+    ?? builder.Configuration[key]
+    ?? "";
+
 // Configurar DbContext con PostgreSQL
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
+    ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 // Configurar JWT Authentication
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret no configurado");
+var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
+    ?? builder.Configuration["JwtSettings:Secret"]
+    ?? throw new InvalidOperationException("JWT Secret no configurado. Configure JWT_SECRET o JwtSettings:Secret");
+
+var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER")
+    ?? builder.Configuration["JwtSettings:Issuer"]
+    ?? "EcommerceApi";
+
+var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")
+    ?? builder.Configuration["JwtSettings:Audience"]
+    ?? "EcommerceClient";
 
 builder.Services.AddAuthentication(options =>
 {
@@ -27,24 +49,41 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
     };
 });
 
 builder.Services.AddAuthorization();
 
 // Configurar CORS
+var frontendUrl = Environment.GetEnvironmentVariable("FRONTEND_URL")
+    ?? builder.Configuration["FrontendUrl"]
+    ?? "http://localhost:4200";
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
+    options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.AllowAnyOrigin()
+            policy.WithOrigins(frontendUrl.Split(','))
                   .AllowAnyMethod()
-                  .AllowAnyHeader();
+                  .AllowAnyHeader()
+                  .AllowCredentials();
         });
+
+    // Política permisiva solo para desarrollo
+    if (builder.Environment.IsDevelopment())
+    {
+        options.AddPolicy("AllowAll",
+            policy =>
+            {
+                policy.AllowAnyOrigin()
+                      .AllowAnyMethod()
+                      .AllowAnyHeader();
+            });
+    }
 });
 
 // Registrar HttpClient para AndreaniService
@@ -82,27 +121,33 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Aplicar migraciones automáticamente
-/*using (var scope = app.Services.CreateScope())
+// Aplicar migraciones automáticamente en producción
+if (!app.Environment.IsDevelopment())
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
 }
 
+// Swagger habilitado en desarrollo
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-}*/
-
-    app.UseSwagger();
-    app.UseSwaggerUI();
-
-
-app.UseCors("AllowAll");
+    app.UseCors("AllowAll");
+}
+else
+{
+    app.UseCors("AllowFrontend");
+    // HTTPS redirect en producción
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Health check endpoint
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
 
 app.MapControllers();
 
