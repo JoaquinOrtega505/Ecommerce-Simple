@@ -30,8 +30,8 @@ public class BrevoEmailService
             ?? _configuration["Email:FromName"]
             ?? "E-Commerce Platform";
 
-        // Configurar el cliente de Brevo
-        Configuration.Default.ApiKey.Add("api-key", apiKey);
+        // Configurar el cliente de Brevo (usar indexer para evitar error de duplicado)
+        Configuration.Default.ApiKey["api-key"] = apiKey;
         _apiInstance = new TransactionalEmailsApi();
     }
 
