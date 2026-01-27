@@ -177,17 +177,38 @@ using (var scope = app.Services.CreateScope())
                 logger.LogInformation("Creando tablas desde el modelo...");
                 var created = await db.Database.EnsureCreatedAsync();
                 logger.LogInformation("EnsureCreated resultado: {Created}", created);
+            }
 
-                // Verificar que se crearon
-                try
+            // Insertar datos semilla si no existen (siempre verificar)
+            if (!await db.Set<EcommerceApi.Models.PlanSuscripcion>().AnyAsync())
+            {
+                logger.LogInformation("Insertando planes de suscripción...");
+                db.Set<EcommerceApi.Models.PlanSuscripcion>().AddRange(
+                    new EcommerceApi.Models.PlanSuscripcion { Nombre = "Plan Básico", Descripcion = "Ideal para emprendedores que están comenzando", MaxProductos = 20, PrecioMensual = 2999.99m, Activo = true, FechaCreacion = DateTime.UtcNow },
+                    new EcommerceApi.Models.PlanSuscripcion { Nombre = "Plan Estándar", Descripcion = "Perfecto para negocios en crecimiento", MaxProductos = 30, PrecioMensual = 4999.99m, Activo = true, FechaCreacion = DateTime.UtcNow },
+                    new EcommerceApi.Models.PlanSuscripcion { Nombre = "Plan Profesional", Descripcion = "Para negocios establecidos con catálogo mediano", MaxProductos = 50, PrecioMensual = 7999.99m, Activo = true, FechaCreacion = DateTime.UtcNow },
+                    new EcommerceApi.Models.PlanSuscripcion { Nombre = "Plan Premium", Descripcion = "Sin límites para grandes emprendimientos", MaxProductos = 100, PrecioMensual = 12999.99m, Activo = true, FechaCreacion = DateTime.UtcNow }
+                );
+                await db.SaveChangesAsync();
+                logger.LogInformation("Planes de suscripción creados");
+            }
+
+            // Crear SuperAdmin si no existe ningún usuario con ese rol
+            if (!await db.Set<EcommerceApi.Models.Usuario>().AnyAsync(u => u.Rol == "SuperAdmin"))
+            {
+                logger.LogInformation("Insertando usuario SuperAdmin...");
+                db.Set<EcommerceApi.Models.Usuario>().Add(new EcommerceApi.Models.Usuario
                 {
-                    await db.Database.ExecuteSqlRawAsync("SELECT 1 FROM \"Usuarios\" LIMIT 1");
-                    logger.LogInformation("Tablas creadas exitosamente");
-                }
-                catch (Exception verifyEx)
-                {
-                    logger.LogError("Las tablas NO se crearon: {Message}", verifyEx.Message);
-                }
+                    Nombre = "Super Administrador",
+                    Email = "admin@ecommerce.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
+                    Rol = "SuperAdmin",
+                    TiendaId = null,
+                    EmailVerificado = true,
+                    FechaCreacion = DateTime.UtcNow
+                });
+                await db.SaveChangesAsync();
+                logger.LogInformation("SuperAdmin creado: admin@ecommerce.com / Admin123!");
             }
         }
     }
