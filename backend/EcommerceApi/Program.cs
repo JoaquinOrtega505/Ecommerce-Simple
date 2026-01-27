@@ -34,7 +34,8 @@ else
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(connectionString, npgsqlOptions =>
+        npgsqlOptions.MigrationsAssembly("EcommerceApi")));
 
 // Configurar JWT Authentication
 var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
