@@ -86,17 +86,14 @@ builder.Services.AddCors(options =>
                   .AllowCredentials();
         });
 
-    // Política permisiva solo para desarrollo
-    if (builder.Environment.IsDevelopment())
-    {
-        options.AddPolicy("AllowAll",
-            policy =>
-            {
-                policy.AllowAnyOrigin()
-                      .AllowAnyMethod()
-                      .AllowAnyHeader();
-            });
-    }
+    // Política permisiva para desarrollo y producción inicial
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
 });
 
 // Registrar HttpClient para AndreaniService
@@ -145,16 +142,15 @@ if (!app.Environment.IsDevelopment())
     db.Database.Migrate();
 }
 
-// Swagger habilitado en desarrollo
-if (app.Environment.IsDevelopment())
+// Swagger habilitado siempre
+app.UseSwagger();
+app.UseSwaggerUI();
+
+// CORS - usar AllowAll temporalmente para debugging
+app.UseCors("AllowAll");
+
+if (!app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    app.UseCors("AllowAll");
-}
-else
-{
-    app.UseCors("AllowFrontend");
     // HTTPS redirect en producción
     app.UseHttpsRedirection();
 }
