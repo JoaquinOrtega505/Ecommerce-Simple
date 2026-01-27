@@ -34,7 +34,10 @@
       "Bash(ng build:*)",
       "Bash(dir:*)",
       "Bash(tree /F /L 3)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix: Auto-detect missing tables and recreate migrations\n\nSi la tabla Usuarios no existe pero el historial de migraciones sí,\nelimina __EFMigrationsHistory y aplica migraciones desde cero.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push)"
     ]
   }
 }

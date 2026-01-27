@@ -135,7 +135,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Aplicar migraciones automáticamente
+// Crear/verificar base de datos
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -154,52 +154,46 @@ using (var scope = app.Services.CreateScope())
             var tablasExisten = false;
             try
             {
-                await db.Database.ExecuteSqlRawAsync("SELECT 1 FROM \"Usuarios\" LIMIT 1");
+                var count = await db.Database.ExecuteSqlRawAsync("SELECT 1 FROM \"Usuarios\" LIMIT 1");
                 tablasExisten = true;
                 logger.LogInformation("Tabla Usuarios existe");
             }
             catch
             {
-                logger.LogWarning("Tabla Usuarios NO existe");
+                logger.LogWarning("Tabla Usuarios NO existe - creando esquema...");
             }
 
-            // Si las tablas no existen, eliminar historial de migraciones y recrear
             if (!tablasExisten)
             {
-                logger.LogInformation("Eliminando historial de migraciones corrupto...");
+                // Eliminar cualquier tabla huérfana
+                logger.LogInformation("Limpiando base de datos...");
                 try
                 {
-                    await db.Database.ExecuteSqlRawAsync("DROP TABLE IF EXISTS \"__EFMigrationsHistory\"");
-                    logger.LogInformation("Historial eliminado");
+                    await db.Database.ExecuteSqlRawAsync("DROP TABLE IF EXISTS \"__EFMigrationsHistory\" CASCADE");
                 }
-                catch (Exception dropEx)
+                catch { }
+
+                // Usar EnsureCreated para crear todas las tablas desde el modelo
+                logger.LogInformation("Creando tablas desde el modelo...");
+                var created = await db.Database.EnsureCreatedAsync();
+                logger.LogInformation("EnsureCreated resultado: {Created}", created);
+
+                // Verificar que se crearon
+                try
                 {
-                    logger.LogWarning("No se pudo eliminar historial: {Message}", dropEx.Message);
+                    await db.Database.ExecuteSqlRawAsync("SELECT 1 FROM \"Usuarios\" LIMIT 1");
+                    logger.LogInformation("Tablas creadas exitosamente");
                 }
-
-                // Ahora aplicar migraciones desde cero
-                logger.LogInformation("Aplicando migraciones desde cero...");
-                await db.Database.MigrateAsync();
-                logger.LogInformation("Migraciones aplicadas correctamente");
-            }
-            else
-            {
-                // Las tablas existen, aplicar migraciones pendientes si hay
-                var pendingMigrations = await db.Database.GetPendingMigrationsAsync();
-                logger.LogInformation("Migraciones pendientes: {Count}", pendingMigrations.Count());
-
-                if (pendingMigrations.Any())
+                catch (Exception verifyEx)
                 {
-                    logger.LogInformation("Aplicando migraciones pendientes...");
-                    await db.Database.MigrateAsync();
-                    logger.LogInformation("Migraciones aplicadas correctamente");
+                    logger.LogError("Las tablas NO se crearon: {Message}", verifyEx.Message);
                 }
             }
         }
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Error al aplicar migraciones: {Message}", ex.Message);
+        logger.LogError(ex, "Error al configurar BD: {Message}", ex.Message);
     }
 }
 
