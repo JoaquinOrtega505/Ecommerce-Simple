@@ -134,12 +134,41 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Aplicar migraciones automáticamente en producción
-if (!app.Environment.IsDevelopment())
+// Aplicar migraciones automáticamente
+using (var scope = app.Services.CreateScope())
 {
-    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    try
+    {
+        logger.LogInformation("Verificando base de datos...");
+
+        // Primero intentar EnsureCreated si las tablas no existen
+        var canConnect = await db.Database.CanConnectAsync();
+        logger.LogInformation("Conexión a BD: {CanConnect}", canConnect);
+
+        // Aplicar migraciones pendientes
+        var pendingMigrations = await db.Database.GetPendingMigrationsAsync();
+        logger.LogInformation("Migraciones pendientes: {Count}", pendingMigrations.Count());
+
+        if (pendingMigrations.Any())
+        {
+            logger.LogInformation("Aplicando migraciones...");
+            await db.Database.MigrateAsync();
+            logger.LogInformation("Migraciones aplicadas correctamente");
+        }
+        else
+        {
+            // Si no hay migraciones pendientes pero las tablas no existen, forzar creación
+            logger.LogInformation("No hay migraciones pendientes, verificando tablas...");
+            await db.Database.EnsureCreatedAsync();
+        }
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error al aplicar migraciones: {Message}", ex.Message);
+    }
 }
 
 // Swagger habilitado siempre
