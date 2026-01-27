@@ -144,25 +144,56 @@ using (var scope = app.Services.CreateScope())
     {
         logger.LogInformation("Verificando base de datos...");
 
-        // Primero intentar EnsureCreated si las tablas no existen
         var canConnect = await db.Database.CanConnectAsync();
         logger.LogInformation("Conexión a BD: {CanConnect}", canConnect);
 
-        // Aplicar migraciones pendientes
-        var pendingMigrations = await db.Database.GetPendingMigrationsAsync();
-        logger.LogInformation("Migraciones pendientes: {Count}", pendingMigrations.Count());
+        if (canConnect)
+        {
+            // Verificar si la tabla Usuarios existe
+            var tablasExisten = false;
+            try
+            {
+                await db.Database.ExecuteSqlRawAsync("SELECT 1 FROM \"Usuarios\" LIMIT 1");
+                tablasExisten = true;
+                logger.LogInformation("Tabla Usuarios existe");
+            }
+            catch
+            {
+                logger.LogWarning("Tabla Usuarios NO existe");
+            }
 
-        if (pendingMigrations.Any())
-        {
-            logger.LogInformation("Aplicando migraciones...");
-            await db.Database.MigrateAsync();
-            logger.LogInformation("Migraciones aplicadas correctamente");
-        }
-        else
-        {
-            // Si no hay migraciones pendientes pero las tablas no existen, forzar creación
-            logger.LogInformation("No hay migraciones pendientes, verificando tablas...");
-            await db.Database.EnsureCreatedAsync();
+            // Si las tablas no existen, eliminar historial de migraciones y recrear
+            if (!tablasExisten)
+            {
+                logger.LogInformation("Eliminando historial de migraciones corrupto...");
+                try
+                {
+                    await db.Database.ExecuteSqlRawAsync("DROP TABLE IF EXISTS \"__EFMigrationsHistory\"");
+                    logger.LogInformation("Historial eliminado");
+                }
+                catch (Exception dropEx)
+                {
+                    logger.LogWarning("No se pudo eliminar historial: {Message}", dropEx.Message);
+                }
+
+                // Ahora aplicar migraciones desde cero
+                logger.LogInformation("Aplicando migraciones desde cero...");
+                await db.Database.MigrateAsync();
+                logger.LogInformation("Migraciones aplicadas correctamente");
+            }
+            else
+            {
+                // Las tablas existen, aplicar migraciones pendientes si hay
+                var pendingMigrations = await db.Database.GetPendingMigrationsAsync();
+                logger.LogInformation("Migraciones pendientes: {Count}", pendingMigrations.Count());
+
+                if (pendingMigrations.Any())
+                {
+                    logger.LogInformation("Aplicando migraciones pendientes...");
+                    await db.Database.MigrateAsync();
+                    logger.LogInformation("Migraciones aplicadas correctamente");
+                }
+            }
         }
     }
     catch (Exception ex)
