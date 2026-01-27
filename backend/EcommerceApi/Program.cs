@@ -107,8 +107,11 @@ builder.Services.AddSingleton<EcommerceApi.Services.CloudinaryService>();
 // Registrar servicio de Tiendas (multi-tenant)
 builder.Services.AddScoped<EcommerceApi.Services.TiendaService>();
 
-// Registrar servicio de Email
+// Registrar servicio de Email (SMTP legacy)
 builder.Services.AddScoped<EcommerceApi.Services.EmailService>();
+
+// Registrar servicio de Email con Brevo (recomendado)
+builder.Services.AddScoped<EcommerceApi.Services.BrevoEmailService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

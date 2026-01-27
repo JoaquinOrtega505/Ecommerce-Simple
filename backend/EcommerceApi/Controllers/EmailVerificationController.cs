@@ -10,12 +10,12 @@ namespace EcommerceApi.Controllers;
 public class EmailVerificationController : ControllerBase
 {
     private readonly AppDbContext _context;
-    private readonly EmailService _emailService;
+    private readonly BrevoEmailService _emailService;
     private readonly ILogger<EmailVerificationController> _logger;
 
     public EmailVerificationController(
         AppDbContext context,
-        EmailService emailService,
+        BrevoEmailService emailService,
         ILogger<EmailVerificationController> logger)
     {
         _context = context;

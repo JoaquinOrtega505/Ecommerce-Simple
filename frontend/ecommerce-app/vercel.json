@@ -1,0 +1,8 @@
+{
+  "buildCommand": "ng build --configuration=production",
+  "outputDirectory": "dist/ecommerce-app/browser",
+  "framework": "angular",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
