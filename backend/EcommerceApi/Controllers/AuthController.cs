@@ -17,13 +17,13 @@ public class AuthController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly IConfiguration _configuration;
-    private readonly EmailService _emailService;
+    private readonly BrevoEmailService _emailService;
     private readonly ILogger<AuthController> _logger;
 
     public AuthController(
         AppDbContext context,
         IConfiguration configuration,
-        EmailService emailService,
+        BrevoEmailService emailService,
         ILogger<AuthController> logger)
     {
         _context = context;
@@ -119,8 +119,23 @@ public class AuthController : ControllerBase
 
     private string GenerateJwtToken(Usuario usuario)
     {
-        var jwtSettings = _configuration.GetSection("JwtSettings");
-        var secretKey = jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret no configurado");
+        // Leer de env vars primero, luego de appsettings
+        var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET")
+            ?? _configuration["JwtSettings:Secret"]
+            ?? throw new InvalidOperationException("JWT Secret no configurado");
+
+        var issuer = Environment.GetEnvironmentVariable("JWT_ISSUER")
+            ?? _configuration["JwtSettings:Issuer"]
+            ?? "EcommerceApi";
+
+        var audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")
+            ?? _configuration["JwtSettings:Audience"]
+            ?? "EcommerceClient";
+
+        var expirationHours = Environment.GetEnvironmentVariable("JWT_EXPIRATION_HOURS")
+            ?? _configuration["JwtSettings:ExpirationHours"]
+            ?? "24";
+
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -133,10 +148,10 @@ public class AuthController : ControllerBase
         };
 
         var token = new JwtSecurityToken(
-            issuer: jwtSettings["Issuer"],
-            audience: jwtSettings["Audience"],
+            issuer: issuer,
+            audience: audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(Convert.ToDouble(jwtSettings["ExpirationHours"])),
+            expires: DateTime.UtcNow.AddHours(Convert.ToDouble(expirationHours)),
             signingCredentials: credentials
         );
 
