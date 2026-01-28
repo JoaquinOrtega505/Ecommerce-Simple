@@ -6,6 +6,7 @@ import { TiendaService } from '../../../../core/services/tienda.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { MercadoPagoOAuthService } from '../../../../core/services/mercadopago-oauth.service';
 import { PlanesService } from '../../../../core/services/planes.service';
+import { UploadService } from '../../../../core/services/upload.service';
 import { Tienda } from '../../../../shared/models/tienda.model';
 import { PlanSuscripcion } from '../../../../shared/models/plan-suscripcion.model';
 
@@ -22,6 +23,7 @@ export class ConfiguracionComponent implements OnInit {
   private authService = inject(AuthService);
   private mercadoPagoOAuthService = inject(MercadoPagoOAuthService);
   private planesService = inject(PlanesService);
+  private uploadService = inject(UploadService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -45,6 +47,12 @@ export class ConfiguracionComponent implements OnInit {
   mostrarPlanes = false;
   loadingPlanes = false;
   planesDisponibles: PlanSuscripcion[] = [];
+
+  // Upload de imágenes
+  uploadingLogo = false;
+  uploadingBanner = false;
+  logoPreview: string | null = null;
+  bannerPreview: string | null = null;
 
   constructor() {
     this.tiendaForm = this.fb.group({
@@ -362,6 +370,163 @@ export class ConfiguracionComponent implements OnInit {
     this.useManualCredentials = !this.useManualCredentials;
     this.errorMessage = '';
     this.successMessage = '';
+  }
+
+  // Métodos para upload de imágenes
+  onLogoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    if (!this.validateImageFile(file)) return;
+
+    this.uploadLogo(file);
+  }
+
+  onBannerSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    if (!this.validateImageFile(file)) return;
+
+    this.uploadBanner(file);
+  }
+
+  private validateImageFile(file: File): boolean {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      this.errorMessage = 'Solo se permiten imágenes (JPG, PNG, GIF, WebP)';
+      return false;
+    }
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      this.errorMessage = 'La imagen no puede superar los 5MB';
+      return false;
+    }
+
+    return true;
+  }
+
+  private uploadLogo(file: File): void {
+    this.uploadingLogo = true;
+    this.errorMessage = '';
+
+    // Preview local
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      this.logoPreview = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+
+    this.uploadService.uploadImage(file, 'tiendas/logos').subscribe({
+      next: (response) => {
+        if (this.tienda) {
+          this.tienda.logoUrl = response.url;
+          this.saveImageToTienda('logo', response.url);
+        }
+        this.uploadingLogo = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Error al subir el logo';
+        this.uploadingLogo = false;
+        this.logoPreview = null;
+      }
+    });
+  }
+
+  private uploadBanner(file: File): void {
+    this.uploadingBanner = true;
+    this.errorMessage = '';
+
+    // Preview local
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      this.bannerPreview = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+
+    this.uploadService.uploadImage(file, 'tiendas/banners').subscribe({
+      next: (response) => {
+        if (this.tienda) {
+          this.tienda.bannerUrl = response.url;
+          this.saveImageToTienda('banner', response.url);
+        }
+        this.uploadingBanner = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Error al subir el banner';
+        this.uploadingBanner = false;
+        this.bannerPreview = null;
+      }
+    });
+  }
+
+  private saveImageToTienda(type: 'logo' | 'banner', url: string): void {
+    if (!this.tienda) return;
+
+    const updateData = {
+      ...this.tienda,
+      logoUrl: type === 'logo' ? url : this.tienda.logoUrl,
+      bannerUrl: type === 'banner' ? url : this.tienda.bannerUrl
+    };
+
+    this.tiendaService.actualizarTienda(this.tienda.id, updateData).subscribe({
+      next: () => {
+        this.successMessage = type === 'logo' ? 'Logo actualizado correctamente' : 'Banner actualizado correctamente';
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || `Error al guardar el ${type}`;
+      }
+    });
+  }
+
+  removeLogo(): void {
+    if (!this.tienda) return;
+
+    const updateData = {
+      ...this.tienda,
+      logoUrl: undefined
+    };
+
+    this.tiendaService.actualizarTienda(this.tienda.id, updateData).subscribe({
+      next: () => {
+        if (this.tienda) {
+          this.tienda.logoUrl = undefined;
+        }
+        this.logoPreview = null;
+        this.successMessage = 'Logo eliminado correctamente';
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Error al eliminar el logo';
+      }
+    });
+  }
+
+  removeBanner(): void {
+    if (!this.tienda) return;
+
+    const updateData = {
+      ...this.tienda,
+      bannerUrl: undefined
+    };
+
+    this.tiendaService.actualizarTienda(this.tienda.id, updateData).subscribe({
+      next: () => {
+        if (this.tienda) {
+          this.tienda.bannerUrl = undefined;
+        }
+        this.bannerPreview = null;
+        this.successMessage = 'Banner eliminado correctamente';
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Error al eliminar el banner';
+      }
+    });
   }
 }
 

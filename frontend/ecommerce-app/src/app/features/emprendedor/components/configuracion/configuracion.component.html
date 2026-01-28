@@ -77,6 +77,81 @@
               placeholder="Describe tu tienda..."></textarea>
           </div>
 
+          <!-- Upload de Imágenes -->
+          <div class="images-section">
+            <h3 class="section-title">Imágenes de la Tienda</h3>
+
+            <div class="form-row">
+              <!-- Logo -->
+              <div class="form-group">
+                <label>Logo de la tienda</label>
+                <div class="image-upload-container">
+                  <div class="image-preview logo-preview"
+                       [class.has-image]="tienda?.logoUrl || logoPreview">
+                    <img *ngIf="tienda?.logoUrl || logoPreview"
+                         [src]="logoPreview || tienda?.logoUrl"
+                         alt="Logo de la tienda">
+                    <div *ngIf="!tienda?.logoUrl && !logoPreview" class="placeholder-icon">🏪</div>
+                    <div *ngIf="uploadingLogo" class="upload-overlay">
+                      <div class="spinner-small"></div>
+                    </div>
+                  </div>
+                  <div class="image-actions">
+                    <label class="btn-upload" [class.disabled]="uploadingLogo">
+                      <input type="file"
+                             accept="image/*"
+                             (change)="onLogoSelected($event)"
+                             [disabled]="uploadingLogo"
+                             hidden>
+                      {{ uploadingLogo ? 'Subiendo...' : (tienda?.logoUrl ? 'Cambiar logo' : 'Subir logo') }}
+                    </label>
+                    <button type="button"
+                            class="btn-remove"
+                            *ngIf="tienda?.logoUrl"
+                            (click)="removeLogo()">
+                      Eliminar
+                    </button>
+                  </div>
+                  <small class="form-hint">Recomendado: 200x200px, formato JPG o PNG</small>
+                </div>
+              </div>
+
+              <!-- Banner -->
+              <div class="form-group">
+                <label>Banner / Imagen de fondo</label>
+                <div class="image-upload-container">
+                  <div class="image-preview banner-preview"
+                       [class.has-image]="tienda?.bannerUrl || bannerPreview">
+                    <img *ngIf="tienda?.bannerUrl || bannerPreview"
+                         [src]="bannerPreview || tienda?.bannerUrl"
+                         alt="Banner de la tienda">
+                    <div *ngIf="!tienda?.bannerUrl && !bannerPreview" class="placeholder-gradient"></div>
+                    <div *ngIf="uploadingBanner" class="upload-overlay">
+                      <div class="spinner-small"></div>
+                    </div>
+                  </div>
+                  <div class="image-actions">
+                    <label class="btn-upload" [class.disabled]="uploadingBanner">
+                      <input type="file"
+                             accept="image/*"
+                             (change)="onBannerSelected($event)"
+                             [disabled]="uploadingBanner"
+                             hidden>
+                      {{ uploadingBanner ? 'Subiendo...' : (tienda?.bannerUrl ? 'Cambiar banner' : 'Subir banner') }}
+                    </label>
+                    <button type="button"
+                            class="btn-remove"
+                            *ngIf="tienda?.bannerUrl"
+                            (click)="removeBanner()">
+                      Eliminar
+                    </button>
+                  </div>
+                  <small class="form-hint">Recomendado: 1200x400px, formato JPG o PNG</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="form-row">
             <div class="form-group">
               <label for="telefonoWhatsApp">Teléfono WhatsApp</label>

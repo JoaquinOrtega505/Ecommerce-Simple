@@ -376,3 +376,151 @@
     height: 24px;
   }
 }
+
+.no-social-text {
+  color: #999;
+  font-style: italic;
+}
+
+// Editable section styles
+.editable-section {
+  position: relative;
+}
+
+.edit-overlay-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 20;
+
+  &:hover {
+    background: rgba(102, 126, 234, 0.9);
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.store-banner:hover .edit-overlay-btn {
+  opacity: 1;
+}
+
+.editable-element {
+  position: relative;
+
+  .edit-icon-btn {
+    position: absolute;
+    bottom: -8px;
+    right: -8px;
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+    }
+  }
+
+  &:hover .edit-icon-btn {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.store-name-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .edit-icon-btn.name-edit {
+    position: relative;
+    bottom: auto;
+    right: auto;
+  }
+}
+
+.store-info-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+
+  .centered-description {
+    flex: 1;
+  }
+
+  .placeholder-text {
+    color: #999;
+    font-style: italic;
+  }
+}
+
+.edit-inline-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #f0f0f0;
+  color: #666;
+  border-radius: 50%;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: scale(1.1);
+  }
+}
+
+.edit-contact-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f0f0f0;
+  color: #666;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-left: auto;
+
+  &:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
