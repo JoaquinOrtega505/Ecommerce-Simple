@@ -156,6 +156,61 @@ public class TiendaService
     }
 
     /// <summary>
+    /// Actualiza parcialmente una tienda (solo campos proporcionados)
+    /// </summary>
+    public async Task<Tienda> ActualizarTiendaParcialAsync(int id, UpdateTiendaDto dto)
+    {
+        var tienda = await _context.Tiendas.FindAsync(id);
+        if (tienda == null)
+        {
+            throw new KeyNotFoundException($"Tienda con ID {id} no encontrada");
+        }
+
+        // Solo actualizar campos que fueron proporcionados
+        if (dto.Nombre != null)
+        {
+            if (dto.Nombre.Length < 3)
+            {
+                throw new InvalidOperationException("El nombre debe tener al menos 3 caracteres");
+            }
+            tienda.Nombre = dto.Nombre;
+        }
+
+        if (dto.LogoUrl != null)
+        {
+            tienda.LogoUrl = string.IsNullOrEmpty(dto.LogoUrl) ? null : dto.LogoUrl;
+        }
+
+        if (dto.BannerUrl != null)
+        {
+            tienda.BannerUrl = string.IsNullOrEmpty(dto.BannerUrl) ? null : dto.BannerUrl;
+        }
+
+        if (dto.Descripcion != null)
+        {
+            tienda.Descripcion = string.IsNullOrEmpty(dto.Descripcion) ? null : dto.Descripcion;
+        }
+
+        if (dto.TelefonoWhatsApp != null)
+        {
+            tienda.TelefonoWhatsApp = string.IsNullOrEmpty(dto.TelefonoWhatsApp) ? null : dto.TelefonoWhatsApp;
+        }
+
+        if (dto.LinkInstagram != null)
+        {
+            tienda.LinkInstagram = string.IsNullOrEmpty(dto.LinkInstagram) ? null : dto.LinkInstagram;
+        }
+
+        tienda.FechaModificacion = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Tienda actualizada parcialmente: {TiendaNombre} (ID: {TiendaId})", tienda.Nombre, tienda.Id);
+
+        return tienda;
+    }
+
+    /// <summary>
     /// Desactiva una tienda (soft delete)
     /// </summary>
     public async Task DesactivarTiendaAsync(int id)
@@ -341,6 +396,19 @@ public class CreateTiendaDto
 {
     public string Nombre { get; set; } = string.Empty;
     public string Subdominio { get; set; } = string.Empty;
+    public string? LogoUrl { get; set; }
+    public string? BannerUrl { get; set; }
+    public string? Descripcion { get; set; }
+    public string? TelefonoWhatsApp { get; set; }
+    public string? LinkInstagram { get; set; }
+}
+
+/// <summary>
+/// DTO para actualización parcial de una tienda
+/// </summary>
+public class UpdateTiendaDto
+{
+    public string? Nombre { get; set; }
     public string? LogoUrl { get; set; }
     public string? BannerUrl { get; set; }
     public string? Descripcion { get; set; }

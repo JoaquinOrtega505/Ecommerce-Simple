@@ -184,6 +184,34 @@ public class TiendasController : ControllerBase
     }
 
     /// <summary>
+    /// Actualiza parcialmente una tienda (PATCH) - para edición inline
+    /// </summary>
+    [HttpPatch("{id}")]
+    [Authorize(Roles = "SuperAdmin,Admin")]
+    public async Task<ActionResult<Tienda>> ActualizarTiendaParcial(int id, [FromBody] UpdateTiendaDto dto)
+    {
+        try
+        {
+            // TODO: Validar que el usuario Admin solo pueda editar su propia tienda
+            var tiendaActualizada = await _tiendaService.ActualizarTiendaParcialAsync(id, dto);
+            return Ok(tiendaActualizada);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "Tienda no encontrada" });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al actualizar parcialmente tienda {TiendaId}", id);
+            return StatusCode(500, new { message = "Error al actualizar tienda" });
+        }
+    }
+
+    /// <summary>
     /// Desactiva una tienda (solo SuperAdmin)
     /// </summary>
     [HttpPut("{id}/desactivar")]

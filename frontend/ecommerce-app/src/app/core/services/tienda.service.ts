@@ -55,10 +55,17 @@ export class TiendaService {
   }
 
   /**
-   * Actualiza una tienda existente
+   * Actualiza una tienda existente (actualización completa)
    */
-  actualizarTienda(id: number, tienda: Partial<Tienda>): Observable<Tienda> {
+  actualizarTiendaCompleta(id: number, tienda: Tienda): Observable<Tienda> {
     return this.http.put<Tienda>(`${this.apiUrl}/${id}`, tienda);
+  }
+
+  /**
+   * Actualiza parcialmente una tienda (PATCH - para edición inline)
+   */
+  actualizarTienda(id: number, datos: Partial<Tienda>): Observable<Tienda> {
+    return this.http.patch<Tienda>(`${this.apiUrl}/${id}`, datos);
   }
 
   /**
