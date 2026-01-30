@@ -6,6 +6,12 @@ import { CategoriaService } from '../../../../core/services/categoria.service';
 import { UploadService } from '../../../../core/services/upload.service';
 import { Categoria, ProductoCreateDto } from '../../../../shared/models';
 
+interface ImageSlot {
+  url: string;
+  uploading: boolean;
+  progress: number;
+}
+
 @Component({
   selector: 'app-producto-form',
   templateUrl: './producto-form.component.html',
@@ -25,13 +31,15 @@ export class ProductoFormComponent implements OnInit {
   productoId?: number;
   loading = false;
   error = '';
-  imagenPreview?: string;
 
-  // Image upload
-  imageSource: 'url' | 'upload' = 'url';
-  uploadingImage = false;
-  uploadProgress = 0;
-  dragOver = false;
+  // Multiple images support (up to 3)
+  images: ImageSlot[] = [
+    { url: '', uploading: false, progress: 0 },
+    { url: '', uploading: false, progress: 0 },
+    { url: '', uploading: false, progress: 0 }
+  ];
+  imageSource: 'url' | 'upload' = 'upload';
+  dragOverIndex: number | null = null;
 
   constructor() {
     this.productoForm = this.fb.group({
@@ -39,7 +47,6 @@ export class ProductoFormComponent implements OnInit {
       descripcion: ['', [Validators.required, Validators.minLength(10)]],
       precio: [0, [Validators.required, Validators.min(0.01)]],
       stock: [0, [Validators.required, Validators.min(0)]],
-      imagenUrl: ['', Validators.required],
       categoriaId: [null, Validators.required]
     });
   }
@@ -61,7 +68,7 @@ export class ProductoFormComponent implements OnInit {
       next: (data) => {
         this.categorias = data;
       },
-      error: (error) => {
+      error: () => {
         this.error = 'Error al cargar categorías';
       }
     });
@@ -76,10 +83,12 @@ export class ProductoFormComponent implements OnInit {
           descripcion: producto.descripcion,
           precio: producto.precio,
           stock: producto.stock,
-          imagenUrl: producto.imagenUrl,
           categoriaId: producto.categoriaId
         });
-        this.imagenPreview = producto.imagenUrl;
+        // Load existing images
+        if (producto.imagenUrl) this.images[0].url = producto.imagenUrl;
+        if (producto.imagenUrl2) this.images[1].url = producto.imagenUrl2;
+        if (producto.imagenUrl3) this.images[2].url = producto.imagenUrl3;
         this.loading = false;
       },
       error: (error) => {
@@ -89,48 +98,47 @@ export class ProductoFormComponent implements OnInit {
     });
   }
 
-  onImageUrlChange(): void {
-    const url = this.productoForm.get('imagenUrl')?.value;
-    if (url) {
-      this.imagenPreview = url;
-    }
-  }
-
   setImageSource(source: 'url' | 'upload'): void {
     this.imageSource = source;
   }
 
-  onDragOver(event: DragEvent): void {
+  onImageUrlChange(index: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.images[index].url = input.value;
+  }
+
+  onDragOver(event: DragEvent, index: number): void {
     event.preventDefault();
     event.stopPropagation();
-    this.dragOver = true;
+    this.dragOverIndex = index;
   }
 
   onDragLeave(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    this.dragOver = false;
+    this.dragOverIndex = null;
   }
 
-  onDrop(event: DragEvent): void {
+  onDrop(event: DragEvent, index: number): void {
     event.preventDefault();
     event.stopPropagation();
-    this.dragOver = false;
+    this.dragOverIndex = null;
 
     const files = event.dataTransfer?.files;
     if (files && files.length > 0) {
-      this.uploadImage(files[0]);
+      this.uploadImage(files[0], index);
     }
   }
 
-  onFileSelected(event: Event): void {
+  onFileSelected(event: Event, index: number): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.uploadImage(input.files[0]);
+      this.uploadImage(input.files[0], index);
     }
+    input.value = ''; // Reset input for re-selection
   }
 
-  uploadImage(file: File): void {
+  uploadImage(file: File, index: number): void {
     if (!file.type.startsWith('image/')) {
       this.error = 'Por favor selecciona un archivo de imagen válido';
       return;
@@ -141,32 +149,38 @@ export class ProductoFormComponent implements OnInit {
       return;
     }
 
-    this.uploadingImage = true;
-    this.uploadProgress = 0;
+    this.images[index].uploading = true;
+    this.images[index].progress = 0;
     this.error = '';
 
-    // Simulate progress
     const progressInterval = setInterval(() => {
-      if (this.uploadProgress < 90) {
-        this.uploadProgress += 10;
+      if (this.images[index].progress < 90) {
+        this.images[index].progress += 10;
       }
     }, 100);
 
     this.uploadService.uploadImage(file, 'productos').subscribe({
       next: (response) => {
         clearInterval(progressInterval);
-        this.uploadProgress = 100;
-        this.productoForm.patchValue({ imagenUrl: response.url });
-        this.imagenPreview = response.url;
-        this.uploadingImage = false;
+        this.images[index].progress = 100;
+        this.images[index].url = response.url;
+        this.images[index].uploading = false;
       },
       error: () => {
         clearInterval(progressInterval);
         this.error = 'Error al subir la imagen. Intenta de nuevo.';
-        this.uploadingImage = false;
-        this.uploadProgress = 0;
+        this.images[index].uploading = false;
+        this.images[index].progress = 0;
       }
     });
+  }
+
+  removeImage(index: number): void {
+    this.images[index].url = '';
+  }
+
+  hasAtLeastOneImage(): boolean {
+    return this.images.some(img => img.url.trim() !== '');
   }
 
   onSubmit(): void {
@@ -177,10 +191,26 @@ export class ProductoFormComponent implements OnInit {
       return;
     }
 
+    if (!this.hasAtLeastOneImage()) {
+      this.error = 'Debes agregar al menos una imagen del producto';
+      return;
+    }
+
     this.loading = true;
     this.error = '';
 
-    const productoData: ProductoCreateDto = this.productoForm.value;
+    const productoData: ProductoCreateDto = {
+      ...this.productoForm.value,
+      imagenUrl: this.images[0].url || this.images[1].url || this.images[2].url,
+      imagenUrl2: this.images[0].url ? (this.images[1].url || undefined) : (this.images[2].url || undefined),
+      imagenUrl3: this.images[0].url && this.images[1].url ? (this.images[2].url || undefined) : undefined
+    };
+
+    // Reorder images to fill gaps
+    const filledImages = this.images.filter(img => img.url.trim() !== '').map(img => img.url);
+    productoData.imagenUrl = filledImages[0] || '';
+    productoData.imagenUrl2 = filledImages[1] || undefined;
+    productoData.imagenUrl3 = filledImages[2] || undefined;
 
     const request = this.isEditMode && this.productoId
       ? this.productoService.updateProducto(this.productoId, productoData)
@@ -215,10 +245,6 @@ export class ProductoFormComponent implements OnInit {
 
   get stock() {
     return this.productoForm.get('stock');
-  }
-
-  get imagenUrl() {
-    return this.productoForm.get('imagenUrl');
   }
 
   get categoriaId() {

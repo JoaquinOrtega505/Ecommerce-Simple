@@ -17,6 +17,10 @@ public partial class Producto
 
     public string ImagenUrl { get; set; } = null!;
 
+    public string? ImagenUrl2 { get; set; }
+
+    public string? ImagenUrl3 { get; set; }
+
     public bool Activo { get; set; }
 
     public DateTime FechaCreacion { get; set; }

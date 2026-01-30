@@ -31,6 +31,31 @@ public class ProductosController : ControllerBase
         return usuario?.TiendaId;
     }
 
+    private static ProductoDto MapToDto(Producto p, string categoriaNombre)
+    {
+        var dto = new ProductoDto
+        {
+            Id = p.Id,
+            Nombre = p.Nombre,
+            Descripcion = p.Descripcion,
+            Precio = p.Precio,
+            Stock = p.Stock,
+            ImagenUrl = p.ImagenUrl,
+            ImagenUrl2 = p.ImagenUrl2,
+            ImagenUrl3 = p.ImagenUrl3,
+            Activo = p.Activo,
+            CategoriaId = p.CategoriaId,
+            CategoriaNombre = categoriaNombre
+        };
+
+        // Build Imagenes list
+        dto.Imagenes = new List<string> { p.ImagenUrl };
+        if (!string.IsNullOrEmpty(p.ImagenUrl2)) dto.Imagenes.Add(p.ImagenUrl2);
+        if (!string.IsNullOrEmpty(p.ImagenUrl3)) dto.Imagenes.Add(p.ImagenUrl3);
+
+        return dto;
+    }
+
     [HttpGet]
     public async Task<ActionResult<List<ProductoDto>>> GetProductos([FromQuery] int? categoriaId, [FromQuery] string? buscar)
     {
@@ -49,22 +74,10 @@ public class ProductosController : ControllerBase
             query = query.Where(p => p.Nombre.Contains(buscar) || p.Descripcion.Contains(buscar));
         }
 
-        var productos = await query
-            .Select(p => new ProductoDto
-            {
-                Id = p.Id,
-                Nombre = p.Nombre,
-                Descripcion = p.Descripcion,
-                Precio = p.Precio,
-                Stock = p.Stock,
-                ImagenUrl = p.ImagenUrl,
-                Activo = p.Activo,
-                CategoriaId = p.CategoriaId,
-                CategoriaNombre = p.Categoria!.Nombre
-            })
-            .ToListAsync();
+        var productos = await query.ToListAsync();
+        var productoDtos = productos.Select(p => MapToDto(p, p.Categoria?.Nombre ?? "")).ToList();
 
-        return Ok(productos);
+        return Ok(productoDtos);
     }
 
     [HttpGet("mis-productos")]
@@ -97,51 +110,25 @@ public class ProductosController : ControllerBase
             query = query.Where(p => p.Nombre.Contains(buscar) || p.Descripcion.Contains(buscar));
         }
 
-        var productos = await query
-            .OrderByDescending(p => p.FechaCreacion)
-            .Select(p => new ProductoDto
-            {
-                Id = p.Id,
-                Nombre = p.Nombre,
-                Descripcion = p.Descripcion,
-                Precio = p.Precio,
-                Stock = p.Stock,
-                ImagenUrl = p.ImagenUrl,
-                Activo = p.Activo,
-                CategoriaId = p.CategoriaId,
-                CategoriaNombre = p.Categoria!.Nombre
-            })
-            .ToListAsync();
+        var productos = await query.OrderByDescending(p => p.FechaCreacion).ToListAsync();
+        var productoDtos = productos.Select(p => MapToDto(p, p.Categoria?.Nombre ?? "")).ToList();
 
-        return Ok(productos);
+        return Ok(productoDtos);
     }
 
     // GET: api/productos/tienda/{tiendaId} - Público (para vista de tienda pública)
     [HttpGet("tienda/{tiendaId}")]
     public async Task<ActionResult<List<ProductoDto>>> GetProductosPorTienda(int tiendaId)
     {
-        var query = _context.Productos
+        var productos = await _context.Productos
             .Include(p => p.Categoria)
             .Where(p => p.TiendaId == tiendaId && p.Activo)
-            .AsQueryable();
-
-        var productos = await query
             .OrderByDescending(p => p.FechaCreacion)
-            .Select(p => new ProductoDto
-            {
-                Id = p.Id,
-                Nombre = p.Nombre,
-                Descripcion = p.Descripcion,
-                Precio = p.Precio,
-                Stock = p.Stock,
-                ImagenUrl = p.ImagenUrl,
-                Activo = p.Activo,
-                CategoriaId = p.CategoriaId,
-                CategoriaNombre = p.Categoria!.Nombre
-            })
             .ToListAsync();
 
-        return Ok(productos);
+        var productoDtos = productos.Select(p => MapToDto(p, p.Categoria?.Nombre ?? "")).ToList();
+
+        return Ok(productoDtos);
     }
 
     [HttpGet("{id}")]
@@ -149,27 +136,15 @@ public class ProductosController : ControllerBase
     {
         var producto = await _context.Productos
             .Include(p => p.Categoria)
-            .Where(p => p.Id == id)
-            .Select(p => new ProductoDto
-            {
-                Id = p.Id,
-                Nombre = p.Nombre,
-                Descripcion = p.Descripcion,
-                Precio = p.Precio,
-                Stock = p.Stock,
-                ImagenUrl = p.ImagenUrl,
-                Activo = p.Activo,
-                CategoriaId = p.CategoriaId,
-                CategoriaNombre = p.Categoria!.Nombre
-            })
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(p => p.Id == id);
 
         if (producto == null)
         {
             return NotFound(new { message = "Producto no encontrado" });
         }
 
-        return Ok(producto);
+        var productoDto = MapToDto(producto, producto.Categoria?.Nombre ?? "");
+        return Ok(productoDto);
     }
 
     [HttpPost]
@@ -202,6 +177,8 @@ public class ProductosController : ControllerBase
             Precio = dto.Precio,
             Stock = dto.Stock,
             ImagenUrl = dto.ImagenUrl,
+            ImagenUrl2 = dto.ImagenUrl2,
+            ImagenUrl3 = dto.ImagenUrl3,
             CategoriaId = dto.CategoriaId,
             TiendaId = tiendaId.Value,
             Activo = true,
@@ -212,19 +189,7 @@ public class ProductosController : ControllerBase
         await _context.SaveChangesAsync();
 
         var categoria = await _context.Categorias.FindAsync(dto.CategoriaId);
-
-        var productoDto = new ProductoDto
-        {
-            Id = producto.Id,
-            Nombre = producto.Nombre,
-            Descripcion = producto.Descripcion,
-            Precio = producto.Precio,
-            Stock = producto.Stock,
-            ImagenUrl = producto.ImagenUrl,
-            Activo = producto.Activo,
-            CategoriaId = producto.CategoriaId,
-            CategoriaNombre = categoria?.Nombre ?? ""
-        };
+        var productoDto = MapToDto(producto, categoria?.Nombre ?? "");
 
         return CreatedAtAction(nameof(GetProducto), new { id = producto.Id }, productoDto);
     }
@@ -256,6 +221,8 @@ public class ProductosController : ControllerBase
         producto.Precio = dto.Precio;
         producto.Stock = dto.Stock;
         producto.ImagenUrl = dto.ImagenUrl;
+        producto.ImagenUrl2 = dto.ImagenUrl2;
+        producto.ImagenUrl3 = dto.ImagenUrl3;
         producto.Activo = dto.Activo;
         producto.CategoriaId = dto.CategoriaId;
 

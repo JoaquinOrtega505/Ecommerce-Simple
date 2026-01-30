@@ -81,7 +81,7 @@
       </div>
 
       <!-- Categoría -->
-      <div class="form-group">
+      <div class="form-group full-width">
         <label for="categoriaId">Categoría *</label>
         <select
           id="categoriaId"
@@ -98,21 +98,12 @@
         </div>
       </div>
 
-      <!-- Imagen del Producto -->
+      <!-- Imágenes del Producto (hasta 3) -->
       <div class="form-group full-width">
-        <label>Imagen del Producto *</label>
+        <label>Imágenes del Producto * <span class="hint">(hasta 3 imágenes)</span></label>
 
         <!-- Toggle para seleccionar fuente de imagen -->
         <div class="image-source-toggle">
-          <button
-            type="button"
-            class="toggle-btn"
-            [class.active]="imageSource === 'url'"
-            (click)="setImageSource('url')"
-          >
-            <span class="icon">🔗</span>
-            URL
-          </button>
           <button
             type="button"
             class="toggle-btn"
@@ -122,63 +113,75 @@
             <span class="icon">📁</span>
             Subir archivo
           </button>
-        </div>
-
-        <!-- Input de URL -->
-        <div *ngIf="imageSource === 'url'" class="url-input-container">
-          <input
-            id="imagenUrl"
-            type="text"
-            formControlName="imagenUrl"
-            class="form-control"
-            placeholder="https://ejemplo.com/imagen.jpg"
-            (blur)="onImageUrlChange()"
+          <button
+            type="button"
+            class="toggle-btn"
+            [class.active]="imageSource === 'url'"
+            (click)="setImageSource('url')"
           >
+            <span class="icon">🔗</span>
+            URL
+          </button>
         </div>
 
-        <!-- Área de subida de archivo -->
-        <div
-          *ngIf="imageSource === 'upload'"
-          class="upload-area"
-          [class.drag-over]="dragOver"
-          [class.uploading]="uploadingImage"
-          (dragover)="onDragOver($event)"
-          (dragleave)="onDragLeave($event)"
-          (drop)="onDrop($event)"
-        >
-          <div *ngIf="!uploadingImage" class="upload-content">
-            <div class="upload-icon">📷</div>
-            <p class="upload-text">Arrastra una imagen aquí o</p>
-            <label class="upload-btn">
-              Seleccionar archivo
-              <input
-                type="file"
-                accept="image/*"
-                (change)="onFileSelected($event)"
-                hidden
-              >
-            </label>
-            <p class="upload-hint">PNG, JPG, WEBP (máx. 5MB)</p>
-          </div>
-          <div *ngIf="uploadingImage" class="upload-progress">
-            <div class="progress-bar">
-              <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+        <!-- Grid de 3 imágenes -->
+        <div class="images-grid">
+          <div *ngFor="let image of images; let i = index" class="image-slot">
+            <div class="slot-label">Imagen {{ i + 1 }} {{ i === 0 ? '(Principal)' : '(Opcional)' }}</div>
+
+            <!-- Si ya tiene imagen -->
+            <div *ngIf="image.url" class="image-preview-slot">
+              <img [src]="image.url" [alt]="'Imagen ' + (i + 1)">
+              <button type="button" class="remove-image-btn" (click)="removeImage(i)" title="Eliminar imagen">
+                ✕
+              </button>
             </div>
-            <p>Subiendo imagen... {{ uploadProgress }}%</p>
+
+            <!-- Si no tiene imagen - modo URL -->
+            <div *ngIf="!image.url && imageSource === 'url'" class="url-input-slot">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="https://ejemplo.com/imagen.jpg"
+                [value]="image.url"
+                (input)="onImageUrlChange(i, $event)"
+              >
+            </div>
+
+            <!-- Si no tiene imagen - modo Upload -->
+            <div
+              *ngIf="!image.url && imageSource === 'upload'"
+              class="upload-slot"
+              [class.drag-over]="dragOverIndex === i"
+              [class.uploading]="image.uploading"
+              (dragover)="onDragOver($event, i)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onDrop($event, i)"
+            >
+              <div *ngIf="!image.uploading" class="upload-content">
+                <div class="upload-icon">📷</div>
+                <p class="upload-text">Arrastra aquí o</p>
+                <label class="upload-btn-small">
+                  Seleccionar
+                  <input
+                    type="file"
+                    accept="image/*"
+                    (change)="onFileSelected($event, i)"
+                    hidden
+                  >
+                </label>
+              </div>
+              <div *ngIf="image.uploading" class="upload-progress-slot">
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="image.progress"></div>
+                </div>
+                <p>{{ image.progress }}%</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="error-text" *ngIf="imagenUrl?.invalid && imagenUrl?.touched">
-          <span *ngIf="imagenUrl?.errors?.['required']">La imagen es requerida</span>
-        </div>
-      </div>
-
-      <!-- Vista Previa de Imagen -->
-      <div class="form-group full-width" *ngIf="imagenPreview">
-        <label>Vista Previa</label>
-        <div class="image-preview">
-          <img [src]="imagenPreview" [alt]="nombre?.value || 'Preview'" (error)="imagenPreview = undefined">
-        </div>
+        <p class="images-hint">La primera imagen será la imagen principal del producto. PNG, JPG, WEBP (máx. 5MB cada una)</p>
       </div>
     </div>
 
@@ -187,7 +190,7 @@
       <button type="button" class="btn-secondary" (click)="cancelar()" [disabled]="loading">
         Cancelar
       </button>
-      <button type="submit" class="btn-primary" [disabled]="loading || productoForm.invalid">
+      <button type="submit" class="btn-primary" [disabled]="loading || productoForm.invalid || !hasAtLeastOneImage()">
         {{ loading ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Crear Producto') }}
       </button>
     </div>

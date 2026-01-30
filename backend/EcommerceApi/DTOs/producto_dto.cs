@@ -8,6 +8,9 @@ public class ProductoDto
     public decimal Precio { get; set; }
     public int Stock { get; set; }
     public string ImagenUrl { get; set; } = string.Empty;
+    public string? ImagenUrl2 { get; set; }
+    public string? ImagenUrl3 { get; set; }
+    public List<string> Imagenes { get; set; } = new(); // Computed list of all images
     public bool Activo { get; set; }
     public int CategoriaId { get; set; }
     public string CategoriaNombre { get; set; } = string.Empty;
@@ -20,6 +23,8 @@ public class CreateProductoDto
     public decimal Precio { get; set; }
     public int Stock { get; set; }
     public string ImagenUrl { get; set; } = string.Empty;
+    public string? ImagenUrl2 { get; set; }
+    public string? ImagenUrl3 { get; set; }
     public int CategoriaId { get; set; }
 }
 
@@ -30,6 +35,8 @@ public class UpdateProductoDto
     public decimal Precio { get; set; }
     public int Stock { get; set; }
     public string ImagenUrl { get; set; } = string.Empty;
+    public string? ImagenUrl2 { get; set; }
+    public string? ImagenUrl3 { get; set; }
     public bool Activo { get; set; }
     public int CategoriaId { get; set; }
 }
