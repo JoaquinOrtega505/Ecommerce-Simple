@@ -95,6 +95,145 @@
   }
 }
 
+// Image source toggle
+.image-source-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+
+  .toggle-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    background: white;
+    color: #6b7280;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    .icon {
+      font-size: 1.1rem;
+    }
+
+    &:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+    }
+
+    &.active {
+      border-color: #3b82f6;
+      background: #eff6ff;
+      color: #3b82f6;
+    }
+  }
+}
+
+.url-input-container {
+  margin-bottom: 0.5rem;
+}
+
+// Upload area
+.upload-area {
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  background: #f9fafb;
+  transition: all 0.2s;
+  cursor: pointer;
+
+  &:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+  }
+
+  &.drag-over {
+    border-color: #3b82f6;
+    background: #dbeafe;
+    transform: scale(1.01);
+  }
+
+  &.uploading {
+    cursor: default;
+    border-style: solid;
+  }
+
+  .upload-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .upload-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .upload-text {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .upload-btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: #3b82f6;
+    color: white;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover {
+      background: #2563eb;
+    }
+  }
+
+  .upload-hint {
+    color: #9ca3af;
+    font-size: 0.8rem;
+    margin: 0.5rem 0 0;
+  }
+
+  .upload-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+
+    p {
+      color: #3b82f6;
+      font-weight: 500;
+      margin: 0;
+    }
+  }
+
+  .progress-bar {
+    width: 100%;
+    max-width: 300px;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+
+    .progress-fill {
+      height: 100%;
+      background: #3b82f6;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+  }
+}
+
 .image-preview {
   margin-top: 0.5rem;
   border: 1px solid #e5e7eb;

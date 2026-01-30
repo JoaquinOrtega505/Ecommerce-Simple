@@ -98,19 +98,78 @@
         </div>
       </div>
 
-      <!-- URL de Imagen -->
+      <!-- Imagen del Producto -->
       <div class="form-group full-width">
-        <label for="imagenUrl">URL de la Imagen *</label>
-        <input
-          id="imagenUrl"
-          type="text"
-          formControlName="imagenUrl"
-          class="form-control"
-          placeholder="https://ejemplo.com/imagen.jpg"
-          (blur)="onImageUrlChange()"
+        <label>Imagen del Producto *</label>
+
+        <!-- Toggle para seleccionar fuente de imagen -->
+        <div class="image-source-toggle">
+          <button
+            type="button"
+            class="toggle-btn"
+            [class.active]="imageSource === 'url'"
+            (click)="setImageSource('url')"
+          >
+            <span class="icon">🔗</span>
+            URL
+          </button>
+          <button
+            type="button"
+            class="toggle-btn"
+            [class.active]="imageSource === 'upload'"
+            (click)="setImageSource('upload')"
+          >
+            <span class="icon">📁</span>
+            Subir archivo
+          </button>
+        </div>
+
+        <!-- Input de URL -->
+        <div *ngIf="imageSource === 'url'" class="url-input-container">
+          <input
+            id="imagenUrl"
+            type="text"
+            formControlName="imagenUrl"
+            class="form-control"
+            placeholder="https://ejemplo.com/imagen.jpg"
+            (blur)="onImageUrlChange()"
+          >
+        </div>
+
+        <!-- Área de subida de archivo -->
+        <div
+          *ngIf="imageSource === 'upload'"
+          class="upload-area"
+          [class.drag-over]="dragOver"
+          [class.uploading]="uploadingImage"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
         >
+          <div *ngIf="!uploadingImage" class="upload-content">
+            <div class="upload-icon">📷</div>
+            <p class="upload-text">Arrastra una imagen aquí o</p>
+            <label class="upload-btn">
+              Seleccionar archivo
+              <input
+                type="file"
+                accept="image/*"
+                (change)="onFileSelected($event)"
+                hidden
+              >
+            </label>
+            <p class="upload-hint">PNG, JPG, WEBP (máx. 5MB)</p>
+          </div>
+          <div *ngIf="uploadingImage" class="upload-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+            </div>
+            <p>Subiendo imagen... {{ uploadProgress }}%</p>
+          </div>
+        </div>
+
         <div class="error-text" *ngIf="imagenUrl?.invalid && imagenUrl?.touched">
-          <span *ngIf="imagenUrl?.errors?.['required']">La URL de la imagen es requerida</span>
+          <span *ngIf="imagenUrl?.errors?.['required']">La imagen es requerida</span>
         </div>
       </div>
 
