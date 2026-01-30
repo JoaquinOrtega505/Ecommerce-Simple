@@ -5,12 +5,12 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 COPY ["EcommerceApi.csproj", "."]
-RUN dotnet restore
+RUN dotnet restore --disable-parallel
 COPY . .
-RUN dotnet build -c Release -o /app/build
+RUN dotnet build -c Release -o /app/build /p:UseSharedCompilation=false
 
 FROM build AS publish
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish -c Release -o /app/publish /p:UseSharedCompilation=false
 
 FROM base AS final
 WORKDIR /app
