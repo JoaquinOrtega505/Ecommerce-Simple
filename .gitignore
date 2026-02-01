@@ -8,9 +8,6 @@ obj/
 *.dll
 *.pdb
 
-# Entity Framework
-Migrations/
-
 # Configuración sensible
 appsettings.json
 appsettings.*.json

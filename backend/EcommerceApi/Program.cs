@@ -150,33 +150,20 @@ using (var scope = app.Services.CreateScope())
 
         if (canConnect)
         {
-            // Verificar si la tabla Usuarios existe
-            var tablasExisten = false;
-            try
+            // Aplicar migraciones pendientes
+            var pendingMigrations = await db.Database.GetPendingMigrationsAsync();
+            if (pendingMigrations.Any())
             {
-                var count = await db.Database.ExecuteSqlRawAsync("SELECT 1 FROM \"Usuarios\" LIMIT 1");
-                tablasExisten = true;
-                logger.LogInformation("Tabla Usuarios existe");
-            }
-            catch
-            {
-                logger.LogWarning("Tabla Usuarios NO existe - creando esquema...");
-            }
+                logger.LogInformation("Aplicando {Count} migraciones pendientes: {Migrations}",
+                    pendingMigrations.Count(),
+                    string.Join(", ", pendingMigrations));
 
-            if (!tablasExisten)
+                await db.Database.MigrateAsync();
+                logger.LogInformation("Migraciones aplicadas exitosamente");
+            }
+            else
             {
-                // Eliminar cualquier tabla huérfana
-                logger.LogInformation("Limpiando base de datos...");
-                try
-                {
-                    await db.Database.ExecuteSqlRawAsync("DROP TABLE IF EXISTS \"__EFMigrationsHistory\" CASCADE");
-                }
-                catch { }
-
-                // Usar EnsureCreated para crear todas las tablas desde el modelo
-                logger.LogInformation("Creando tablas desde el modelo...");
-                var created = await db.Database.EnsureCreatedAsync();
-                logger.LogInformation("EnsureCreated resultado: {Created}", created);
+                logger.LogInformation("No hay migraciones pendientes");
             }
 
             // Insertar datos semilla si no existen (siempre verificar)
