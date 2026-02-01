@@ -168,7 +168,20 @@
             <h3>{{ producto.nombre }}</h3>
             <p class="product-price">${{ producto.precio }}</p>
             <div class="product-actions">
-              <a [routerLink]="['/emprendedor/productos/editar', producto.id]" class="btn-edit">Editar</a>
+              <button (click)="verDetalleProducto(producto)" class="btn-preview" title="Vista previa">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                Ver
+              </button>
+              <a [routerLink]="['/emprendedor/productos/editar', producto.id]" class="btn-edit">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                Editar
+              </a>
               <button (click)="eliminarProducto(producto)" class="btn-delete" title="Eliminar producto">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"></polyline>
@@ -273,5 +286,77 @@
         </div>
       </div>
     </footer>
+  </div>
+
+  <!-- Modal de Vista Previa del Producto -->
+  <div *ngIf="mostrarModalPreview && productoPreview" class="modal-overlay" (click)="cerrarModalPreview()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="cerrarModalPreview()">&times;</button>
+
+      <div class="modal-body">
+        <div class="modal-image-container">
+          <div class="image-carousel">
+            <!-- Imagen principal -->
+            <div class="carousel-main-image">
+              <img [src]="imagenActualPreview" [alt]="productoPreview.nombre">
+
+              <!-- Flechas de navegación (solo si hay más de 1 imagen) -->
+              <button *ngIf="imagenesProductoPreview.length > 1"
+                      class="carousel-btn prev"
+                      (click)="anteriorImagenPreview()"
+                      aria-label="Imagen anterior">
+                ‹
+              </button>
+              <button *ngIf="imagenesProductoPreview.length > 1"
+                      class="carousel-btn next"
+                      (click)="siguienteImagenPreview()"
+                      aria-label="Siguiente imagen">
+                ›
+              </button>
+
+              <!-- Indicador de imagen actual -->
+              <div *ngIf="imagenesProductoPreview.length > 1" class="image-counter">
+                {{ imagenActualIndex + 1 }} / {{ imagenesProductoPreview.length }}
+              </div>
+            </div>
+
+            <!-- Thumbnails (solo si hay más de 1 imagen) -->
+            <div *ngIf="imagenesProductoPreview.length > 1" class="carousel-thumbnails">
+              <div *ngFor="let img of imagenesProductoPreview; let i = index"
+                   class="thumbnail"
+                   [class.active]="i === imagenActualIndex"
+                   (click)="seleccionarImagenPreview(i)">
+                <img [src]="img" [alt]="'Imagen ' + (i + 1)">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-info">
+          <h2>{{ productoPreview.nombre }}</h2>
+
+          <div class="detail-section">
+            <h3>Descripción</h3>
+            <p>{{ productoPreview.descripcion || 'Sin descripción disponible' }}</p>
+          </div>
+
+          <div class="detail-section">
+            <h3>Precio</h3>
+            <p class="modal-price">${{ productoPreview.precio }}</p>
+          </div>
+
+          <div class="detail-section">
+            <h3>Disponibilidad</h3>
+            <p class="modal-stock" [class.low-stock]="productoPreview.stock && productoPreview.stock <= 5">
+              {{ productoPreview.stock > 0 ? 'En stock: ' + productoPreview.stock + ' unidades' : 'Sin stock' }}
+            </p>
+          </div>
+
+          <div class="preview-note">
+            <p>Esta es la vista previa de cómo verán tus clientes este producto en tu tienda.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

@@ -47,6 +47,20 @@ export class MiTiendaComponent implements OnInit {
   uploadingBanner = false;
   savingChanges = false;
 
+  // Modal de vista previa de producto
+  mostrarModalPreview = false;
+  productoPreview: Producto | null = null;
+  imagenActualIndex = 0;
+
+  get imagenesProductoPreview(): string[] {
+    if (!this.productoPreview) return [];
+    return this.productoPreview.imagenes || [this.productoPreview.imagenUrl];
+  }
+
+  get imagenActualPreview(): string {
+    return this.imagenesProductoPreview[this.imagenActualIndex] || 'assets/placeholder.jpg';
+  }
+
   ngOnInit(): void {
     const currentUser = this.authService.currentUser();
     if (currentUser?.tiendaId) {
@@ -318,6 +332,38 @@ export class MiTiendaComponent implements OnInit {
   }
 
   // ==================== Métodos para productos ====================
+
+  verDetalleProducto(producto: Producto): void {
+    this.productoPreview = producto;
+    this.imagenActualIndex = 0;
+    this.mostrarModalPreview = true;
+  }
+
+  cerrarModalPreview(): void {
+    this.mostrarModalPreview = false;
+    this.productoPreview = null;
+    this.imagenActualIndex = 0;
+  }
+
+  anteriorImagenPreview(): void {
+    if (this.imagenActualIndex > 0) {
+      this.imagenActualIndex--;
+    } else {
+      this.imagenActualIndex = this.imagenesProductoPreview.length - 1;
+    }
+  }
+
+  siguienteImagenPreview(): void {
+    if (this.imagenActualIndex < this.imagenesProductoPreview.length - 1) {
+      this.imagenActualIndex++;
+    } else {
+      this.imagenActualIndex = 0;
+    }
+  }
+
+  seleccionarImagenPreview(index: number): void {
+    this.imagenActualIndex = index;
+  }
 
   eliminarProducto(producto: Producto): void {
     if (!confirm(`¿Estás seguro de que deseas eliminar "${producto.nombre}"?`)) {
