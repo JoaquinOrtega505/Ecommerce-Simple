@@ -299,9 +299,54 @@
   text-decoration: none;
   font-weight: 600;
   transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
 
   &:hover {
     background: #e0e0e0;
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.btn-delete {
+  flex: 1;
+  padding: 0.625rem;
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+  text-align: center;
+  border-radius: 6px;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+
+  &:hover {
+    background: #dc2626;
+    color: white;
+    border-color: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  svg {
+    flex-shrink: 0;
   }
 }
 

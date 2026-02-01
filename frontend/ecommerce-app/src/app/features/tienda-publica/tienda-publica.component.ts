@@ -30,6 +30,16 @@ export class TiendaPublicaComponent implements OnInit {
   cantidadCarrito = 0;
   productoSeleccionado: Producto | null = null;
   mostrarModal = false;
+  imagenActualIndex = 0;
+
+  get imagenesProducto(): string[] {
+    if (!this.productoSeleccionado) return [];
+    return this.productoSeleccionado.imagenes || [this.productoSeleccionado.imagenUrl];
+  }
+
+  get imagenActual(): string {
+    return this.imagenesProducto[this.imagenActualIndex] || 'assets/placeholder.jpg';
+  }
 
   ngOnInit(): void {
     this.cargarTiendaPorSubdominio();
@@ -148,12 +158,34 @@ export class TiendaPublicaComponent implements OnInit {
 
   verDetalle(producto: Producto): void {
     this.productoSeleccionado = producto;
+    this.imagenActualIndex = 0;
     this.mostrarModal = true;
   }
 
   cerrarModal(): void {
     this.mostrarModal = false;
     this.productoSeleccionado = null;
+    this.imagenActualIndex = 0;
+  }
+
+  anteriorImagen(): void {
+    if (this.imagenActualIndex > 0) {
+      this.imagenActualIndex--;
+    } else {
+      this.imagenActualIndex = this.imagenesProducto.length - 1;
+    }
+  }
+
+  siguienteImagen(): void {
+    if (this.imagenActualIndex < this.imagenesProducto.length - 1) {
+      this.imagenActualIndex++;
+    } else {
+      this.imagenActualIndex = 0;
+    }
+  }
+
+  seleccionarImagen(index: number): void {
+    this.imagenActualIndex = index;
   }
 
   irAlCarrito(): void {

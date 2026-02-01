@@ -118,8 +118,42 @@
       <button class="modal-close" (click)="cerrarModal()">&times;</button>
 
       <div class="modal-body">
-        <div class="modal-image">
-          <img [src]="productoSeleccionado.imagenUrl || 'assets/placeholder.jpg'" [alt]="productoSeleccionado.nombre">
+        <div class="modal-image-container">
+          <div class="image-carousel">
+            <!-- Imagen principal -->
+            <div class="carousel-main-image">
+              <img [src]="imagenActual" [alt]="productoSeleccionado.nombre">
+
+              <!-- Flechas de navegación (solo si hay más de 1 imagen) -->
+              <button *ngIf="imagenesProducto.length > 1"
+                      class="carousel-btn prev"
+                      (click)="anteriorImagen()"
+                      aria-label="Imagen anterior">
+                ‹
+              </button>
+              <button *ngIf="imagenesProducto.length > 1"
+                      class="carousel-btn next"
+                      (click)="siguienteImagen()"
+                      aria-label="Siguiente imagen">
+                ›
+              </button>
+
+              <!-- Indicador de imagen actual -->
+              <div *ngIf="imagenesProducto.length > 1" class="image-counter">
+                {{ imagenActualIndex + 1 }} / {{ imagenesProducto.length }}
+              </div>
+            </div>
+
+            <!-- Thumbnails (solo si hay más de 1 imagen) -->
+            <div *ngIf="imagenesProducto.length > 1" class="carousel-thumbnails">
+              <div *ngFor="let img of imagenesProducto; let i = index"
+                   class="thumbnail"
+                   [class.active]="i === imagenActualIndex"
+                   (click)="seleccionarImagen(i)">
+                <img [src]="img" [alt]="'Imagen ' + (i + 1)">
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="modal-info">

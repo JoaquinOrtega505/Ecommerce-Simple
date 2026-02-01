@@ -316,4 +316,23 @@ export class MiTiendaComponent implements OnInit {
     this.successMessage = '';
     this.errorMessage = '';
   }
+
+  // ==================== Métodos para productos ====================
+
+  eliminarProducto(producto: Producto): void {
+    if (!confirm(`¿Estás seguro de que deseas eliminar "${producto.nombre}"?`)) {
+      return;
+    }
+
+    this.productoService.deleteProducto(producto.id).subscribe({
+      next: () => {
+        this.productos = this.productos.filter(p => p.id !== producto.id);
+        this.showSuccess('Producto eliminado correctamente');
+      },
+      error: (err) => {
+        console.error('Error al eliminar producto:', err);
+        this.showError(err.error?.message || 'Error al eliminar el producto');
+      }
+    });
+  }
 }

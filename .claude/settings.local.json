@@ -39,7 +39,9 @@
       "Bash(git commit -m \"$\\(cat <<''EOF''\nFix: Auto-detect missing tables and recreate migrations\n\nSi la tabla Usuarios no existe pero el historial de migraciones sí,\nelimina __EFMigrationsHistory y aplica migraciones desde cero.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git push)",
       "Bash(git commit:*)",
-      "Bash(git status:*)"
+      "Bash(git status:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(git push:*)"
     ]
   }
 }
