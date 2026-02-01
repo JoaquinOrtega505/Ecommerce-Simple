@@ -150,20 +150,64 @@ using (var scope = app.Services.CreateScope())
 
         if (canConnect)
         {
-            // Aplicar migraciones pendientes
-            var pendingMigrations = await db.Database.GetPendingMigrationsAsync();
-            if (pendingMigrations.Any())
+            // Verificar si la tabla Usuarios existe
+            var tablasExisten = false;
+            try
             {
-                logger.LogInformation("Aplicando {Count} migraciones pendientes: {Migrations}",
-                    pendingMigrations.Count(),
-                    string.Join(", ", pendingMigrations));
+                var count = await db.Database.ExecuteSqlRawAsync("SELECT 1 FROM \"Usuarios\" LIMIT 1");
+                tablasExisten = true;
+                logger.LogInformation("Tabla Usuarios existe");
+            }
+            catch
+            {
+                logger.LogWarning("Tabla Usuarios NO existe - creando esquema...");
+            }
 
-                await db.Database.MigrateAsync();
-                logger.LogInformation("Migraciones aplicadas exitosamente");
+            if (!tablasExisten)
+            {
+                // Eliminar cualquier tabla huérfana
+                logger.LogInformation("Limpiando base de datos...");
+                try
+                {
+                    await db.Database.ExecuteSqlRawAsync("DROP TABLE IF EXISTS \"__EFMigrationsHistory\" CASCADE");
+                }
+                catch { }
+
+                // Usar EnsureCreated para crear todas las tablas desde el modelo
+                logger.LogInformation("Creando tablas desde el modelo...");
+                var created = await db.Database.EnsureCreatedAsync();
+                logger.LogInformation("EnsureCreated resultado: {Created}", created);
             }
             else
             {
-                logger.LogInformation("No hay migraciones pendientes");
+                // Agregar columnas ImagenUrl2 e ImagenUrl3 si no existen
+                try
+                {
+                    logger.LogInformation("Verificando columnas de imágenes múltiples...");
+
+                    await db.Database.ExecuteSqlRawAsync(@"
+                        DO $$
+                        BEGIN
+                            IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                                         WHERE table_name = 'Productos' AND column_name = 'ImagenUrl2') THEN
+                                ALTER TABLE ""Productos"" ADD COLUMN ""ImagenUrl2"" text NULL;
+                                RAISE NOTICE 'Columna ImagenUrl2 agregada';
+                            END IF;
+
+                            IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                                         WHERE table_name = 'Productos' AND column_name = 'ImagenUrl3') THEN
+                                ALTER TABLE ""Productos"" ADD COLUMN ""ImagenUrl3"" text NULL;
+                                RAISE NOTICE 'Columna ImagenUrl3 agregada';
+                            END IF;
+                        END $$;
+                    ");
+
+                    logger.LogInformation("Columnas de imágenes verificadas/agregadas");
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Error al agregar columnas de imágenes: {Message}", ex.Message);
+                }
             }
 
             // Insertar datos semilla si no existen (siempre verificar)
