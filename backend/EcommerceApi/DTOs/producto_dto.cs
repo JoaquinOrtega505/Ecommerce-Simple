@@ -40,3 +40,8 @@ public class UpdateProductoDto
     public bool Activo { get; set; }
     public int CategoriaId { get; set; }
 }
+
+public class ToggleActivoDto
+{
+    public bool Activo { get; set; }
+}

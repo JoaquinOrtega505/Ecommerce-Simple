@@ -55,4 +55,8 @@ export class ProductoService {
   deleteProducto(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  toggleActivoProducto(id: number, activo: boolean): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${id}/toggle-activo`, { activo });
+  }
 }

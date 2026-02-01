@@ -231,6 +231,34 @@ public class ProductosController : ControllerBase
         return NoContent();
     }
 
+    [HttpPatch("{id}/toggle-activo")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult> ToggleActivoProducto(int id, [FromBody] ToggleActivoDto dto)
+    {
+        var tiendaId = await GetUserTiendaIdAsync();
+        if (tiendaId == null)
+        {
+            return BadRequest(new { message = "Usuario no asociado a ninguna tienda" });
+        }
+
+        var producto = await _context.Productos.FindAsync(id);
+        if (producto == null)
+        {
+            return NotFound(new { message = "Producto no encontrado" });
+        }
+
+        // Verificar que el producto pertenece a la tienda del usuario
+        if (producto.TiendaId != tiendaId.Value)
+        {
+            return Forbid();
+        }
+
+        producto.Activo = dto.Activo;
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult> DeleteProducto(int id)

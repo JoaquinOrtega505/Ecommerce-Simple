@@ -55,6 +55,27 @@ export class ProductosListComponent implements OnInit {
     this.router.navigate(['/emprendedor/productos/editar', id]);
   }
 
+  toggleActivoProducto(producto: Producto): void {
+    const accion = producto.activo ? 'pausar' : 'activar';
+    const mensaje = producto.activo
+      ? `¿Deseas pausar "${producto.nombre}"? No se mostrará en tu tienda.`
+      : `¿Deseas activar "${producto.nombre}"? Se mostrará en tu tienda.`;
+
+    if (!confirm(mensaje)) {
+      return;
+    }
+
+    this.productoService.toggleActivoProducto(producto.id, !producto.activo).subscribe({
+      next: () => {
+        // Actualizar el producto localmente
+        producto.activo = !producto.activo;
+      },
+      error: (error) => {
+        alert(error.error?.message || `Error al ${accion} producto`);
+      }
+    });
+  }
+
   eliminarProducto(id: number): void {
     if (!confirm('¿Estás seguro de que deseas eliminar este producto?')) {
       return;
