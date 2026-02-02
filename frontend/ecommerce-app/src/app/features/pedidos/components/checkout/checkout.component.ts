@@ -303,8 +303,8 @@ export class CheckoutComponent implements OnInit, AfterViewInit {
         next: (pedido) => {
           console.log('Pedido creado:', pedido);
 
-          // Procesar el pago con el token de la tarjeta
-          this.http.post(`${environment.apiUrl}/pagos/procesar-pago`, {
+          // Procesar el pago anónimo con el token de la tarjeta
+          this.http.post(`${environment.apiUrl}/pagos/procesar-pago-anonimo`, {
             pedidoId: pedido.id,
             token: token,
             paymentMethodId: tokenData.payment_method_id || 'visa',
