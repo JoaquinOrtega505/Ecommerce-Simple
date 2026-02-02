@@ -21,9 +21,12 @@ export class CarritoComponent implements OnInit {
   loading = false;
   mensaje = '';
   esUsuarioAnonimo = false;
+  subdominioTienda: string = '';
 
   ngOnInit(): void {
     this.esUsuarioAnonimo = true; // Siempre anónimo en tienda pública
+    // Obtener el subdominio de la tienda actual desde localStorage
+    this.subdominioTienda = localStorage.getItem('tienda_actual') || '';
     this.cargarCarrito();
   }
 
@@ -37,7 +40,8 @@ export class CarritoComponent implements OnInit {
   }
 
   private obtenerCarritoLocal(): CarritoItem[] {
-    const carrito = localStorage.getItem('carrito_anonimo');
+    const key = `carrito_${this.subdominioTienda}`;
+    const carrito = localStorage.getItem(key);
     if (!carrito) return [];
 
     try {
@@ -55,12 +59,13 @@ export class CarritoComponent implements OnInit {
   }
 
   private guardarCarritoLocal(items: CarritoItem[]): void {
+    const key = `carrito_${this.subdominioTienda}`;
     const carrito = items.map(item => ({
       productoId: item.productoId,
       cantidad: item.cantidad,
       producto: item.producto
     }));
-    localStorage.setItem('carrito_anonimo', JSON.stringify(carrito));
+    localStorage.setItem(key, JSON.stringify(carrito));
   }
 
   get total(): number {
@@ -98,7 +103,8 @@ export class CarritoComponent implements OnInit {
   vaciarCarrito(): void {
     if (confirm('¿Estás seguro de vaciar todo el carrito?')) {
       // Siempre vaciar localStorage
-      localStorage.removeItem('carrito_anonimo');
+      const key = `carrito_${this.subdominioTienda}`;
+      localStorage.removeItem(key);
       this.items = [];
       this.mensaje = 'Carrito vaciado';
       setTimeout(() => this.mensaje = '', 3000);

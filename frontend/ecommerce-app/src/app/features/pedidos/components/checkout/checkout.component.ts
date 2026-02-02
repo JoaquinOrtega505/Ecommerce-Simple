@@ -34,6 +34,7 @@ export class CheckoutComponent implements OnInit, AfterViewInit {
   procesando = false;
   errorMessage = '';
   esUsuarioAnonimo = false;
+  subdominioTienda: string = '';
 
   // Método de pago seleccionado
   metodoPago: 'tarjeta' | 'transferencia' = 'tarjeta';
@@ -56,6 +57,8 @@ export class CheckoutComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.esUsuarioAnonimo = true; // Siempre anónimo en checkout de tienda pública
+    // Obtener el subdominio de la tienda actual desde localStorage
+    this.subdominioTienda = localStorage.getItem('tienda_actual') || '';
     this.cargarCarrito();
     this.inicializarMercadoPago();
   }
@@ -68,9 +71,25 @@ export class CheckoutComponent implements OnInit, AfterViewInit {
   inicializarMercadoPago(): void {
     // Inicializar MercadoPago con la Public Key desde environment
     const publicKey = environment.mercadoPagoPublicKey;
-    this.mp = new MercadoPago(publicKey, {
-      locale: 'es-AR'
-    });
+
+    console.log('Environment:', environment);
+    console.log('Public Key:', publicKey);
+
+    if (!publicKey) {
+      console.error('Public Key no está configurada en environment');
+      this.errorMessage = 'Error de configuración: Public Key de MercadoPago no encontrada';
+      return;
+    }
+
+    try {
+      this.mp = new MercadoPago(publicKey, {
+        locale: 'es-AR'
+      });
+      console.log('MercadoPago inicializado correctamente');
+    } catch (error: any) {
+      console.error('Error al inicializar MercadoPago:', error);
+      this.errorMessage = 'Error al inicializar sistema de pagos: ' + error.message;
+    }
   }
 
   inicializarCardForm(): void {
@@ -177,8 +196,10 @@ export class CheckoutComponent implements OnInit, AfterViewInit {
   }
 
   private obtenerCarritoLocal(): CarritoItem[] {
-    const carrito = localStorage.getItem('carrito_anonimo');
+    const key = `carrito_${this.subdominioTienda}`;
+    const carrito = localStorage.getItem(key);
     console.log('Carrito raw de localStorage:', carrito);
+    console.log('Key usada:', key);
 
     if (!carrito) {
       console.warn('No hay carrito en localStorage');
@@ -322,7 +343,8 @@ export class CheckoutComponent implements OnInit, AfterViewInit {
               console.log('Pago procesado exitosamente:', paymentResponse);
 
               // Vaciar el carrito de localStorage
-              localStorage.removeItem('carrito_anonimo');
+              const key = `carrito_${this.subdominioTienda}`;
+              localStorage.removeItem(key);
 
               this.procesando = false;
 

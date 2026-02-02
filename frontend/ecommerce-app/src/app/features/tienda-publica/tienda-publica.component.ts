@@ -31,6 +31,7 @@ export class TiendaPublicaComponent implements OnInit {
   productoSeleccionado: Producto | null = null;
   mostrarModal = false;
   imagenActualIndex = 0;
+  subdominioTienda: string = '';
 
   get imagenesProducto(): string[] {
     if (!this.productoSeleccionado) return [];
@@ -55,6 +56,11 @@ export class TiendaPublicaComponent implements OnInit {
       this.loading = false;
       return;
     }
+
+    // Guardar el subdominio para usarlo en el carrito
+    this.subdominioTienda = subdominio;
+    // Guardar también en localStorage para que carrito y checkout puedan acceder
+    localStorage.setItem('tienda_actual', subdominio);
 
     // Cargar la tienda por subdominio
     this.tiendaService.getTiendaPorSubdominio(subdominio).subscribe({
@@ -90,12 +96,14 @@ export class TiendaPublicaComponent implements OnInit {
   }
 
   private obtenerCarritoLocal(): any[] {
-    const carrito = localStorage.getItem('carrito_anonimo');
+    const key = `carrito_${this.subdominioTienda}`;
+    const carrito = localStorage.getItem(key);
     return carrito ? JSON.parse(carrito) : [];
   }
 
   private guardarCarritoLocal(carrito: any[]): void {
-    localStorage.setItem('carrito_anonimo', JSON.stringify(carrito));
+    const key = `carrito_${this.subdominioTienda}`;
+    localStorage.setItem(key, JSON.stringify(carrito));
   }
 
   private obtenerCantidadCarritoLocal(): number {
