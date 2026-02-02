@@ -55,7 +55,7 @@ export class CheckoutComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.esUsuarioAnonimo = !this.authService.isAuthenticated;
+    this.esUsuarioAnonimo = true; // Siempre anónimo en checkout de tienda pública
     this.cargarCarrito();
     this.inicializarMercadoPago();
   }
@@ -165,30 +165,12 @@ export class CheckoutComponent implements OnInit, AfterViewInit {
   cargarCarrito(): void {
     this.loading = true;
 
-    if (this.authService.isAuthenticated) {
-      // Usuario autenticado: cargar desde BD
-      this.carritoService.getCarrito().subscribe({
-        next: (items) => {
-          this.items = items;
-          this.loading = false;
+    // Siempre cargar desde localStorage (compras anónimas)
+    this.items = this.obtenerCarritoLocal();
+    this.loading = false;
 
-          if (items.length === 0) {
-            this.router.navigate(['/carrito']);
-          }
-        },
-        error: (error) => {
-          console.error('Error al cargar carrito:', error);
-          this.loading = false;
-        }
-      });
-    } else {
-      // Usuario anónimo: cargar desde localStorage
-      this.items = this.obtenerCarritoLocal();
-      this.loading = false;
-
-      if (this.items.length === 0) {
-        this.router.navigate(['/carrito']);
-      }
+    if (this.items.length === 0) {
+      this.router.navigate(['/carrito']);
     }
   }
 
@@ -292,23 +274,19 @@ export class CheckoutComponent implements OnInit, AfterViewInit {
         return;
       }
 
-      // Crear el pedido
+      // Crear el pedido anónimo
       const direccion = `${this.checkoutForm.value.direccionEnvio}, ${this.checkoutForm.value.ciudad}, CP: ${this.checkoutForm.value.codigoPostal}`;
 
-      // Determinar el observable correcto según si es usuario autenticado o anónimo
-      const crearPedidoObservable = this.authService.isAuthenticated
-        ? this.pedidoService.crearPedido({ direccionEnvio: direccion })
-        : this.http.post<any>(`${environment.apiUrl}/pedidos/anonimo`, {
-            compradorNombre: this.checkoutForm.value.nombre,
-            compradorEmail: this.checkoutForm.value.email,
-            direccionEnvio: direccion,
-            items: this.items.map(item => ({
-              productoId: item.productoId,
-              cantidad: item.cantidad
-            }))
-          });
-
-      crearPedidoObservable.subscribe({
+      // Siempre usar endpoint anónimo
+      this.http.post<any>(`${environment.apiUrl}/pedidos/anonimo`, {
+        compradorNombre: this.checkoutForm.value.nombre,
+        compradorEmail: this.checkoutForm.value.email,
+        direccionEnvio: direccion,
+        items: this.items.map(item => ({
+          productoId: item.productoId,
+          cantidad: item.cantidad
+        }))
+      }).subscribe({
         next: (pedido) => {
           console.log('Pedido creado:', pedido);
 
@@ -330,25 +308,15 @@ export class CheckoutComponent implements OnInit, AfterViewInit {
             next: (paymentResponse: any) => {
               console.log('Pago procesado exitosamente:', paymentResponse);
 
-              // Vaciar el carrito
-              if (this.authService.isAuthenticated) {
-                this.carritoService.vaciarCarrito().subscribe();
-              } else {
-                localStorage.removeItem('carrito_anonimo');
-              }
+              // Vaciar el carrito de localStorage
+              localStorage.removeItem('carrito_anonimo');
 
               this.procesando = false;
 
-              // Redirigir según tipo de usuario
-              if (this.authService.isAuthenticated) {
-                this.router.navigate(['/pedidos', pedido.id], {
-                  queryParams: { pagado: 'true' }
-                });
-              } else {
-                this.router.navigate(['/tienda'], {
-                  queryParams: { pagado: 'true', pedidoId: pedido.id }
-                });
-              }
+              // Redirigir a la tienda con confirmación de pago
+              this.router.navigate(['/tienda'], {
+                queryParams: { pagado: 'true', pedidoId: pedido.id }
+              });
             },
             error: (error) => {
               console.error('Error al procesar pago:', error);
@@ -374,52 +342,33 @@ export class CheckoutComponent implements OnInit, AfterViewInit {
   crearPedido(): void {
     const direccion = `${this.checkoutForm.value.direccionEnvio}, ${this.checkoutForm.value.ciudad}, CP: ${this.checkoutForm.value.codigoPostal}`;
 
-    if (this.authService.isAuthenticated) {
-      // Usuario autenticado: crear pedido normal
-      this.pedidoService.crearPedido({ direccionEnvio: direccion }).subscribe({
-        next: (pedido) => {
-          // Vaciar el carrito después de crear el pedido
-          this.carritoService.vaciarCarrito().subscribe();
+    // Siempre crear pedido anónimo
+    const pedidoAnonimo = {
+      compradorNombre: this.checkoutForm.value.nombre,
+      compradorEmail: this.checkoutForm.value.email,
+      direccionEnvio: direccion,
+      items: this.items.map(item => ({
+        productoId: item.productoId,
+        cantidad: item.cantidad
+      }))
+    };
 
-          this.procesando = false;
-          this.router.navigate(['/pedidos', pedido.id], {
-            queryParams: { nuevo: 'true' }
-          });
-        },
-        error: (error) => {
-          this.errorMessage = error.error?.message || 'Error al procesar el pedido';
-          this.procesando = false;
-        }
-      });
-    } else {
-      // Usuario anónimo: crear pedido anónimo
-      const pedidoAnonimo = {
-        compradorNombre: this.checkoutForm.value.nombre,
-        compradorEmail: this.checkoutForm.value.email,
-        direccionEnvio: direccion,
-        items: this.items.map(item => ({
-          productoId: item.productoId,
-          cantidad: item.cantidad
-        }))
-      };
+    this.http.post(`${environment.apiUrl}/pedidos/anonimo`, pedidoAnonimo).subscribe({
+      next: (pedido: any) => {
+        // Vaciar el carrito de localStorage
+        localStorage.removeItem('carrito_anonimo');
 
-      this.http.post(`${environment.apiUrl}/pedidos/anonimo`, pedidoAnonimo).subscribe({
-        next: (pedido: any) => {
-          // Vaciar el carrito de localStorage
-          localStorage.removeItem('carrito_anonimo');
-
-          this.procesando = false;
-          // Redirigir a una página de confirmación (por ahora a inicio)
-          this.router.navigate(['/tienda'], {
-            queryParams: { pedidoCreado: pedido.id }
-          });
-        },
-        error: (error) => {
-          this.errorMessage = error.error?.message || 'Error al procesar el pedido';
-          this.procesando = false;
-        }
-      });
-    }
+        this.procesando = false;
+        // Redirigir a la tienda con confirmación
+        this.router.navigate(['/tienda'], {
+          queryParams: { pedidoCreado: pedido.id }
+        });
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Error al procesar el pedido';
+        this.procesando = false;
+      }
+    });
   }
 
   get email() {
