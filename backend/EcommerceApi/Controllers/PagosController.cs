@@ -6,6 +6,7 @@ using EcommerceApi.Data;
 using EcommerceApi.Services;
 using MercadoPago.Client.Payment;
 using MercadoPago.Resource.Payment;
+using MercadoPago.Config;
 
 namespace EcommerceApi.Controllers;
 
@@ -144,6 +145,18 @@ public class PagosController : ControllerBase
             {
                 return BadRequest(new { message = "El pedido no está en estado pendiente" });
             }
+
+            // Configurar Access Token de MercadoPago
+            var accessToken = Environment.GetEnvironmentVariable("MERCADOPAGO_ACCESS_TOKEN")
+                ?? _configuration["MercadoPago:AccessToken"];
+
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                _logger.LogError("MercadoPago AccessToken no configurado");
+                return StatusCode(500, new { message = "Error de configuración del sistema de pagos" });
+            }
+
+            MercadoPagoConfig.AccessToken = accessToken;
 
             // Calcular el monto total
             var amount = pedido.PedidoItems.Sum(i => i.PrecioUnitario * i.Cantidad);
@@ -355,6 +368,18 @@ public class PagosController : ControllerBase
             {
                 return BadRequest(new { message = "El pedido no está en estado pendiente" });
             }
+
+            // Configurar Access Token de MercadoPago
+            var accessToken = Environment.GetEnvironmentVariable("MERCADOPAGO_ACCESS_TOKEN")
+                ?? _configuration["MercadoPago:AccessToken"];
+
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                _logger.LogError("MercadoPago AccessToken no configurado");
+                return StatusCode(500, new { message = "Error de configuración del sistema de pagos" });
+            }
+
+            MercadoPago.Config.MercadoPagoConfig.AccessToken = accessToken;
 
             // Calcular el monto total
             var amount = pedido.PedidoItems.Sum(i => i.PrecioUnitario * i.Cantidad);
