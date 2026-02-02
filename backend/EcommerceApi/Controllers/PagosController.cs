@@ -333,6 +333,97 @@ public class PagosController : ControllerBase
     }
 
     /// <summary>
+    /// Procesa un pago directo para pedidos anónimos (sin autenticación)
+    /// </summary>
+    [HttpPost("procesar-pago-anonimo")]
+    [AllowAnonymous]
+    public async Task<ActionResult> ProcesarPagoAnonimo([FromBody] ProcessPaymentRequest request)
+    {
+        try
+        {
+            // Obtener el pedido con items (sin filtrar por usuario)
+            var pedido = await _context.Pedidos
+                .Include(p => p.PedidoItems)
+                .FirstOrDefaultAsync(p => p.Id == request.PedidoId);
+
+            if (pedido == null)
+            {
+                return NotFound(new { message = "Pedido no encontrado" });
+            }
+
+            if (pedido.Estado != "Pendiente")
+            {
+                return BadRequest(new { message = "El pedido no está en estado pendiente" });
+            }
+
+            // Calcular el monto total
+            var amount = pedido.PedidoItems.Sum(i => i.PrecioUnitario * i.Cantidad);
+
+            // Crear la solicitud de pago simplificada
+            var paymentRequest = new PaymentCreateRequest
+            {
+                TransactionAmount = amount,
+                Token = request.Token,
+                Description = $"Pedido #{request.PedidoId}",
+                Installments = request.Installments,
+                PaymentMethodId = request.PaymentMethodId,
+                Payer = new PaymentPayerRequest
+                {
+                    Email = request.Payer.Email
+                },
+                ExternalReference = request.PedidoId.ToString()
+            };
+
+            // Procesar el pago
+            var client = new PaymentClient();
+            Payment payment = await client.CreateAsync(paymentRequest);
+
+            _logger.LogInformation("Pago anónimo procesado: {PaymentId}, Estado: {Status}, Pedido: {PedidoId}",
+                payment.Id, payment.Status, request.PedidoId);
+
+            // Actualizar el pedido según el resultado
+            switch (payment.Status)
+            {
+                case "approved":
+                    pedido.Estado = "Pagado";
+                    pedido.FechaPago = DateTime.UtcNow;
+                    pedido.TransaccionId = payment.Id.ToString();
+                    pedido.MetodoPago = payment.PaymentMethodId;
+                    break;
+
+                case "rejected":
+                    return BadRequest(new
+                    {
+                        message = "El pago fue rechazado",
+                        status = payment.Status,
+                        statusDetail = payment.StatusDetail
+                    });
+
+                case "pending":
+                case "in_process":
+                    pedido.Estado = "Pendiente";
+                    break;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                paymentId = payment.Id,
+                status = payment.Status,
+                statusDetail = payment.StatusDetail,
+                pedidoId = pedido.Id,
+                mensaje = "Pago procesado correctamente"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al procesar pago anónimo para pedido {PedidoId}", request.PedidoId);
+            return StatusCode(500, new { message = "Error al procesar el pago: " + ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Marca un pedido como pagado (para usar sin webhook en desarrollo)
     /// </summary>
     [HttpPost("confirmar-pago/{pedidoId}")]
