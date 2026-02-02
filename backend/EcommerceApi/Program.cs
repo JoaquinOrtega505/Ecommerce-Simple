@@ -253,8 +253,8 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// CORS - usar AllowAll temporalmente para debugging
-app.UseCors("AllowAll");
+// CORS - usar la política configurada con FRONTEND_URL
+app.UseCors("AllowFrontend");
 
 if (!app.Environment.IsDevelopment())
 {
