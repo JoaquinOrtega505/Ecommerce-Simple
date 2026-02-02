@@ -172,7 +172,19 @@ export class CarritoComponent implements OnInit {
   }
 
   irACheckout(): void {
-    // Permitir checkout para todos los usuarios (autenticados y anónimos)
-    this.router.navigate(['/checkout']);
+    console.log('Navegando a checkout...');
+    console.log('Items en carrito:', this.items);
+
+    // Verificar que haya items en el carrito
+    if (this.items.length === 0) {
+      alert('El carrito está vacío');
+      return;
+    }
+
+    // Navegar al checkout
+    this.router.navigate(['/checkout']).then(
+      () => console.log('Navegación exitosa'),
+      (error) => console.error('Error en navegación:', error)
+    );
   }
 }
