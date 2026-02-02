@@ -66,8 +66,8 @@ export class CheckoutComponent implements OnInit, AfterViewInit {
 
 
   inicializarMercadoPago(): void {
-    // Inicializar MercadoPago con la Public Key
-    const publicKey = 'TEST-0d4adb81-9cad-4c89-b1dc-c61e8dc2c06f';
+    // Inicializar MercadoPago con la Public Key desde environment
+    const publicKey = environment.mercadoPagoPublicKey;
     this.mp = new MercadoPago(publicKey, {
       locale: 'es-AR'
     });
