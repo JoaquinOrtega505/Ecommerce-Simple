@@ -167,20 +167,29 @@ export class CheckoutComponent implements OnInit, AfterViewInit {
 
     // Siempre cargar desde localStorage (compras anónimas)
     this.items = this.obtenerCarritoLocal();
+    console.log('Items cargados en checkout:', this.items);
     this.loading = false;
 
     if (this.items.length === 0) {
+      console.warn('No hay items en el carrito, redirigiendo...');
       this.router.navigate(['/carrito']);
     }
   }
 
   private obtenerCarritoLocal(): CarritoItem[] {
     const carrito = localStorage.getItem('carrito_anonimo');
-    if (!carrito) return [];
+    console.log('Carrito raw de localStorage:', carrito);
+
+    if (!carrito) {
+      console.warn('No hay carrito en localStorage');
+      return [];
+    }
 
     try {
       const items = JSON.parse(carrito);
-      return items.map((item: any) => ({
+      console.log('Items parseados:', items);
+
+      const mappedItems = items.map((item: any) => ({
         id: item.productoId,
         productoId: item.productoId,
         cantidad: item.cantidad,
@@ -188,7 +197,11 @@ export class CheckoutComponent implements OnInit, AfterViewInit {
         producto: item.producto,
         precioUnitario: item.producto.precio
       }));
-    } catch {
+
+      console.log('Items mapeados para checkout:', mappedItems);
+      return mappedItems;
+    } catch (error) {
+      console.error('Error al parsear carrito:', error);
       return [];
     }
   }
