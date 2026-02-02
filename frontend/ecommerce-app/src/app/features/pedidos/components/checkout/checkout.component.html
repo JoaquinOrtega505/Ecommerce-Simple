@@ -15,7 +15,7 @@
         <!-- Datos de Envío -->
         <div class="card mb-4">
           <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">1. Datos de Envío</h5>
+            <h5 class="mb-0">Datos de Envío</h5>
           </div>
           <div class="card-body">
             <div class="row">
@@ -110,134 +110,29 @@
           </div>
         </div>
 
-        <!-- Método de Pago -->
+        <!-- Información de Pago -->
         <div class="card mb-4">
           <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">2. Método de Pago</h5>
+            <h5 class="mb-0">Información de Pago</h5>
           </div>
           <div class="card-body">
-            <div class="row mb-3">
-              <div class="col-md-6 mb-2">
-                <div
-                  class="card h-100 cursor-pointer"
-                  [class.border-primary]="metodoPago === 'tarjeta'"
-                  (click)="seleccionarMetodoPago('tarjeta')"
-                  style="cursor: pointer;"
-                >
-                  <div class="card-body text-center">
-                    <i class="bi bi-credit-card" style="font-size: 2rem; color: #009ee3;"></i>
-                    <p class="mb-0 mt-2"><strong>Pago con Tarjeta</strong></p>
-                    <small class="text-muted">Crédito o débito (Checkout seguro)</small>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6 mb-2">
-                <div
-                  class="card h-100 cursor-pointer"
-                  [class.border-primary]="metodoPago === 'transferencia'"
-                  (click)="seleccionarMetodoPago('transferencia')"
-                  style="cursor: pointer;"
-                >
-                  <div class="card-body text-center">
-                    <i class="bi bi-bank" style="font-size: 2rem; color: #009ee3;"></i>
-                    <p class="mb-0 mt-2"><strong>Transferencia Bancaria</strong></p>
-                    <small class="text-muted">Pago manual por transferencia</small>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Formulario de pago con tarjeta (Checkout Transparente) -->
-            <div *ngIf="metodoPago === 'tarjeta'" class="mt-3">
-              <div class="alert alert-info mb-3">
-                <i class="bi bi-info-circle me-2"></i>
-                <strong>Pago seguro:</strong> El formulario está protegido por MercadoPago.
-                <br>
-                <small class="text-muted">
-                  <strong>Tarjeta de prueba:</strong> 4509 9535 6623 3704, CVV: 123, Nombre: APRO
-                </small>
-              </div>
-
-              <!-- Formulario de MercadoPago CardForm -->
-              <form id="form-checkout">
-                <div class="row">
-                  <div class="col-md-12 mb-3">
-                    <label for="form-checkout__cardNumber" class="form-label">Número de tarjeta</label>
-                    <div id="form-checkout__cardNumber"></div>
-                  </div>
-
-                  <div class="col-md-6 mb-3">
-                    <label for="form-checkout__expirationDate" class="form-label">Vencimiento</label>
-                    <div id="form-checkout__expirationDate"></div>
-                  </div>
-
-                  <div class="col-md-6 mb-3">
-                    <label for="form-checkout__securityCode" class="form-label">CVV</label>
-                    <div id="form-checkout__securityCode"></div>
-                  </div>
-
-                  <div class="col-md-12 mb-3">
-                    <label for="form-checkout__cardholderName" class="form-label">Titular de la tarjeta</label>
-                    <input type="text" id="form-checkout__cardholderName" class="form-control" placeholder="NOMBRE APELLIDO">
-                  </div>
-
-                  <div class="col-md-12 mb-3">
-                    <label for="form-checkout__cardholderEmail" class="form-label">Email</label>
-                    <input type="email" id="form-checkout__cardholderEmail" class="form-control" placeholder="email@ejemplo.com">
-                  </div>
-
-                  <div class="col-md-6 mb-3">
-                    <label for="form-checkout__identificationType" class="form-label">Tipo de documento</label>
-                    <select id="form-checkout__identificationType" class="form-select"></select>
-                  </div>
-
-                  <div class="col-md-6 mb-3">
-                    <label for="form-checkout__identificationNumber" class="form-label">Número de documento</label>
-                    <input type="text" id="form-checkout__identificationNumber" class="form-control" placeholder="12345678">
-                  </div>
-
-                  <div class="col-md-6 mb-3">
-                    <label for="form-checkout__issuer" class="form-label">Banco emisor</label>
-                    <select id="form-checkout__issuer" class="form-select"></select>
-                  </div>
-
-                  <div class="col-md-6 mb-3">
-                    <label for="form-checkout__installments" class="form-label">Cuotas</label>
-                    <select id="form-checkout__installments" class="form-select"></select>
-                  </div>
-                </div>
-              </form>
-
-              <div *ngIf="!cardFormReady" class="text-center my-3">
-                <div class="spinner-border spinner-border-sm text-primary" role="status">
-                  <span class="visually-hidden">Cargando formulario...</span>
-                </div>
-                <small class="d-block mt-2 text-muted">Cargando formulario de pago seguro...</small>
-              </div>
-            </div>
-
-            <div *ngIf="metodoPago === 'transferencia'" class="alert alert-info">
+            <div class="alert alert-info">
               <i class="bi bi-info-circle me-2"></i>
-              <strong>Datos para transferencia:</strong><br>
-              CBU: 0000000000000000000000<br>
-              Alias: ECOMMERCE.SHOP<br>
-              Titular: E-Commerce SA
+              <strong>Pago por transferencia:</strong><br>
+              Una vez confirmado el pedido, recibirás un email con los datos para realizar la transferencia.
             </div>
           </div>
         </div>
 
-        <!-- Botón de Pago -->
+        <!-- Botón de Confirmar -->
         <button
           type="button"
           class="btn btn-primary btn-lg w-100"
-          (click)="procesarPago()"
+          (click)="procesarPedido()"
           [disabled]="procesando || checkoutForm.invalid"
         >
           <span *ngIf="procesando" class="spinner-border spinner-border-sm me-2"></span>
-          <span *ngIf="!procesando && metodoPago === 'tarjeta'">
-            <i class="bi bi-credit-card me-2"></i>Confirmar y Pagar ${{ total | number:'1.2-2' }}
-          </span>
-          <span *ngIf="!procesando && metodoPago === 'transferencia'">
+          <span *ngIf="!procesando">
             <i class="bi bi-check-circle me-2"></i>Confirmar Pedido
           </span>
           <span *ngIf="procesando">
@@ -257,7 +152,7 @@
           <div class="mb-3">
             <div *ngFor="let item of items" class="d-flex justify-content-between mb-2">
               <div class="flex-grow-1">
-                <small>{{ item.productoNombre || item.producto?.nombre }}</small><br>
+                <small>{{ item.producto?.nombre }}</small><br>
                 <small class="text-muted">Cantidad: {{ item.cantidad }}</small>
               </div>
               <div>

@@ -106,9 +106,6 @@ builder.Services.AddHttpClient();
 // Registrar servicio de envíos simulado
 builder.Services.AddSingleton<EcommerceApi.Services.MockShippingService>();
 
-// Registrar servicio de MercadoPago
-builder.Services.AddScoped<EcommerceApi.Services.MercadoPagoService>();
-
 // Registrar servicio de Encriptación
 builder.Services.AddSingleton<EcommerceApi.Services.EncryptionService>();
 

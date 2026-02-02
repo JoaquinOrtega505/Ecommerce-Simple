@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Data;
 using EcommerceApi.Models;
-using EcommerceApi.Services;
 using System.Security.Claims;
 
 namespace EcommerceApi.Controllers;
@@ -14,18 +13,15 @@ public class PlanesController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly ILogger<PlanesController> _logger;
-    private readonly MercadoPagoService _mercadoPagoService;
     private readonly IConfiguration _configuration;
 
     public PlanesController(
         AppDbContext context,
         ILogger<PlanesController> logger,
-        MercadoPagoService mercadoPagoService,
         IConfiguration configuration)
     {
         _context = context;
         _logger = logger;
-        _mercadoPagoService = mercadoPagoService;
         _configuration = configuration;
     }
 
@@ -332,54 +328,8 @@ public class PlanesController : ControllerBase
         });
     }
 
-    // POST: api/planes/iniciar-pago
-    [HttpPost("iniciar-pago")]
-    [Authorize(Roles = "Admin")]
-    public async Task<ActionResult> IniciarPago([FromBody] IniciarPagoDto dto)
-    {
-        var tienda = await _context.Tiendas.FindAsync(dto.TiendaId);
-        if (tienda == null)
-        {
-            return NotFound(new { message = "Tienda no encontrada" });
-        }
-
-        var plan = await _context.PlanesSuscripcion.FindAsync(dto.PlanId);
-        if (plan == null || !plan.Activo)
-        {
-            return NotFound(new { message = "Plan no encontrado o inactivo" });
-        }
-
-        try
-        {
-            var frontendUrl = _configuration["FrontendUrl"];
-            var urlSuccess = $"{frontendUrl}/emprendedor/configuracion?pago=success&tienda={dto.TiendaId}&plan={dto.PlanId}";
-            var urlFailure = $"{frontendUrl}/emprendedor/configuracion?pago=failure";
-            var urlPending = $"{frontendUrl}/emprendedor/configuracion?pago=pending";
-
-            var preference = await _mercadoPagoService.CrearPreferenciaSuscripcionAsync(
-                plan,
-                tienda,
-                dto.Email,
-                urlSuccess,
-                urlFailure,
-                urlPending
-            );
-
-            return Ok(new
-            {
-                preferenceId = preference.Id,
-                initPoint = preference.InitPoint,
-                sandboxInitPoint = preference.SandboxInitPoint
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error al crear preferencia de pago para suscripción");
-            return StatusCode(500, new { message = "Error al iniciar el pago" });
-        }
-    }
-
     // POST: api/planes/confirmar-pago
+    // Endpoint simplificado para confirmar pago de suscripción (sin MercadoPago por ahora)
     [HttpPost("confirmar-pago")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult> ConfirmarPago([FromBody] ConfirmarPagoDto dto)
@@ -394,16 +344,6 @@ public class PlanesController : ControllerBase
         if (plan == null)
         {
             return NotFound(new { message = "Plan no encontrado" });
-        }
-
-        // Verificar el pago en MercadoPago si se proporciona paymentId
-        if (dto.PaymentId.HasValue)
-        {
-            var pago = await _mercadoPagoService.ObtenerPagoAsync(dto.PaymentId.Value);
-            if (pago == null || pago.Status != "approved")
-            {
-                return BadRequest(new { message = "El pago no fue aprobado" });
-            }
         }
 
         // Si la tienda tiene una suscripción previa, marcarla como "Cambiada"
@@ -428,10 +368,10 @@ public class PlanesController : ControllerBase
             PlanSuscripcionId = dto.PlanId,
             FechaInicio = DateTime.UtcNow,
             Estado = "Activa",
-            MetodoPago = "MercadoPago",
-            TransaccionId = dto.PaymentId?.ToString() ?? dto.PreferenceId,
+            MetodoPago = "Manual",
+            TransaccionId = dto.PreferenceId,
             MontoTotal = plan.PrecioMensual,
-            Notas = "Pago procesado con MercadoPago"
+            Notas = "Pago confirmado manualmente"
         };
 
         _context.HistorialSuscripciones.Add(nuevoHistorial);
@@ -447,8 +387,8 @@ public class PlanesController : ControllerBase
         await _context.SaveChangesAsync();
 
         _logger.LogInformation(
-            "Pago confirmado para tienda {TiendaId}, plan {PlanNombre}, payment {PaymentId}",
-            dto.TiendaId, plan.Nombre, dto.PaymentId);
+            "Pago confirmado para tienda {TiendaId}, plan {PlanNombre}",
+            dto.TiendaId, plan.Nombre);
 
         return Ok(new
         {
@@ -468,18 +408,10 @@ public class SuscripcionDto
     public string? Notas { get; set; }
 }
 
-public class IniciarPagoDto
-{
-    public int TiendaId { get; set; }
-    public int PlanId { get; set; }
-    public string Email { get; set; } = string.Empty;
-}
-
 public class ConfirmarPagoDto
 {
     public int TiendaId { get; set; }
     public int PlanId { get; set; }
-    public long? PaymentId { get; set; }
     public string? PreferenceId { get; set; }
 }
 

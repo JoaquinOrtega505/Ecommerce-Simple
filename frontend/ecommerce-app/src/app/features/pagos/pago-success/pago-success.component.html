@@ -9,15 +9,15 @@
           </div>
 
           <!-- Título -->
-          <h2 class="text-success mb-3">¡Pago Exitoso!</h2>
+          <h2 class="text-success mb-3">¡Pedido Confirmado!</h2>
 
           <!-- Mensaje -->
           <p class="lead mb-3">
-            Tu pago ha sido procesado correctamente
+            Tu pedido ha sido registrado correctamente
           </p>
           <p class="text-muted mb-4">
-            <i class="bi bi-box-seam me-2"></i>
-            <strong>Estamos preparando tu pedido</strong>
+            <i class="bi bi-envelope me-2"></i>
+            <strong>Recibirás un email con los detalles de tu pedido</strong>
           </p>
 
           <!-- Información del pedido -->
@@ -25,43 +25,31 @@
             <div class="mb-2">
               <strong>Número de Pedido:</strong> #{{ pedidoId }}
             </div>
-            <small class="text-muted">Recibirás un correo electrónico con los detalles</small>
+            <small class="text-muted">Guarda este número para seguimiento</small>
           </div>
 
-          <div class="alert alert-light" *ngIf="paymentId">
-            <small><strong>ID de Transacción:</strong> {{ paymentId }}</small>
+          <div class="alert alert-info mb-4">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Próximo paso:</strong> Recibirás instrucciones de pago por email
           </div>
 
           <!-- Contador de redirección -->
-          <div class="alert alert-info mb-4">
-            <i class="bi bi-clock me-2"></i>
-            Serás redirigido a tus pedidos en <strong>{{ secondsRemaining }}</strong> segundos
+          <div class="text-muted mb-4">
+            <small>
+              <i class="bi bi-clock me-1"></i>
+              Volviendo a la tienda en {{ secondsRemaining }} segundos...
+            </small>
           </div>
 
-          <!-- Botones de acción -->
+          <!-- Botón de acción -->
           <div class="d-grid gap-2 mt-4">
             <button
               type="button"
-              class="btn btn-success btn-lg"
-              (click)="verMisPedidos()"
+              class="btn btn-primary btn-lg"
+              (click)="volverATienda()"
             >
-              <i class="bi bi-list-check me-2"></i>
-              Ver Mis Pedidos
-            </button>
-            <button
-              type="button"
-              class="btn btn-outline-primary"
-              (click)="verPedido()"
-              *ngIf="pedidoId"
-            >
-              Ver Detalles de Este Pedido
-            </button>
-            <button
-              type="button"
-              class="btn btn-outline-secondary"
-              (click)="irAInicio()"
-            >
-              Volver al Inicio
+              <i class="bi bi-shop me-2"></i>
+              Volver a la Tienda
             </button>
           </div>
         </div>

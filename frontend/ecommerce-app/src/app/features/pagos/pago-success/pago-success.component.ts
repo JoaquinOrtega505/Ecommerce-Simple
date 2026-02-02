@@ -1,7 +1,6 @@
 import { Component, OnInit, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { PagoService } from '../../../core/services/pago.service';
 
 @Component({
   selector: 'app-pago-success',
@@ -13,16 +12,15 @@ import { PagoService } from '../../../core/services/pago.service';
 export class PagoSuccessComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private pagoService = inject(PagoService);
 
   pedidoId: string | null = null;
-  paymentId: string | null = null;
   redirectTimer: any;
-  secondsRemaining = 5;
+  secondsRemaining = 10;
+  tiendaSubdominio: string = '';
 
   ngOnInit(): void {
     this.pedidoId = this.route.snapshot.queryParamMap.get('pedidoId');
-    this.paymentId = this.route.snapshot.queryParamMap.get('payment_id');
+    this.tiendaSubdominio = localStorage.getItem('tienda_actual') || '';
 
     // Iniciar contador de redirección automática
     this.startRedirectTimer();
@@ -38,31 +36,19 @@ export class PagoSuccessComponent implements OnInit, OnDestroy {
     this.redirectTimer = setInterval(() => {
       this.secondsRemaining--;
       if (this.secondsRemaining <= 0) {
-        this.verMisPedidos();
+        this.volverATienda();
       }
     }, 1000);
   }
 
-  verPedido(): void {
+  volverATienda(): void {
     if (this.redirectTimer) {
       clearInterval(this.redirectTimer);
     }
-    if (this.pedidoId) {
-      this.router.navigate(['/pedidos', this.pedidoId]);
+    if (this.tiendaSubdominio) {
+      this.router.navigate(['/tienda', this.tiendaSubdominio]);
+    } else {
+      this.router.navigate(['/']);
     }
-  }
-
-  verMisPedidos(): void {
-    if (this.redirectTimer) {
-      clearInterval(this.redirectTimer);
-    }
-    this.router.navigate(['/pedidos']);
-  }
-
-  irAInicio(): void {
-    if (this.redirectTimer) {
-      clearInterval(this.redirectTimer);
-    }
-    this.router.navigate(['/']);
   }
 }
