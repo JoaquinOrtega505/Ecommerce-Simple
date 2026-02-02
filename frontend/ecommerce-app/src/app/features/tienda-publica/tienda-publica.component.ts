@@ -85,19 +85,8 @@ export class TiendaPublicaComponent implements OnInit {
   }
 
   cargarCantidadCarrito(): void {
-    if (this.authService.isAuthenticated) {
-      this.carritoService.getCarrito().subscribe({
-        next: (items) => {
-          this.cantidadCarrito = items.reduce((sum, item) => sum + item.cantidad, 0);
-        },
-        error: (err) => {
-          console.error('Error al cargar carrito:', err);
-        }
-      });
-    } else {
-      // Cargar desde localStorage para usuarios no autenticados
-      this.cantidadCarrito = this.obtenerCantidadCarritoLocal();
-    }
+    // Siempre cargar desde localStorage (compras anónimas en tienda pública)
+    this.cantidadCarrito = this.obtenerCantidadCarritoLocal();
   }
 
   private obtenerCarritoLocal(): any[] {
@@ -115,45 +104,30 @@ export class TiendaPublicaComponent implements OnInit {
   }
 
   agregarAlCarrito(producto: Producto): void {
-    if (this.authService.isAuthenticated) {
-      // Usuario autenticado: guardar en BD
-      this.carritoService.agregarAlCarrito({ productoId: producto.id, cantidad: 1 }).subscribe({
-        next: () => {
-          this.mensaje = `${producto.nombre} agregado al carrito`;
-          this.cantidadCarrito++;
-          setTimeout(() => this.mensaje = '', 3000);
-        },
-        error: (error) => {
-          this.mensaje = error.error?.message || 'Error al agregar al carrito';
-          setTimeout(() => this.mensaje = '', 3000);
+    // Siempre guardar en localStorage (compras anónimas en tienda pública)
+    const carrito = this.obtenerCarritoLocal();
+    const itemExistente = carrito.find((item: any) => item.productoId === producto.id);
+
+    if (itemExistente) {
+      itemExistente.cantidad++;
+    } else {
+      carrito.push({
+        productoId: producto.id,
+        cantidad: 1,
+        producto: {
+          id: producto.id,
+          nombre: producto.nombre,
+          precio: producto.precio,
+          imagenUrl: producto.imagenUrl,
+          stock: producto.stock
         }
       });
-    } else {
-      // Usuario anónimo: guardar en localStorage
-      const carrito = this.obtenerCarritoLocal();
-      const itemExistente = carrito.find((item: any) => item.productoId === producto.id);
-
-      if (itemExistente) {
-        itemExistente.cantidad++;
-      } else {
-        carrito.push({
-          productoId: producto.id,
-          cantidad: 1,
-          producto: {
-            id: producto.id,
-            nombre: producto.nombre,
-            precio: producto.precio,
-            imagenUrl: producto.imagenUrl,
-            stock: producto.stock
-          }
-        });
-      }
-
-      this.guardarCarritoLocal(carrito);
-      this.cantidadCarrito = this.obtenerCantidadCarritoLocal();
-      this.mensaje = `${producto.nombre} agregado al carrito`;
-      setTimeout(() => this.mensaje = '', 3000);
     }
+
+    this.guardarCarritoLocal(carrito);
+    this.cantidadCarrito = this.obtenerCantidadCarritoLocal();
+    this.mensaje = `${producto.nombre} agregado al carrito`;
+    setTimeout(() => this.mensaje = '', 3000);
   }
 
   verDetalle(producto: Producto): void {
