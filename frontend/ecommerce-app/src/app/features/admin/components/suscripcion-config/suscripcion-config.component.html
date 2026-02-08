@@ -1,0 +1,355 @@
+<div class="container-fluid py-4">
+  <h2 class="mb-4">
+    <i class="bi bi-gear me-2"></i>
+    Configuración de Suscripciones
+  </h2>
+
+  <!-- Mensajes -->
+  <div class="alert alert-danger" *ngIf="errorMessage">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    {{ errorMessage }}
+  </div>
+
+  <div class="alert alert-success" *ngIf="successMessage">
+    <i class="bi bi-check-circle me-2"></i>
+    {{ successMessage }}
+  </div>
+
+  <!-- Loading -->
+  <div class="text-center py-5" *ngIf="loading">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-2 text-muted">Cargando configuración...</p>
+  </div>
+
+  <div class="row" *ngIf="!loading">
+    <!-- Configuración de Suscripciones -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-sliders me-2"></i>
+            Parámetros de Suscripción
+          </h5>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="guardarConfiguracion()">
+            <!-- Días de Prueba -->
+            <div class="mb-3">
+              <label for="diasPrueba" class="form-label">
+                <i class="bi bi-calendar-check me-1"></i>
+                Días de Período de Prueba
+              </label>
+              <input
+                type="number"
+                class="form-control"
+                id="diasPrueba"
+                [(ngModel)]="configForm.diasPrueba"
+                name="diasPrueba"
+                min="0"
+                max="30"
+                required
+              />
+              <small class="text-muted">
+                Días gratuitos antes de cobrar la primera cuota (0-30)
+              </small>
+            </div>
+
+            <!-- Reintentos de Pago -->
+            <div class="mb-3">
+              <label for="maxReintentosPago" class="form-label">
+                <i class="bi bi-arrow-repeat me-1"></i>
+                Reintentos de Pago
+              </label>
+              <input
+                type="number"
+                class="form-control"
+                id="maxReintentosPago"
+                [(ngModel)]="configForm.maxReintentosPago"
+                name="maxReintentosPago"
+                min="1"
+                max="10"
+                required
+              />
+              <small class="text-muted">
+                Intentos de cobro antes de suspender (1-10)
+              </small>
+            </div>
+
+            <!-- Días de Gracia -->
+            <div class="mb-3">
+              <label for="diasGraciaSuspension" class="form-label">
+                <i class="bi bi-hourglass-split me-1"></i>
+                Días de Gracia
+              </label>
+              <input
+                type="number"
+                class="form-control"
+                id="diasGraciaSuspension"
+                [(ngModel)]="configForm.diasGraciaSuspension"
+                name="diasGraciaSuspension"
+                min="1"
+                max="30"
+                required
+              />
+              <small class="text-muted">
+                Días para regularizar después de suspensión (1-30)
+              </small>
+            </div>
+
+            <!-- Días de Aviso -->
+            <div class="mb-3">
+              <label for="diasAvisoFinTrial" class="form-label">
+                <i class="bi bi-bell me-1"></i>
+                Días de Aviso Fin Trial
+              </label>
+              <input
+                type="number"
+                class="form-control"
+                id="diasAvisoFinTrial"
+                [(ngModel)]="configForm.diasAvisoFinTrial"
+                name="diasAvisoFinTrial"
+                min="1"
+                [max]="configForm.diasPrueba"
+                required
+              />
+              <small class="text-muted">
+                Días antes del fin del trial para enviar recordatorio
+              </small>
+            </div>
+
+            <div class="d-grid">
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="saving"
+              >
+                <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+                <i *ngIf="!saving" class="bi bi-save me-2"></i>
+                Guardar Configuración
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- MercadoPago -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header" [ngClass]="mpCredenciales?.conectado ? 'bg-success text-white' : 'bg-secondary text-white'">
+          <h5 class="mb-0">
+            <i class="bi bi-credit-card me-2"></i>
+            Conexión MercadoPago
+          </h5>
+        </div>
+        <div class="card-body">
+          <!-- Estado de conexión -->
+          <div *ngIf="!showMpForm">
+            <div class="text-center py-4" *ngIf="!mpCredenciales?.conectado">
+              <i class="bi bi-x-circle text-danger" style="font-size: 3rem;"></i>
+              <h5 class="mt-3 text-danger">No Conectado</h5>
+              <p class="text-muted">
+                Conecta tu cuenta de MercadoPago para recibir pagos de suscripciones
+              </p>
+              <button
+                class="btn btn-primary"
+                (click)="mostrarFormularioMP()"
+              >
+                <i class="bi bi-link-45deg me-2"></i>
+                Conectar MercadoPago
+              </button>
+            </div>
+
+            <div *ngIf="mpCredenciales?.conectado">
+              <div class="text-center mb-4">
+                <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+                <h5 class="mt-3 text-success">Conectado</h5>
+              </div>
+
+              <ul class="list-group mb-4">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-envelope me-2"></i>Email</span>
+                  <strong>{{ mpCredenciales?.mercadoPagoEmail || 'No disponible' }}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-calendar me-2"></i>Fecha de conexión</span>
+                  <strong>{{ mpCredenciales?.fechaConexion | date:'dd/MM/yyyy HH:mm' }}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-shield-check me-2"></i>Modo</span>
+                  <span class="badge" [ngClass]="mpCredenciales?.esProduccion ? 'bg-success' : 'bg-warning'">
+                    {{ mpCredenciales?.esProduccion ? 'Producción' : 'Sandbox' }}
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-key me-2"></i>Token</span>
+                  <span class="badge" [ngClass]="mpCredenciales?.tokenValido ? 'bg-success' : 'bg-danger'">
+                    {{ mpCredenciales?.tokenValido ? 'Válido' : 'Expirado' }}
+                  </span>
+                </li>
+              </ul>
+
+              <div class="d-grid gap-2">
+                <button
+                  class="btn btn-outline-primary"
+                  (click)="mostrarFormularioMP()"
+                >
+                  <i class="bi bi-arrow-repeat me-2"></i>
+                  Actualizar Credenciales
+                </button>
+                <button
+                  class="btn btn-outline-danger"
+                  (click)="desconectarMercadoPago()"
+                  [disabled]="saving"
+                >
+                  <i class="bi bi-x-lg me-2"></i>
+                  Desconectar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Formulario de conexión -->
+          <div *ngIf="showMpForm">
+            <form (ngSubmit)="conectarMercadoPago()">
+              <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>¿Dónde obtener las credenciales?</strong>
+                <ol class="mb-0 mt-2">
+                  <li>Ingresa a <a href="https://www.mercadopago.com.ar/developers/panel" target="_blank">MercadoPago Developers</a></li>
+                  <li>Selecciona tu aplicación o crea una nueva</li>
+                  <li>Ve a "Credenciales de producción" o "Credenciales de prueba"</li>
+                  <li>Copia el Access Token y Public Key</li>
+                </ol>
+              </div>
+
+              <div class="mb-3">
+                <label for="accessToken" class="form-label">
+                  Access Token
+                </label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="accessToken"
+                  [(ngModel)]="mpForm.accessToken"
+                  name="accessToken"
+                  placeholder="APP_USR-xxxxx..."
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="publicKey" class="form-label">
+                  Public Key
+                </label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="publicKey"
+                  [(ngModel)]="mpForm.publicKey"
+                  name="publicKey"
+                  placeholder="APP_USR-xxxxx..."
+                  required
+                />
+              </div>
+
+              <div class="mb-4">
+                <div class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="esProduccion"
+                    [(ngModel)]="mpForm.esProduccion"
+                    name="esProduccion"
+                  />
+                  <label class="form-check-label" for="esProduccion">
+                    Modo Producción
+                  </label>
+                </div>
+                <small class="text-muted">
+                  Activa esto solo cuando uses credenciales de producción reales
+                </small>
+              </div>
+
+              <div class="d-grid gap-2">
+                <button
+                  type="submit"
+                  class="btn btn-success"
+                  [disabled]="saving"
+                >
+                  <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+                  <i *ngIf="!saving" class="bi bi-check-lg me-2"></i>
+                  Conectar
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  (click)="cancelarFormularioMP()"
+                  [disabled]="saving"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Información adicional -->
+  <div class="row" *ngIf="!loading">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-info-circle me-2"></i>
+            ¿Cómo funciona el sistema de suscripciones?
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3 text-center mb-3">
+              <div class="bg-light rounded p-3">
+                <i class="bi bi-1-circle text-primary" style="font-size: 2rem;"></i>
+                <h6 class="mt-2">Registro</h6>
+                <small class="text-muted">
+                  El emprendedor selecciona un plan y registra su tarjeta
+                </small>
+              </div>
+            </div>
+            <div class="col-md-3 text-center mb-3">
+              <div class="bg-light rounded p-3">
+                <i class="bi bi-2-circle text-primary" style="font-size: 2rem;"></i>
+                <h6 class="mt-2">Período de Prueba</h6>
+                <small class="text-muted">
+                  {{ configForm.diasPrueba }} días gratis para probar la plataforma
+                </small>
+              </div>
+            </div>
+            <div class="col-md-3 text-center mb-3">
+              <div class="bg-light rounded p-3">
+                <i class="bi bi-3-circle text-primary" style="font-size: 2rem;"></i>
+                <h6 class="mt-2">Cobro Automático</h6>
+                <small class="text-muted">
+                  Se cobra mensualmente después del trial
+                </small>
+              </div>
+            </div>
+            <div class="col-md-3 text-center mb-3">
+              <div class="bg-light rounded p-3">
+                <i class="bi bi-4-circle text-primary" style="font-size: 2rem;"></i>
+                <h6 class="mt-2">Reintentos</h6>
+                <small class="text-muted">
+                  {{ configForm.maxReintentosPago }} intentos antes de suspender
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

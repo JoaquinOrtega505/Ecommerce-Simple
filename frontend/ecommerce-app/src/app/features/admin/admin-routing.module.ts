@@ -5,6 +5,7 @@ import { TiendasListComponent } from './components/tiendas-list/tiendas-list.com
 import { TiendaFormComponent } from './components/tienda-form/tienda-form.component';
 import { UsuariosAdminComponent } from './components/usuarios-admin/usuarios-admin.component';
 import { PlanesAdminComponent } from './components/planes-admin/planes-admin.component';
+import { SuscripcionConfigComponent } from './components/suscripcion-config/suscripcion-config.component';
 
 const routes: Routes = [
   {
@@ -16,7 +17,8 @@ const routes: Routes = [
       { path: 'tiendas/nueva', component: TiendaFormComponent },
       { path: 'tiendas/editar/:id', component: TiendaFormComponent },
       { path: 'usuarios', component: UsuariosAdminComponent },
-      { path: 'planes', component: PlanesAdminComponent }
+      { path: 'planes', component: PlanesAdminComponent },
+      { path: 'suscripciones', component: SuscripcionConfigComponent }
     ]
   }
 ];

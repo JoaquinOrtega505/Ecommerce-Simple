@@ -41,7 +41,11 @@
       "Bash(git commit:*)",
       "Bash(git status:*)",
       "Bash(git ls-tree:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(cd:*)",
+      "Bash(npx ng build:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(dotnet nuget search:*)"
     ]
   }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Data;
 using EcommerceApi.Models;
+using EcommerceApi.Services;
 using System.Security.Claims;
 
 namespace EcommerceApi.Controllers;
@@ -14,15 +15,18 @@ public class PlanesController : ControllerBase
     private readonly AppDbContext _context;
     private readonly ILogger<PlanesController> _logger;
     private readonly IConfiguration _configuration;
+    private readonly MercadoPagoSuscripcionesService _mpService;
 
     public PlanesController(
         AppDbContext context,
         ILogger<PlanesController> logger,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        MercadoPagoSuscripcionesService mpService)
     {
         _context = context;
         _logger = logger;
         _configuration = configuration;
+        _mpService = mpService;
     }
 
     // GET: api/planes
@@ -80,6 +84,22 @@ public class PlanesController : ControllerBase
         _context.PlanesSuscripcion.Add(plan);
         await _context.SaveChangesAsync();
 
+        // Sincronizar con MercadoPago si está conectado
+        if (await _mpService.EstaConectadoAsync())
+        {
+            var mpResult = await _mpService.CrearPlanAsync(plan);
+            if (mpResult.Success)
+            {
+                plan.MercadoPagoPlanId = mpResult.MercadoPagoPlanId;
+                plan.MercadoPagoSyncDate = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                _logger.LogWarning("No se pudo crear el plan en MercadoPago: {Error}", mpResult.Error);
+            }
+        }
+
         _logger.LogInformation("Plan de suscripción creado: {PlanNombre} (ID: {PlanId})", plan.Nombre, plan.Id);
 
         return CreatedAtAction(nameof(GetPlan), new { id = plan.Id }, plan);
@@ -101,6 +121,21 @@ public class PlanesController : ControllerBase
         plan.MaxProductos = dto.MaxProductos;
         plan.PrecioMensual = dto.PrecioMensual;
         plan.Activo = dto.Activo;
+
+        // Sincronizar con MercadoPago si está conectado
+        if (await _mpService.EstaConectadoAsync())
+        {
+            var mpResult = await _mpService.ActualizarPlanAsync(plan);
+            if (mpResult.Success)
+            {
+                plan.MercadoPagoPlanId = mpResult.MercadoPagoPlanId;
+                plan.MercadoPagoSyncDate = DateTime.UtcNow;
+            }
+            else
+            {
+                _logger.LogWarning("No se pudo actualizar el plan en MercadoPago: {Error}", mpResult.Error);
+            }
+        }
 
         await _context.SaveChangesAsync();
 
@@ -132,12 +167,36 @@ public class PlanesController : ControllerBase
             });
         }
 
+        // Desactivar en MercadoPago si está conectado
+        if (!string.IsNullOrEmpty(plan.MercadoPagoPlanId) && await _mpService.EstaConectadoAsync())
+        {
+            await _mpService.DesactivarPlanAsync(plan.MercadoPagoPlanId);
+        }
+
         _context.PlanesSuscripcion.Remove(plan);
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Plan de suscripción eliminado: {PlanNombre} (ID: {PlanId})", plan.Nombre, plan.Id);
 
         return Ok(new { message = "Plan eliminado exitosamente" });
+    }
+
+    // POST: api/planes/sincronizar-mp
+    [HttpPost("sincronizar-mp")]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<ActionResult> SincronizarConMercadoPago()
+    {
+        if (!await _mpService.EstaConectadoAsync())
+        {
+            return BadRequest(new { message = "MercadoPago no está conectado. Configúrelo primero." });
+        }
+
+        var sincronizados = await _mpService.SincronizarTodosPlanesAsync();
+
+        return Ok(new {
+            message = $"Sincronización completada. {sincronizados} planes sincronizados con MercadoPago.",
+            planesSincronizados = sincronizados
+        });
     }
 
     // POST: api/planes/suscribirse

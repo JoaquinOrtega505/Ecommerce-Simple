@@ -24,6 +24,8 @@ public class AppDbContext : DbContext
     public DbSet<Tienda> Tiendas { get; set; }
     public DbSet<PlanSuscripcion> PlanesSuscripcion { get; set; }
     public DbSet<HistorialSuscripcion> HistorialSuscripciones { get; set; }
+    public DbSet<ConfiguracionSuscripciones> ConfiguracionSuscripciones { get; set; }
+    public DbSet<MercadoPagoCredencialesSuperAdmin> MercadoPagoCredenciales { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -215,6 +217,31 @@ public class AppDbContext : DbContext
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
                 Rol = "SuperAdmin",
                 TiendaId = null,
+                FechaCreacion = DateTime.UtcNow
+            }
+        );
+
+        // Configuración de suscripciones por defecto
+        modelBuilder.Entity<ConfiguracionSuscripciones>().HasData(
+            new ConfiguracionSuscripciones
+            {
+                Id = 1,
+                DiasPrueba = 7,
+                MaxReintentosPago = 3,
+                DiasGraciaSuspension = 3,
+                DiasAvisoFinTrial = 2,
+                Activo = true,
+                FechaCreacion = DateTime.UtcNow
+            }
+        );
+
+        // Registro vacío para credenciales de MercadoPago (se llenará cuando el SuperAdmin conecte)
+        modelBuilder.Entity<MercadoPagoCredencialesSuperAdmin>().HasData(
+            new MercadoPagoCredencialesSuperAdmin
+            {
+                Id = 1,
+                Conectado = false,
+                EsProduccion = false,
                 FechaCreacion = DateTime.UtcNow
             }
         );
