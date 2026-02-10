@@ -8,6 +8,7 @@ import { PedidosListComponent } from './components/pedidos-list/pedidos-list.com
 import { MiTiendaComponent } from './components/mi-tienda/mi-tienda.component';
 import { ConfiguracionComponent } from './components/configuracion/configuracion.component';
 import { OAuthCallbackComponent } from './components/oauth-callback/oauth-callback.component';
+import { SuscripcionCheckoutComponent } from './components/suscripcion-checkout/suscripcion-checkout.component';
 
 const routes: Routes = [
   {
@@ -50,6 +51,14 @@ const routes: Routes = [
       {
         path: 'configuracion/oauth-callback',
         component: OAuthCallbackComponent
+      },
+      {
+        path: 'suscripcion',
+        component: SuscripcionCheckoutComponent
+      },
+      {
+        path: 'suscripcion/resultado',
+        component: SuscripcionCheckoutComponent
       }
     ]
   }

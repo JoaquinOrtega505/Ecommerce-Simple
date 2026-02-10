@@ -42,6 +42,13 @@ public partial class Tienda
     public DateTime? FechaSuscripcion { get; set; }
     public DateTime? FechaVencimientoSuscripcion { get; set; }
 
+    // MercadoPago Suscripción
+    public string? MercadoPagoSuscripcionId { get; set; }
+    public string? EstadoSuscripcion { get; set; } // trial, active, paused, cancelled, pending
+    public DateTime? FechaInicioTrial { get; set; }
+    public DateTime? FechaFinTrial { get; set; }
+    public int ReintentosPago { get; set; } = 0;
+
     // Estado de la tienda: Borrador, Activa, Suspendida, Inactiva
     public string EstadoTienda { get; set; } = "Borrador";
 

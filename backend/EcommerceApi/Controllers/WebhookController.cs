@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Data;
 using EcommerceApi.DTOs;
+using EcommerceApi.Services;
 
 namespace EcommerceApi.Controllers;
 
@@ -12,12 +13,18 @@ public class WebhookController : ControllerBase
     private readonly AppDbContext _context;
     private readonly ILogger<WebhookController> _logger;
     private readonly IConfiguration _configuration;
+    private readonly MercadoPagoSuscripcionesService _mpService;
 
-    public WebhookController(AppDbContext context, ILogger<WebhookController> logger, IConfiguration configuration)
+    public WebhookController(
+        AppDbContext context,
+        ILogger<WebhookController> logger,
+        IConfiguration configuration,
+        MercadoPagoSuscripcionesService mpService)
     {
         _context = context;
         _logger = logger;
         _configuration = configuration;
+        _mpService = mpService;
     }
 
     /// <summary>
@@ -126,8 +133,131 @@ public class WebhookController : ControllerBase
             timestamp = DateTime.UtcNow,
             endpoints = new
             {
-                entrega = "/api/webhook/entrega"
+                entrega = "/api/webhook/entrega",
+                mercadopago = "/api/webhook/mercadopago"
             }
         });
     }
+
+    /// <summary>
+    /// Webhook para recibir notificaciones de MercadoPago (suscripciones y pagos)
+    /// Documentación: https://www.mercadopago.com.ar/developers/es/docs/your-integrations/notifications/webhooks
+    /// </summary>
+    [HttpPost("mercadopago")]
+    public async Task<ActionResult> MercadoPagoWebhook()
+    {
+        try
+        {
+            // Leer el body raw para logging
+            using var reader = new StreamReader(Request.Body);
+            var body = await reader.ReadToEndAsync();
+
+            _logger.LogInformation("Webhook MercadoPago recibido: {Body}", body);
+
+            // MercadoPago envía diferentes formatos según el tipo de notificación
+            // Query params: ?topic=payment&id=123456
+            var topic = Request.Query["topic"].ToString();
+            var resourceId = Request.Query["id"].ToString();
+
+            // También puede venir en el body como JSON
+            if (string.IsNullOrEmpty(topic) && !string.IsNullOrEmpty(body))
+            {
+                try
+                {
+                    var notification = System.Text.Json.JsonSerializer.Deserialize<MercadoPagoNotification>(body);
+                    if (notification != null)
+                    {
+                        topic = notification.Topic ?? notification.Type ?? "";
+                        resourceId = notification.Data?.Id ?? notification.Id ?? "";
+                    }
+                }
+                catch (System.Text.Json.JsonException)
+                {
+                    _logger.LogWarning("No se pudo parsear el body del webhook como JSON");
+                }
+            }
+
+            _logger.LogInformation("Webhook MP: Topic={Topic}, Id={Id}", topic, resourceId);
+
+            if (string.IsNullOrEmpty(resourceId))
+            {
+                return Ok(new { message = "Notificación recibida sin ID" });
+            }
+
+            // Procesar según el tipo de notificación
+            Services.WebhookResult result;
+
+            switch (topic.ToLower())
+            {
+                case "preapproval":
+                case "subscription_preapproval":
+                    result = await _mpService.ProcesarWebhookSuscripcionAsync(topic, resourceId);
+                    break;
+
+                case "payment":
+                    result = await _mpService.ProcesarWebhookPagoAsync(resourceId);
+                    break;
+
+                case "subscription_authorized_payment":
+                    result = await _mpService.ProcesarWebhookPagoAsync(resourceId);
+                    break;
+
+                default:
+                    _logger.LogInformation("Topic no manejado: {Topic}", topic);
+                    result = new Services.WebhookResult { Success = true, Message = $"Topic '{topic}' no manejado" };
+                    break;
+            }
+
+            if (result.Success)
+            {
+                return Ok(new { message = result.Message });
+            }
+            else
+            {
+                _logger.LogError("Error procesando webhook: {Error}", result.Error);
+                // Retornamos 200 para que MP no reintente, pero logueamos el error
+                return Ok(new { message = "Error procesado", error = result.Error });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error procesando webhook de MercadoPago");
+            // Retornamos 200 para evitar reintentos excesivos de MP
+            return Ok(new { message = "Error interno", error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Endpoint de verificación para MercadoPago (GET para validar URL)
+    /// </summary>
+    [HttpGet("mercadopago")]
+    public ActionResult MercadoPagoWebhookVerify()
+    {
+        return Ok(new
+        {
+            status = "Webhook MercadoPago activo",
+            timestamp = DateTime.UtcNow
+        });
+    }
+}
+
+/// <summary>
+/// Modelo para deserializar notificaciones de MercadoPago
+/// </summary>
+public class MercadoPagoNotification
+{
+    public string? Id { get; set; }
+    public string? Topic { get; set; }
+    public string? Type { get; set; }
+    public string? Action { get; set; }
+    public string? ApiVersion { get; set; }
+    public MercadoPagoNotificationData? Data { get; set; }
+    public DateTime? DateCreated { get; set; }
+    public long? UserId { get; set; }
+    public bool? LiveMode { get; set; }
+}
+
+public class MercadoPagoNotificationData
+{
+    public string? Id { get; set; }
 }

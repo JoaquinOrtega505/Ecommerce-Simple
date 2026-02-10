@@ -124,6 +124,9 @@ builder.Services.AddScoped<EcommerceApi.Services.BrevoEmailService>();
 // Registrar servicio de suscripciones MercadoPago
 builder.Services.AddScoped<EcommerceApi.Services.MercadoPagoSuscripcionesService>();
 
+// Registrar servicio en segundo plano para verificar suscripciones
+builder.Services.AddHostedService<EcommerceApi.Services.SuscripcionesBackgroundService>();
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
