@@ -1,0 +1,581 @@
+.dashboard-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+
+  h2 {
+    margin: 0;
+    color: #333;
+  }
+}
+
+// Alerts
+.alert {
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+
+  &.alert-error {
+    background-color: #fee;
+    border: 1px solid #fcc;
+    color: #c33;
+  }
+
+  &.alert-success {
+    background-color: #efe;
+    border: 1px solid #cfc;
+    color: #3c3;
+  }
+}
+
+// Loading
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+}
+
+// Tabs
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #dee2e6;
+  padding-bottom: 0;
+
+  .tab {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #666;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+
+    &:hover {
+      color: #007bff;
+    }
+
+    &.active {
+      color: #007bff;
+      border-bottom-color: #007bff;
+      font-weight: 600;
+    }
+  }
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+// Metrics Grid
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  border-left: 4px solid #6c757d;
+
+  .metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  .metric-label {
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  &.success {
+    border-left-color: #28a745;
+    .metric-value { color: #28a745; }
+  }
+
+  &.info {
+    border-left-color: #17a2b8;
+    .metric-value { color: #17a2b8; }
+  }
+
+  &.warning {
+    border-left-color: #ffc107;
+    .metric-value { color: #856404; }
+  }
+
+  &.danger {
+    border-left-color: #dc3545;
+    .metric-value { color: #dc3545; }
+  }
+
+  &.highlight {
+    border-left-color: #007bff;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    .metric-value { color: #007bff; font-size: 1.5rem; }
+  }
+}
+
+// Alerts Section
+.alerts-section {
+  margin-bottom: 2rem;
+
+  h3 {
+    margin-bottom: 1rem;
+    color: #333;
+  }
+}
+
+.alerts-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.alert-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  flex: 1;
+  min-width: 250px;
+
+  .alert-icon {
+    width: 32px;
+    height: 32px;
+    background: #ffc107;
+    color: #856404;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+
+  .alert-content {
+    color: #856404;
+  }
+
+  &.success {
+    background: #d4edda;
+    border-color: #28a745;
+
+    .alert-icon {
+      background: #28a745;
+      color: white;
+    }
+
+    .alert-content {
+      color: #155724;
+    }
+  }
+}
+
+// MercadoPago Status
+.mp-status {
+  margin-bottom: 2rem;
+
+  h3 {
+    margin-bottom: 1rem;
+    color: #333;
+  }
+}
+
+.mp-card {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  .mp-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+  }
+
+  .status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #dc3545;
+
+    &.active {
+      background: #28a745;
+    }
+  }
+
+  .mp-email {
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  &.connected {
+    border-color: #28a745;
+  }
+}
+
+// Distribution Section
+.distribution-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.distribution-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  h4 {
+    margin: 0 0 1rem;
+    color: #333;
+    font-size: 1rem;
+  }
+}
+
+.distribution-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.distribution-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .distribution-label {
+    color: #666;
+  }
+
+  .distribution-value {
+    font-weight: 600;
+    color: #333;
+  }
+}
+
+// Tables
+.table-container {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+
+  h3 {
+    margin: 0;
+    color: #333;
+  }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead {
+    background-color: #f8f9fa;
+
+    th {
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: #333;
+      border-bottom: 2px solid #dee2e6;
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid #dee2e6;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: #f8f9fa;
+      }
+
+      &.expiring-soon {
+        background-color: #fff3cd;
+      }
+    }
+
+    td {
+      padding: 1rem;
+      color: #555;
+
+      small {
+        color: #999;
+      }
+    }
+  }
+}
+
+.no-data {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+}
+
+// Badge
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  &.badge-success {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  &.badge-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+
+  &.badge-warning {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+
+  &.badge-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+  }
+
+  &.badge-secondary {
+    background-color: #e9ecef;
+    color: #6c757d;
+  }
+}
+
+.text-danger {
+  color: #dc3545 !important;
+  font-weight: 600;
+}
+
+.text-warning {
+  color: #856404 !important;
+}
+
+// Planes Section
+.planes-section {
+  .planes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+
+    h3 {
+      margin: 0;
+      color: #333;
+    }
+
+    .total-ingresos {
+      font-size: 1.1rem;
+      color: #666;
+
+      strong {
+        color: #28a745;
+      }
+    }
+  }
+}
+
+.planes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.plan-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #dee2e6;
+
+  &.inactive {
+    opacity: 0.7;
+    background: #f8f9fa;
+  }
+
+  .plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+
+    h4 {
+      margin: 0;
+      color: #333;
+    }
+
+    .plan-price {
+      font-weight: 600;
+      color: #007bff;
+    }
+  }
+
+  .plan-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 1rem;
+
+    .stat {
+      text-align: center;
+
+      .stat-value {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+      }
+
+      .stat-label {
+        font-size: 0.85rem;
+        color: #666;
+      }
+    }
+  }
+
+  .plan-footer {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .plan-revenue {
+    text-align: center;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+    color: #28a745;
+    font-weight: 500;
+  }
+}
+
+// Buttons
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.btn-primary {
+    background-color: #007bff;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background-color: #0056b3;
+    }
+  }
+
+  &.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background-color: #545b62;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .tabs {
+    flex-wrap: wrap;
+
+    .tab {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .metric-card .metric-value {
+    font-size: 1.5rem;
+  }
+
+  .table-container {
+    overflow-x: auto;
+
+    table {
+      min-width: 700px;
+    }
+  }
+
+  .distribution-section {
+    grid-template-columns: 1fr;
+  }
+
+  .planes-grid {
+    grid-template-columns: 1fr;
+  }
+}

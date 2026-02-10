@@ -6,13 +6,15 @@ import { TiendaFormComponent } from './components/tienda-form/tienda-form.compon
 import { UsuariosAdminComponent } from './components/usuarios-admin/usuarios-admin.component';
 import { PlanesAdminComponent } from './components/planes-admin/planes-admin.component';
 import { SuscripcionConfigComponent } from './components/suscripcion-config/suscripcion-config.component';
+import { SuscripcionesDashboardComponent } from './components/suscripciones-dashboard/suscripciones-dashboard.component';
 
 const routes: Routes = [
   {
     path: '',
     component: AdminDashboardComponent,
     children: [
-      { path: '', redirectTo: 'tiendas', pathMatch: 'full' },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: SuscripcionesDashboardComponent },
       { path: 'tiendas', component: TiendasListComponent },
       { path: 'tiendas/nueva', component: TiendaFormComponent },
       { path: 'tiendas/editar/:id', component: TiendaFormComponent },

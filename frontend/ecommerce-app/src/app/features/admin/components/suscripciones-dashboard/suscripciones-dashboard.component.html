@@ -1,0 +1,309 @@
+<div class="dashboard-container">
+  <div class="header">
+    <h2>Dashboard de Suscripciones</h2>
+    <button class="btn btn-secondary" (click)="refrescarDatos()" [disabled]="loading">
+      Refrescar
+    </button>
+  </div>
+
+  <!-- Mensajes de error -->
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <p>Cargando dashboard...</p>
+  </div>
+
+  <!-- Contenido principal -->
+  <div *ngIf="!loading && metricas" class="dashboard-content">
+    <!-- Tabs -->
+    <div class="tabs">
+      <button
+        class="tab"
+        [class.active]="activeTab === 'resumen'"
+        (click)="cambiarTab('resumen')">
+        Resumen
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'suspendidas'"
+        (click)="cambiarTab('suspendidas')">
+        Suspendidas ({{ metricas.resumen.tiendasSuspendidas + metricas.resumen.tiendasPendienteEliminacion }})
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'trial'"
+        (click)="cambiarTab('trial')">
+        En Trial ({{ metricas.resumen.tiendasEnTrial }})
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'planes'"
+        (click)="cambiarTab('planes')">
+        Planes
+      </button>
+    </div>
+
+    <!-- Tab: Resumen -->
+    <div *ngIf="activeTab === 'resumen'" class="tab-content">
+      <!-- Cards de métricas -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-value">{{ metricas.resumen.totalTiendas }}</div>
+          <div class="metric-label">Total Tiendas</div>
+        </div>
+        <div class="metric-card success">
+          <div class="metric-value">{{ metricas.resumen.tiendasActivas }}</div>
+          <div class="metric-label">Tiendas Activas</div>
+        </div>
+        <div class="metric-card info">
+          <div class="metric-value">{{ metricas.resumen.tiendasEnTrial }}</div>
+          <div class="metric-label">En Trial</div>
+        </div>
+        <div class="metric-card warning">
+          <div class="metric-value">{{ metricas.resumen.tiendasSuspendidas }}</div>
+          <div class="metric-label">Suspendidas</div>
+        </div>
+        <div class="metric-card danger">
+          <div class="metric-value">{{ metricas.resumen.tiendasPendienteEliminacion }}</div>
+          <div class="metric-label">Pendiente Eliminacion</div>
+        </div>
+        <div class="metric-card highlight">
+          <div class="metric-value">{{ formatCurrency(metricas.ingresos.mensualesEstimados) }}</div>
+          <div class="metric-label">Ingresos Mensuales Est.</div>
+        </div>
+      </div>
+
+      <!-- Alertas -->
+      <div class="alerts-section">
+        <h3>Alertas</h3>
+        <div class="alerts-grid">
+          <div class="alert-card" *ngIf="metricas.resumen.trialsPorExpirar > 0">
+            <span class="alert-icon">!</span>
+            <div class="alert-content">
+              <strong>{{ metricas.resumen.trialsPorExpirar }}</strong> trials expiran en los proximos 3 dias
+            </div>
+          </div>
+          <div class="alert-card success" *ngIf="metricas.resumen.nuevasSuscripcionesMes > 0">
+            <span class="alert-icon">+</span>
+            <div class="alert-content">
+              <strong>{{ metricas.resumen.nuevasSuscripcionesMes }}</strong> nuevas suscripciones este mes
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado MercadoPago -->
+      <div class="mp-status">
+        <h3>Estado MercadoPago</h3>
+        <div class="mp-card" [class.connected]="metricas.mercadoPago.conectado">
+          <div class="mp-indicator">
+            <span class="status-dot" [class.active]="metricas.mercadoPago.conectado"></span>
+            {{ metricas.mercadoPago.conectado ? 'Conectado' : 'Desconectado' }}
+          </div>
+          <div *ngIf="metricas.mercadoPago.email" class="mp-email">
+            {{ metricas.mercadoPago.email }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Distribucion por estado -->
+      <div class="distribution-section">
+        <div class="distribution-card">
+          <h4>Por Estado de Suscripcion</h4>
+          <div class="distribution-list">
+            <div *ngFor="let item of metricas.tiendasPorEstadoSuscripcion" class="distribution-item">
+              <span class="distribution-label">{{ item.estado }}</span>
+              <span class="distribution-value">{{ item.cantidad }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="distribution-card">
+          <h4>Por Estado de Tienda</h4>
+          <div class="distribution-list">
+            <div *ngFor="let item of metricas.tiendasPorEstadoTienda" class="distribution-item">
+              <span class="distribution-label">{{ item.estado }}</span>
+              <span class="distribution-value">{{ item.cantidad }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Tiendas Suspendidas -->
+    <div *ngIf="activeTab === 'suspendidas'" class="tab-content">
+      <div *ngIf="!tiendasSuspendidas" class="loading">
+        <p>Cargando tiendas suspendidas...</p>
+      </div>
+
+      <div *ngIf="tiendasSuspendidas" class="table-container">
+        <div class="table-header">
+          <h3>Tiendas Suspendidas</h3>
+          <span class="badge">Dias de gracia: {{ tiendasSuspendidas.diasGraciaConfiguracion }}</span>
+        </div>
+
+        <table *ngIf="tiendasSuspendidas.tiendas.length > 0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tienda</th>
+              <th>Estado</th>
+              <th>Plan</th>
+              <th>Dias Suspendida</th>
+              <th>Gracia Restante</th>
+              <th>Propietario</th>
+              <th>Reintentos</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let tienda of tiendasSuspendidas.tiendas">
+              <td>{{ tienda.id }}</td>
+              <td>
+                <strong>{{ tienda.nombre }}</strong>
+                <br><small>{{ tienda.subdominio }}</small>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getEstadoClass(tienda.estadoTienda)">
+                  {{ tienda.estadoTienda }}
+                </span>
+              </td>
+              <td>{{ tienda.plan }}</td>
+              <td>{{ tienda.diasEnSuspension }} dias</td>
+              <td>
+                <span [class.text-danger]="tienda.diasRestantesGracia === 0">
+                  {{ tienda.diasRestantesGracia }} dias
+                </span>
+              </td>
+              <td>
+                <span *ngIf="tienda.propietario">
+                  {{ tienda.propietario.nombre }}
+                  <br><small>{{ tienda.propietario.email }}</small>
+                </span>
+                <span *ngIf="!tienda.propietario">-</span>
+              </td>
+              <td>{{ tienda.reintentosPago }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="tiendasSuspendidas.tiendas.length === 0" class="no-data">
+          No hay tiendas suspendidas
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Tiendas Trial -->
+    <div *ngIf="activeTab === 'trial'" class="tab-content">
+      <div *ngIf="!tiendasTrial" class="loading">
+        <p>Cargando tiendas en trial...</p>
+      </div>
+
+      <div *ngIf="tiendasTrial" class="table-container">
+        <div class="table-header">
+          <h3>Tiendas en Periodo de Prueba</h3>
+          <span class="badge badge-info">Total: {{ tiendasTrial.total }}</span>
+        </div>
+
+        <table *ngIf="tiendasTrial.tiendas.length > 0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tienda</th>
+              <th>Plan</th>
+              <th>Inicio Trial</th>
+              <th>Fin Trial</th>
+              <th>Dias Restantes</th>
+              <th>MercadoPago</th>
+              <th>Propietario</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let tienda of tiendasTrial.tiendas" [class.expiring-soon]="tienda.diasRestantes <= 3">
+              <td>{{ tienda.id }}</td>
+              <td>
+                <strong>{{ tienda.nombre }}</strong>
+                <br><small>{{ tienda.subdominio }}</small>
+              </td>
+              <td>{{ tienda.plan }}</td>
+              <td>{{ formatDate(tienda.fechaInicioTrial) }}</td>
+              <td>{{ formatDate(tienda.fechaFinTrial) }}</td>
+              <td>
+                <span [class.text-danger]="tienda.diasRestantes <= 3" [class.text-warning]="tienda.diasRestantes <= 7 && tienda.diasRestantes > 3">
+                  {{ tienda.diasRestantes }} dias
+                </span>
+              </td>
+              <td>
+                <span class="badge" [class.badge-success]="tienda.tieneMercadoPago" [class.badge-secondary]="!tienda.tieneMercadoPago">
+                  {{ tienda.tieneMercadoPago ? 'Configurado' : 'Sin configurar' }}
+                </span>
+              </td>
+              <td>
+                <span *ngIf="tienda.propietario">
+                  {{ tienda.propietario.nombre }}
+                  <br><small>{{ tienda.propietario.email }}</small>
+                </span>
+                <span *ngIf="!tienda.propietario">-</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="tiendasTrial.tiendas.length === 0" class="no-data">
+          No hay tiendas en periodo de prueba
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Planes -->
+    <div *ngIf="activeTab === 'planes'" class="tab-content">
+      <div *ngIf="!planesMetricas" class="loading">
+        <p>Cargando metricas de planes...</p>
+      </div>
+
+      <div *ngIf="planesMetricas" class="planes-section">
+        <div class="planes-header">
+          <h3>Metricas de Planes</h3>
+          <div class="total-ingresos">
+            Ingresos Totales: <strong>{{ formatCurrency(planesMetricas.ingresosMensualesTotal) }}</strong>/mes
+          </div>
+        </div>
+
+        <div class="planes-grid">
+          <div *ngFor="let plan of planesMetricas.planes" class="plan-card" [class.inactive]="!plan.activo">
+            <div class="plan-header">
+              <h4>{{ plan.nombre }}</h4>
+              <span class="plan-price">{{ formatCurrency(plan.precioMensual) }}/mes</span>
+            </div>
+            <div class="plan-stats">
+              <div class="stat">
+                <span class="stat-value">{{ plan.tiendasActivas }}</span>
+                <span class="stat-label">Activas</span>
+              </div>
+              <div class="stat">
+                <span class="stat-value">{{ plan.tiendasTrial }}</span>
+                <span class="stat-label">Trial</span>
+              </div>
+              <div class="stat">
+                <span class="stat-value">{{ plan.totalTiendas }}</span>
+                <span class="stat-label">Total</span>
+              </div>
+            </div>
+            <div class="plan-footer">
+              <span class="badge" [class.badge-success]="plan.activo" [class.badge-secondary]="!plan.activo">
+                {{ plan.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+              <span class="badge" [class.badge-info]="plan.sincronizadoMP" [class.badge-warning]="!plan.sincronizadoMP">
+                {{ plan.sincronizadoMP ? 'Sincronizado MP' : 'Sin sincronizar' }}
+              </span>
+            </div>
+            <div class="plan-revenue">
+              Ingresos: {{ formatCurrency(plan.tiendasActivas * plan.precioMensual) }}/mes
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
